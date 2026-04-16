@@ -1,5 +1,6 @@
 # Nội dung truyện crawl (không đẩy lên repo)
 story/
+story-content/
 
 # Python
 .venv/
