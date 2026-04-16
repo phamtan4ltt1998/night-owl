@@ -1,0 +1,20 @@
+# Nội dung truyện crawl (không đẩy lên repo)
+story/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Môi trường / IDE
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
