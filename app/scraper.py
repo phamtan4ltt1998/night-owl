@@ -27,6 +27,7 @@ class ChapterLink:
 class StoryScraper:
     def __init__(self, output_root: str = "story") -> None:
         self.output_root = Path(output_root)
+        self.content_root = Path("story-content")
         self.session = requests.Session()
         self.session.headers.update(
             {
@@ -96,15 +97,19 @@ class StoryScraper:
     ) -> Dict[str, object]:
         story_slug = self._story_slug_from_url(story_url)
         output_dir = self.output_root / f"{story_slug}-clone"
+        content_dir = self.content_root / story_slug
         output_dir.mkdir(parents=True, exist_ok=True)
+        content_dir.mkdir(parents=True, exist_ok=True)
 
         chapters = self._sort_chapters(chapters)
         saved_files = await self._crawl_and_save_chapters(chapters, output_dir)
+        content_files = self._extract_story_content_files(output_dir, content_dir)
         metadata = {
             "story_url": story_url,
             "story_slug": story_slug,
             "chapter_count": len(chapters),
             "saved_files": saved_files,
+            "content_files": content_files,
         }
         metadata_path = output_dir / "metadata.json"
         metadata_path.write_text(
@@ -117,6 +122,8 @@ class StoryScraper:
             "story_slug": story_slug,
             "chapter_count": len(chapters),
             "metadata_file": str(metadata_path),
+            "content_output_dir": str(content_dir),
+            "content_file_count": len(content_files),
         }
 
     async def _crawl_and_save_chapters(
@@ -132,6 +139,7 @@ class StoryScraper:
                 markdown = self._extract_markdown(result)
                 if not markdown:
                     markdown = f"# {chapter.title}\n\nKhong trich xuat duoc noi dung."
+                markdown = self._replace_branding(markdown)
 
                 file_name = f"{index:04d}-{chapter.slug}.md"
                 chapter_path = output_dir / file_name
@@ -142,6 +150,39 @@ class StoryScraper:
                 await asyncio.sleep(0.3)
 
         return saved_files
+
+    def _extract_story_content_files(self, source_dir: Path, content_dir: Path) -> List[str]:
+        saved_content_files: List[str] = []
+        for chapter_path in sorted(source_dir.glob("*.md")):
+            chapter_markdown = chapter_path.read_text(encoding="utf-8")
+            chapter_content = self._extract_chapter_content(chapter_markdown)
+            if not chapter_content:
+                continue
+
+            content_path = content_dir / chapter_path.name
+            content_path.write_text(self._replace_branding(chapter_content), encoding="utf-8")
+            saved_content_files.append(str(content_path))
+        return saved_content_files
+
+    def _extract_chapter_content(self, markdown: str) -> str:
+        lines = markdown.splitlines()
+        separator_indices = [index for index, line in enumerate(lines) if line.strip() == "* * *"]
+        if len(separator_indices) < 3:
+            return markdown.strip()
+
+        start_index = separator_indices[1] + 1
+        end_index = separator_indices[-1]
+        content_lines = lines[start_index:end_index]
+
+        while content_lines and not content_lines[0].strip():
+            content_lines.pop(0)
+        while content_lines and not content_lines[-1].strip():
+            content_lines.pop()
+
+        return "\n".join(content_lines).strip()
+
+    def _replace_branding(self, content: str) -> str:
+        return content.replace("Truyencom.com", "nightowl.com")
 
     def _extract_markdown(self, crawl_result: object) -> str:
         markdown = getattr(crawl_result, "markdown", "")
