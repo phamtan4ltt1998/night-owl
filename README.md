@@ -120,13 +120,28 @@ curl -X POST "http://127.0.0.1:8000/tts/story/clone" \
   }'
 ```
 
-Ket qua audio duoc luu vao `outputs/audio/<ten-truyen>/` voi ten:
+Ket qua audio duoc luu vao `output/<ten-voice>/` voi ten:
 `<ten-truyen>_chuong-x,y_voice-<ten-sample>.wav`
+
+Vi du voi `reference_audio_path = input/sample-voice/mc-minh-nguyet/mc-minh-nguyet.wav`,
+file se duoc luu trong `output/mc-minh-nguyet/`.
 
 Luu y voi `mode: "standard"`:
 
-- Can truyen them `reference_text` (dung transcript cua file audio sample)
-- Vi du:
+- Can transcript dung voi audio mau: hoac truyen `reference_text` trong JSON, hoac dat file trong cung thu muc voi file mp3 (vi du `input/sample-voice/nguyen-ngoc-ngan/`): `reference.txt`, `reference_text.txt`, hoac file ten `reference text`.
+- Khi doc tu file, response co them `reference_text_file` (duong dan file da dung).
+- Vi du chi can audio + file transcript (khong can `reference_text` trong body):
+
+```json
+{
+  "story_name": "muc-than-ky",
+  "chapters": [0],
+  "mode": "standard",
+  "reference_audio_path": "input/sample-voice/nguyen-ngoc-ngan/nguyen_ngoc_ngan.mp3"
+}
+```
+
+Hoac ghi de bang body:
 
 ```json
 {

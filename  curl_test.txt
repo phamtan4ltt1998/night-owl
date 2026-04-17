@@ -7,12 +7,22 @@ curl -X POST "http://127.0.0.1:8000/tts/story" \
 
 
 
+  # mode standard: dat file reference.txt (hoac reference_text.txt) trong
+  # input/sample-voice/nguyen-ngoc-ngan/ — khong bat buoc reference_text trong JSON.
   curl -X POST "http://127.0.0.1:8000/tts/story/clone" \
   -H "Content-Type: application/json" \
   -d '{
     "story_name":"muc-than-ky",
     "chapters":[0],
     "mode":"standard",
-    "reference_audio_path":"input/sample-voice/nguyen-ngoc-ngan/nguyen_ngoc_ngan.mp3",
-    "reference_text":"<noi dung chinh xac cua audio mau>"
+    "reference_audio_path":"input/sample-voice/nguyen-ngoc-ngan/nguyen_ngoc_ngan.mp3"
+  }'
+
+    curl -X POST "http://127.0.0.1:8000/tts/story/clone" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "story_name":"muc-than-ky",
+    "chapters":[1],
+    "mode":"turbo",
+    "reference_audio_path":"input/sample-voice/mc-minh-nguyet/mc-minh-nguyet.wav"
   }'

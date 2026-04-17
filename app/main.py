@@ -30,7 +30,13 @@ class StoryCloneTTSRequest(BaseModel):
         default="input/sample-voice/nguyen-ngoc-ngan/nguyen_ngoc_ngan.mp3",
         min_length=1,
     )
-    reference_text: str | None = None
+    reference_text: str | None = Field(
+        default=None,
+        description=(
+            "Transcript cua audio mau (mode standard). Bo trong thi doc file "
+            "reference.txt / reference_text.txt / 'reference text' trong cung thu muc voi reference_audio_path."
+        ),
+    )
 
 
 @app.get("/health")
@@ -70,7 +76,7 @@ async def tts_story(request: StoryTTSRequest) -> dict:
 @app.post("/tts/story/clone")
 async def tts_story_clone(request: StoryCloneTTSRequest) -> dict:
     try:
-        return await run_in_threadpool(
+        await run_in_threadpool(
             tts_service.synthesize_story_chapters_with_clone_voice,
             request.story_name,
             request.chapters,
@@ -78,6 +84,7 @@ async def tts_story_clone(request: StoryCloneTTSRequest) -> dict:
             request.mode,
             request.reference_text,
         )
+        return {"status": "ok"}
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:  # noqa: BLE001

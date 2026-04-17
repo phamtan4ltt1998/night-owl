@@ -1,11 +1,17 @@
 from __future__ import annotations
 
+import logging
 import re
 import unicodedata
 from pathlib import Path
 from typing import Iterable
 
 from vieneu import Vieneu
+
+logger = logging.getLogger(__name__)
+
+# Ten file transcript trong cung thu muc voi file audio mau (input/sample-voice/<ten>/...)
+_REFERENCE_TEXT_FILENAMES = ("reference.txt", "reference_text.txt", "reference text")
 
 
 class StoryTTSService:
@@ -22,7 +28,7 @@ class StoryTTSService:
         )
         normalized_mode = self._normalize_mode(mode)
         tts = self._get_tts(normalized_mode)
-        audio = tts.infer(text=merged_text)
+        audio = tts.infer(text=merged_text, speed=0.8, temperature=0.7, top_p=0.9)
 
         output_dir = self.output_root / story_slug
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -57,20 +63,29 @@ class StoryTTSService:
             raise ValueError(f"Khong tim thay reference audio: {reference_audio}")
 
         tts = self._get_tts(normalized_mode)
+        resolved_text, text_from_file = self._resolve_reference_text(reference_audio, reference_text)
+        ref_size_mb = reference_audio.stat().st_size / 1024 / 1024
+        logger.info("encode_reference bat dau: %s (%.1f MB)", reference_audio, ref_size_mb)
         if normalized_mode == "standard":
-            if not reference_text or not reference_text.strip():
+            if not resolved_text:
+                names = ", ".join(_REFERENCE_TEXT_FILENAMES)
                 raise ValueError(
-                    "mode='standard' can them reference_text (noi dung cua audio mau)."
+                    "mode='standard' can reference_text trong body hoac file transcript trong thu muc audio mau "
+                    f"({names}) tai {reference_audio.parent}."
                 )
             ref_codes = tts.encode_reference(str(reference_audio))
+            logger.info("encode_reference hoan thanh, bat dau infer (standard)...")
             audio = tts.infer(
                 text=merged_text,
+                speed=0.8, temperature=0.7, top_p=0.9,
                 ref_codes=ref_codes,
-                ref_text=reference_text.strip(),
+                ref_text=resolved_text,
             )
         else:
             cloned_voice = tts.encode_reference(str(reference_audio))
+            logger.info("encode_reference hoan thanh, bat dau infer (turbo)...")
             audio = tts.infer(text=merged_text, voice=cloned_voice)
+        logger.info("infer hoan thanh, dang luu file...")
 
         output_dir = self.output_root / story_slug
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -80,7 +95,7 @@ class StoryTTSService:
         output_path = output_dir / output_name
         tts.save(audio, str(output_path))
 
-        return {
+        out: dict[str, object] = {
             "story_name": story_slug,
             "mode": normalized_mode,
             "chapters": chapter_numbers,
@@ -89,6 +104,19 @@ class StoryTTSService:
             "output_file": str(output_path),
             "output_dir": str(output_dir),
         }
+        if text_from_file is not None:
+            out["reference_text_file"] = text_from_file
+        return out
+
+    def _resolve_clone_output_dir(self, reference_audio: Path) -> Path:
+        """
+        Clone API luu theo voice: output/<ten-voice>.
+        Uu tien ten thu muc cha cua sample audio, fallback sang ten file audio.
+        """
+        voice_folder = self._slugify(reference_audio.parent.name)
+        if voice_folder == "story":
+            voice_folder = self._slugify(reference_audio.stem)
+        return Path("output") / voice_folder
 
     def _load_story_chapter_texts(
         self, story_name: str, chapters: Iterable[int]
@@ -154,3 +182,17 @@ class StoryTTSService:
         normalized = normalized.lower()
         normalized = re.sub(r"[^a-z0-9]+", "-", normalized).strip("-")
         return normalized or "story"
+
+    def _resolve_reference_text(
+        self, reference_audio: Path, explicit: str | None
+    ) -> tuple[str | None, str | None]:
+        """Tra ve (noi dung transcript, duong file neu doc tu disk). Uu tien body, sau do file trong thu muc mau."""
+        if explicit and explicit.strip():
+            return explicit.strip(), None
+        sample_dir = reference_audio.parent
+        for name in _REFERENCE_TEXT_FILENAMES:
+            candidate = sample_dir / name
+            if candidate.is_file():
+                text = candidate.read_text(encoding="utf-8").strip()
+                return text, str(candidate)
+        return None, None

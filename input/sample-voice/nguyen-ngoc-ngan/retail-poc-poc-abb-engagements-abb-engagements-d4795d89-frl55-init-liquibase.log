@@ -1,0 +1,1320 @@
+2026-04-17T14:01:32.536+07:00 DEBUG [restartedMain] [,,] o.s.c.k.c.p.AbstractKubernetesProfileEnvironmentPostProcessor - Adding 'kubernetes' to list of active profiles
+2026-04-17T14:01:32.542+07:00 DEBUG [restartedMain] [,,] o.s.boot.SpringApplication - Loading source class org.springframework.cloud.bootstrap.BootstrapImportSelectorConfiguration
+2026-04-17T14:01:32.575+07:00 DEBUG [restartedMain] [,,] c.a.s.c.a.i.k.e.KeyVaultEnvironmentPostProcessor - Skip configuring Key Vault PropertySource because spring.cloud.azure.keyvault.secret.property-sources is empty.
+2026-04-17T14:01:32.578+07:00 INFO  [restartedMain] [,,] o.s.b.d.restart.ChangeableUrls - The Class-Path manifest attribute in /app/libs/ojdbc8-23.7.0.25.01.jar referenced one or more files that do not exist: file:/app/libs/oraclepki.jar
+2026-04-17T14:01:32.629+07:00 DEBUG [restartedMain] [,,] o.s.b.d.restart.ChangeableUrls - Matching URLs for reloading : [file:/app/resources/, file:/app/classes/]
+2026-04-17T14:01:32.630+07:00 DEBUG [restartedMain] [,,] o.s.b.d.settings.DevToolsSettings - Included patterns for restart : []
+2026-04-17T14:01:32.630+07:00 DEBUG [restartedMain] [,,] o.s.b.d.settings.DevToolsSettings - Excluded patterns for restart : [/spring-boot-starter-[\w-]+/, /spring-boot/(bin|build|out)/, /spring-boot-starter/(bin|build|out)/, /spring-boot-devtools/(bin|build|out)/, /spring-boot-actuator/(bin|build|out)/, /spring-boot-autoconfigure/(bin|build|out)/]
+2026-04-17T14:01:32.630+07:00 INFO  [restartedMain] [,,] o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-04-17T14:01:32.630+07:00 DEBUG [restartedMain] [,,] o.s.c.a.AnnotationConfigApplicationContext - Refreshing org.springframework.context.annotation.AnnotationConfigApplicationContext@7b1b2e3e
+2026-04-17T14:01:32.649+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.context.annotation.internalConfigurationAnnotationProcessor'
+2026-04-17T14:01:32.661+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.internalCachingMetadataReaderFactory'
+2026-04-17T14:01:32.930+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.main.cloud-platform' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.162+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.main.cloud-platform' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.168+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.main.cloud-platform' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.169+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.main.cloud-platform' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.171+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.main.cloud-platform' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.230+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.main.cloud-platform' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.231+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.main.cloud-platform' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.237+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.main.cloud-platform' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.242+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.main.cloud-platform' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.244+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.cloud.kubernetes.secrets.enabled' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.245+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.cloud.kubernetes.secrets.enabled' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.246+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.cloud.kubernetes.secrets.enabled' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.247+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.main.cloud-platform' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.247+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.cloud.kubernetes.config.enabled' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.248+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.cloud.kubernetes.config.enabled' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.250+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.cloud.kubernetes.config.enabled' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.270+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'eureka.client.enabled' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.345+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.cloud.config.enabled' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.368+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.main.cloud-platform' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.368+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.main.cloud-platform' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.369+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.main.cloud-platform' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.436+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.cloud.kubernetes.config.enabled' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.438+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.cloud.kubernetes.secrets.enabled' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.440+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.main.cloud-platform' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.441+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.cloud.kubernetes.secrets.enabled' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.443+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.cloud.kubernetes.secrets.enabled' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.444+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.cloud.kubernetes.secrets.enabled' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.445+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.main.cloud-platform' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.446+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.cloud.kubernetes.config.enabled' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.447+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.cloud.kubernetes.config.enabled' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.449+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring.cloud.kubernetes.config.enabled' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:33.577+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'propertySourcesPlaceholderConfigurer'
+2026-04-17T14:01:33.635+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.context.event.internalEventListenerProcessor'
+2026-04-17T14:01:33.638+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.context.event.internalEventListenerFactory'
+2026-04-17T14:01:33.641+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.context.annotation.internalAutowiredAnnotationProcessor'
+2026-04-17T14:01:33.645+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.context.annotation.internalCommonAnnotationProcessor'
+2026-04-17T14:01:33.652+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.context.annotation.internalPersistenceAnnotationProcessor'
+2026-04-17T14:01:33.653+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor'
+2026-04-17T14:01:33.654+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.context.internalConfigurationPropertiesBinder'
+2026-04-17T14:01:33.659+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'configurationPropertiesBeans'
+2026-04-17T14:01:33.673+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'bootstrapImportSelectorConfiguration'
+2026-04-17T14:01:33.730+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.cloud.kubernetes.commons.config.KubernetesBootstrapConfiguration'
+2026-04-17T14:01:33.733+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.context.properties.BoundConfigurationProperties'
+2026-04-17T14:01:33.734+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.context.properties.EnableConfigurationPropertiesRegistrar.methodValidationExcludeFilter'
+2026-04-17T14:01:33.748+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'spring.cloud.kubernetes.secrets-org.springframework.cloud.kubernetes.commons.config.SecretsConfigProperties'
+2026-04-17T14:01:33.937+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'spring.cloud.kubernetes.config-org.springframework.cloud.kubernetes.commons.config.ConfigMapConfigProperties'
+2026-04-17T14:01:33.954+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'com.backbase.buildingblocks.cloudconfig.CloudConfigClientConfig'
+2026-04-17T14:01:33.958+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.cloud.config.client.ConfigServiceBootstrapConfiguration'
+2026-04-17T14:01:33.965+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'configClientProperties'
+2026-04-17T14:01:34.048+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration'
+2026-04-17T14:01:34.052+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'spring.cloud.config-org.springframework.cloud.bootstrap.config.PropertySourceBootstrapProperties'
+2026-04-17T14:01:34.057+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.cloud.bootstrap.encrypt.EncryptionBootstrapConfiguration'
+2026-04-17T14:01:34.060+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'keyProperties'
+2026-04-17T14:01:34.065+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'environmentDecryptApplicationListener'
+2026-04-17T14:01:34.067+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'environmentDecryptApplicationListener' via factory method to bean named 'org.springframework.context.annotation.AnnotationConfigApplicationContext@7b1b2e3e'
+2026-04-17T14:01:34.067+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'environmentDecryptApplicationListener' via factory method to bean named 'keyProperties'
+2026-04-17T14:01:34.070+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration'
+2026-04-17T14:01:34.073+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'configurationPropertiesRebinder'
+2026-04-17T14:01:34.073+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'configurationPropertiesRebinder' via factory method to bean named 'configurationPropertiesBeans'
+2026-04-17T14:01:34.137+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration'
+2026-04-17T14:01:34.141+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.cloud.kubernetes.commons.KubernetesCommonsAutoConfiguration'
+2026-04-17T14:01:34.142+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'spring.cloud.kubernetes.client-org.springframework.cloud.kubernetes.commons.KubernetesClientProperties'
+2026-04-17T14:01:34.173+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.cloud.kubernetes.fabric8.Fabric8AutoConfiguration'
+2026-04-17T14:01:34.234+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'kubernetesClientConfig'
+2026-04-17T14:01:34.235+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'kubernetesClientConfig' via factory method to bean named 'spring.cloud.kubernetes.client-org.springframework.cloud.kubernetes.commons.KubernetesClientProperties'
+2026-04-17T14:01:34.236+07:00 DEBUG [restartedMain] [,,] io.fabric8.kubernetes.client.Config - Trying to configure client from Kubernetes config...
+2026-04-17T14:01:34.238+07:00 DEBUG [restartedMain] [,,] io.fabric8.kubernetes.client.Config - Did not find Kubernetes config at: [/home/nonroot/.kube/config]. Ignoring.
+2026-04-17T14:01:34.241+07:00 DEBUG [restartedMain] [,,] io.fabric8.kubernetes.client.Config - Trying to configure client from service account...
+2026-04-17T14:01:34.241+07:00 DEBUG [restartedMain] [,,] io.fabric8.kubernetes.client.Config - Found service account host and port: 10.161.36.1:443
+2026-04-17T14:01:34.242+07:00 DEBUG [restartedMain] [,,] io.fabric8.kubernetes.client.Config - Found service account ca cert at: [/var/run/secrets/kubernetes.io/serviceaccount/ca.crt}].
+2026-04-17T14:01:34.242+07:00 DEBUG [restartedMain] [,,] io.fabric8.kubernetes.client.Config - Found service account token at: [/var/run/secrets/kubernetes.io/serviceaccount/token].
+2026-04-17T14:01:34.243+07:00 DEBUG [restartedMain] [,,] io.fabric8.kubernetes.client.Config - Trying to configure client namespace from Kubernetes service account namespace path...
+2026-04-17T14:01:34.243+07:00 DEBUG [restartedMain] [,,] io.fabric8.kubernetes.client.Config - Found service account namespace at: [/var/run/secrets/kubernetes.io/serviceaccount/namespace].
+2026-04-17T14:01:34.245+07:00 DEBUG [restartedMain] [,,] io.fabric8.kubernetes.client.Config - Trying to configure client from Kubernetes config...
+2026-04-17T14:01:34.246+07:00 DEBUG [restartedMain] [,,] io.fabric8.kubernetes.client.Config - Did not find Kubernetes config at: [/home/nonroot/.kube/config]. Ignoring.
+2026-04-17T14:01:34.246+07:00 DEBUG [restartedMain] [,,] io.fabric8.kubernetes.client.Config - Trying to configure client from service account...
+2026-04-17T14:01:34.246+07:00 DEBUG [restartedMain] [,,] io.fabric8.kubernetes.client.Config - Found service account host and port: 10.161.36.1:443
+2026-04-17T14:01:34.247+07:00 DEBUG [restartedMain] [,,] io.fabric8.kubernetes.client.Config - Found service account ca cert at: [/var/run/secrets/kubernetes.io/serviceaccount/ca.crt}].
+2026-04-17T14:01:34.247+07:00 DEBUG [restartedMain] [,,] io.fabric8.kubernetes.client.Config - Found service account token at: [/var/run/secrets/kubernetes.io/serviceaccount/token].
+2026-04-17T14:01:34.248+07:00 DEBUG [restartedMain] [,,] io.fabric8.kubernetes.client.Config - Trying to configure client namespace from Kubernetes service account namespace path...
+2026-04-17T14:01:34.248+07:00 DEBUG [restartedMain] [,,] io.fabric8.kubernetes.client.Config - Found service account namespace at: [/var/run/secrets/kubernetes.io/serviceaccount/namespace].
+2026-04-17T14:01:34.339+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'kubernetesClient'
+2026-04-17T14:01:34.340+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'kubernetesClient' via factory method to bean named 'kubernetesClientConfig'
+2026-04-17T14:01:34.342+07:00 DEBUG [restartedMain] [,,] i.f.k.client.utils.HttpClientUtils - Using httpclient io.fabric8.kubernetes.client.vertx.VertxHttpClientFactory factory
+2026-04-17T14:01:34.362+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'kubernetesPodUtils'
+2026-04-17T14:01:34.363+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'kubernetesPodUtils' via factory method to bean named 'kubernetesClient'
+2026-04-17T14:01:34.364+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.cloud.kubernetes.fabric8.config.Fabric8BootstrapConfiguration'
+2026-04-17T14:01:34.367+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'provider'
+2026-04-17T14:01:34.368+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'provider' via factory method to bean named 'environment'
+2026-04-17T14:01:34.368+07:00 DEBUG [restartedMain] [,,] o.s.c.k.c.KubernetesNamespaceProvider - Looking for service account namespace at: [/var/run/secrets/kubernetes.io/serviceaccount/namespace].
+2026-04-17T14:01:34.368+07:00 DEBUG [restartedMain] [,,] o.s.c.k.c.KubernetesNamespaceProvider - Found service account namespace at: [/var/run/secrets/kubernetes.io/serviceaccount/namespace].
+2026-04-17T14:01:34.368+07:00 DEBUG [restartedMain] [,,] o.s.c.k.c.KubernetesNamespaceProvider - Service account namespace value: /var/run/secrets/kubernetes.io/serviceaccount/namespace
+2026-04-17T14:01:34.439+07:00 DEBUG [restartedMain] [,,] o.s.c.e.EventListenerMethodProcessor - 1 @EventListener methods processed on bean 'org.springframework.cloud.kubernetes.fabric8.Fabric8AutoConfiguration': {void org.springframework.cloud.kubernetes.fabric8.Fabric8AutoConfiguration.onContextClosed(org.springframework.context.event.ContextClosedEvent)=@org.springframework.context.event.EventListener(classes={}, condition="", defaultExecution=true, id="", value={})}
+2026-04-17T14:01:34.458+07:00 DEBUG [restartedMain] [,,] o.s.c.s.DefaultLifecycleProcessor - Starting beans in phase -2147483647
+2026-04-17T14:01:34.458+07:00 DEBUG [restartedMain] [,,] o.s.c.s.DefaultLifecycleProcessor - Successfully started bean 'springBootLoggingLifecycle'
+2026-04-17T14:01:34.468+07:00 DEBUG [restartedMain] [,,] o.s.b.a.l.ConditionEvaluationReportLogger -
++[
++[
++[ ============================
++[ CONDITIONS EVALUATION REPORT
++[ ============================
++[
++[
++[ Positive matches:
++[ -----------------
++[
++[    AopAutoConfiguration matched:
++[       - @ConditionalOnBooleanProperty (spring.aop.auto=true) matched (OnPropertyCondition)
++[
++[    AopAutoConfiguration.AspectJAutoProxyingConfiguration matched:
++[       - @ConditionalOnClass found required class 'org.aspectj.weaver.Advice' (OnClassCondition)
++[
++[    AopAutoConfiguration.AspectJAutoProxyingConfiguration.CglibAutoProxyConfiguration matched:
++[       - @ConditionalOnBooleanProperty (spring.aop.proxy-target-class=true) matched (OnPropertyCondition)
++[
++[    ConfigServiceBootstrapConfiguration#configClientProperties matched:
++[       - @ConditionalOnMissingBean (types: org.springframework.cloud.config.client.ConfigClientProperties; SearchStrategy: all) did not find any beans (OnBeanCondition)
++[
++[    ConfigurationPropertiesRebinderAutoConfiguration matched:
++[       - @ConditionalOnBean (types: org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor; SearchStrategy: all) found bean 'org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor' (OnBeanCondition)
++[
++[    ConfigurationPropertiesRebinderAutoConfiguration#configurationPropertiesBeans matched:
++[       - @ConditionalOnMissingBean (types: org.springframework.cloud.context.properties.ConfigurationPropertiesBeans; SearchStrategy: current) did not find any beans (OnBeanCondition)
++[
++[    ConfigurationPropertiesRebinderAutoConfiguration#configurationPropertiesRebinder matched:
++[       - @ConditionalOnMissingBean (types: org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder; SearchStrategy: current) did not find any beans (OnBeanCondition)
++[
++[    EncryptionBootstrapConfiguration matched:
++[       - @ConditionalOnClass found required class 'org.springframework.security.crypto.encrypt.TextEncryptor' (OnClassCondition)
++[
++[    EncryptionBootstrapConfiguration#keyProperties matched:
++[       - @ConditionalOnMissingBean (types: org.springframework.cloud.bootstrap.encrypt.KeyProperties; SearchStrategy: all) did not find any beans (OnBeanCondition)
++[
++[    Fabric8AutoConfiguration matched:
++[       - @ConditionalOnCloudPlatform found KUBERNETES (OnCloudPlatformCondition)
++[
++[    Fabric8AutoConfiguration#kubernetesClient matched:
++[       - @ConditionalOnMissingBean (types: io.fabric8.kubernetes.client.KubernetesClient; SearchStrategy: all) did not find any beans (OnBeanCondition)
++[
++[    Fabric8AutoConfiguration#kubernetesClientConfig matched:
++[       - @ConditionalOnMissingBean (types: io.fabric8.kubernetes.client.Config; SearchStrategy: all) did not find any beans (OnBeanCondition)
++[
++[    Fabric8AutoConfiguration#kubernetesPodUtils matched:
++[       - @ConditionalOnMissingBean (types: org.springframework.cloud.kubernetes.fabric8.Fabric8PodUtils; SearchStrategy: all) did not find any beans (OnBeanCondition)
++[
++[    Fabric8BootstrapConfiguration matched:
++[       - @ConditionalOnClass found required classes 'io.fabric8.kubernetes.api.model.ConfigMap', 'io.fabric8.kubernetes.api.model.Secret' (OnClassCondition)
++[       - @ConditionalOnCloudPlatform found KUBERNETES (OnCloudPlatformCondition)
++[       - AnyNestedCondition 1 matched 2 did not; NestedCondition on ConditionalOnBootstrapEnabled.OnBootstrapEnabledCondition.OnBootstrapEnabled @ConditionalOnProperty (spring.cloud.bootstrap.enabled) did not find property 'spring.cloud.bootstrap.enabled'; NestedCondition on ConditionalOnBootstrapEnabled.OnBootstrapEnabledCondition.OnUseLegacyProcessingEnabled @ConditionalOnProperty (spring.config.use-legacy-processing) did not find property 'spring.config.use-legacy-processing'; NestedCondition on ConditionalOnBootstrapEnabled.OnBootstrapEnabledCondition.OnBootstrapMarkerClassPresent @ConditionalOnClass found required class 'org.springframework.cloud.bootstrap.marker.Marker' (ConditionalOnBootstrapEnabled.OnBootstrapEnabledCondition)
++[
++[    KubernetesBootstrapConfiguration matched:
++[       - @ConditionalOnCloudPlatform found KUBERNETES (OnCloudPlatformCondition)
++[
++[    KubernetesCommonsAutoConfiguration matched:
++[       - @ConditionalOnCloudPlatform found KUBERNETES (OnCloudPlatformCondition)
++[
++[    PropertyPlaceholderAutoConfiguration#propertySourcesPlaceholderConfigurer matched:
++[       - @ConditionalOnMissingBean (types: org.springframework.context.support.PropertySourcesPlaceholderConfigurer; SearchStrategy: current) did not find any beans (OnBeanCondition)
++[
++[
++[ Negative matches:
++[ -----------------
++[
++[    AopAutoConfiguration.AspectJAutoProxyingConfiguration.JdkDynamicAutoProxyConfiguration:
++[       Did not match:
++[          - @ConditionalOnBooleanProperty (spring.aop.proxy-target-class=false) did not find property 'spring.aop.proxy-target-class' (OnPropertyCondition)
++[
++[    AopAutoConfiguration.ClassProxyingConfiguration:
++[       Did not match:
++[          - @ConditionalOnMissingClass found unwanted class 'org.aspectj.weaver.Advice' (OnClassCondition)
++[
++[    ConfigServiceBootstrapConfiguration#configServicePropertySource:
++[       Did not match:
++[          - @ConditionalOnProperty (spring.cloud.config.enabled) found different value in property 'spring.cloud.config.enabled' (OnPropertyCondition)
++[
++[    ConfigServiceBootstrapConfiguration.RetryConfiguration:
++[       Did not match:
++[          - @ConditionalOnProperty (spring.cloud.config.fail-fast) did not find property 'spring.cloud.config.fail-fast' (OnPropertyCondition)
++[       Matched:
++[          - @ConditionalOnClass found required classes 'org.springframework.retry.annotation.Retryable', 'org.aspectj.lang.annotation.Aspect', 'org.springframework.boot.autoconfigure.aop.AopAutoConfiguration' (OnClassCondition)
++[
++[    DiscoveryClientConfigServiceBootstrapConfiguration:
++[       Did not match:
++[          - @ConditionalOnProperty (spring.cloud.config.discovery.enabled) did not find property 'spring.cloud.config.discovery.enabled' (OnPropertyCondition)
++[
++[    EncryptionBootstrapConfiguration.RsaEncryptionConfiguration:
++[       Did not match:
++[          - Keystore nor key found in Environment (EncryptionBootstrapConfiguration.KeyCondition)
++[       Matched:
++[          - @ConditionalOnClass found required classes 'org.springframework.security.crypto.encrypt.RsaSecretEncryptor', 'org.bouncycastle.asn1.ASN1Sequence' (OnClassCondition)
++[
++[    EncryptionBootstrapConfiguration.VanillaEncryptionConfiguration:
++[       Did not match:
++[          - @ConditionalOnMissingClass found unwanted class 'org.bouncycastle.asn1.ASN1Sequence' (OnClassCondition)
++[
++[    EurekaConfigServerBootstrapConfiguration:
++[       Did not match:
++[          - AllNestedConditions 0 matched 2 did not; NestedCondition on EurekaConfigServerBootstrapConfiguration.EurekaConfigServerBootstrapCondition.OnEurekaClient @ConditionalOnProperty (eureka.client.enabled) found different value in property 'eureka.client.enabled'; NestedCondition on EurekaConfigServerBootstrapConfiguration.EurekaConfigServerBootstrapCondition.OnCloudConfigProperty @ConditionalOnProperty (spring.cloud.config.discovery.enabled) did not find property 'spring.cloud.config.discovery.enabled' (EurekaConfigServerBootstrapConfiguration.EurekaConfigServerBootstrapCondition)
++[       Matched:
++[          - @ConditionalOnClass found required class 'org.springframework.cloud.config.client.ConfigServicePropertySourceLocator' (OnClassCondition)
++[
++[    EurekaConfigServerBootstrapConfiguration.WebClientConfiguration:
++[       Did not match:
++[          - @ConditionalOnProperty (eureka.client.webclient.enabled=true) did not find property 'webclient.enabled' (OnPropertyCondition)
++[          - Ancestor org.springframework.cloud.netflix.eureka.config.EurekaConfigServerBootstrapConfiguration did not match (ConditionEvaluationReport.AncestorsMatchedCondition)
++[       Matched:
++[          - @ConditionalOnClass found required class 'org.springframework.web.reactive.function.client.WebClient' (OnClassCondition)
++[
++[    Fabric8BootstrapConfiguration#configMapPropertySourceLocator:
++[       Did not match:
++[          - @ConditionalOnProperty (spring.cloud.kubernetes.config.enabled) found different value in property 'spring.cloud.kubernetes.config.enabled' (OnPropertyCondition)
++[
++[    Fabric8BootstrapConfiguration#secretsPropertySourceLocator:
++[       Did not match:
++[          - @ConditionalOnProperty (spring.cloud.kubernetes.secrets.enabled) found different value in property 'spring.cloud.kubernetes.secrets.enabled' (OnPropertyCondition)
++[
++[    Fabric8RetryBootstrapConfiguration:
++[       Did not match:
++[          - AnyNestedCondition 0 matched 2 did not; NestedCondition on ConditionalOnKubernetesConfigOrSecretsRetryEnabled.OnKubernetesConfigPropertiesRetryEnabled.OnSecretsPropertiesRetryEnabled found non-matching nested conditions @ConditionalOnProperty (spring.cloud.kubernetes.secrets.enabled) found different value in property 'spring.cloud.kubernetes.secrets.enabled'; @ConditionalOnProperty (spring.cloud.kubernetes.secrets.fail-fast=true) did not find property 'fail-fast', @ConditionalOnProperty (spring.cloud.kubernetes.secrets.enabled) found different value in property 'spring.cloud.kubernetes.secrets.enabled'; @ConditionalOnProperty (spring.cloud.kubernetes.secrets.fail-fast=true) did not find property 'fail-fast', @ConditionalOnProperty (spring.cloud.kubernetes.secrets.enabled) found different value in property 'spring.cloud.kubernetes.secrets.enabled'; @ConditionalOnProperty (spring.cloud.kubernetes.secrets.fail-fast=true) did not find property 'fail-fast'; NestedCondition on ConditionalOnKubernetesConfigOrSecretsRetryEnabled.OnKubernetesConfigPropertiesRetryEnabled.OnConfigMapPropertiesRetryEnabled found non-matching nested conditions @ConditionalOnProperty (spring.cloud.kubernetes.config.enabled) found different value in property 'spring.cloud.kubernetes.config.enabled'; @ConditionalOnProperty (spring.cloud.kubernetes.config.fail-fast=true) did not find property 'fail-fast', @ConditionalOnProperty (spring.cloud.kubernetes.config.enabled) found different value in property 'spring.cloud.kubernetes.config.enabled'; @ConditionalOnProperty (spring.cloud.kubernetes.config.fail-fast=true) did not find property 'fail-fast', @ConditionalOnProperty (spring.cloud.kubernetes.config.enabled) found different value in property 'spring.cloud.kubernetes.config.enabled'; @ConditionalOnProperty (spring.cloud.kubernetes.config.fail-fast=true) did not find property 'fail-fast' (ConditionalOnKubernetesConfigOrSecretsRetryEnabled.OnKubernetesConfigPropertiesRetryEnabled)
++[       Matched:
++[          - @ConditionalOnClass found required classes 'io.fabric8.kubernetes.api.model.ConfigMap', 'io.fabric8.kubernetes.api.model.Secret' (OnClassCondition)
++[          - @ConditionalOnCloudPlatform found KUBERNETES (OnCloudPlatformCondition)
++[
++[    KubernetesBootstrapConfiguration.RetryConfiguration:
++[       Did not match:
++[          - AnyNestedCondition 0 matched 2 did not; NestedCondition on ConditionalOnKubernetesConfigOrSecretsRetryEnabled.OnKubernetesConfigPropertiesRetryEnabled.OnSecretsPropertiesRetryEnabled found non-matching nested conditions @ConditionalOnProperty (spring.cloud.kubernetes.secrets.enabled) found different value in property 'spring.cloud.kubernetes.secrets.enabled'; @ConditionalOnProperty (spring.cloud.kubernetes.secrets.fail-fast=true) did not find property 'fail-fast', @ConditionalOnProperty (spring.cloud.kubernetes.secrets.enabled) found different value in property 'spring.cloud.kubernetes.secrets.enabled'; @ConditionalOnProperty (spring.cloud.kubernetes.secrets.fail-fast=true) did not find property 'fail-fast', @ConditionalOnProperty (spring.cloud.kubernetes.secrets.enabled) found different value in property 'spring.cloud.kubernetes.secrets.enabled'; @ConditionalOnProperty (spring.cloud.kubernetes.secrets.fail-fast=true) did not find property 'fail-fast'; NestedCondition on ConditionalOnKubernetesConfigOrSecretsRetryEnabled.OnKubernetesConfigPropertiesRetryEnabled.OnConfigMapPropertiesRetryEnabled found non-matching nested conditions @ConditionalOnProperty (spring.cloud.kubernetes.config.enabled) found different value in property 'spring.cloud.kubernetes.config.enabled'; @ConditionalOnProperty (spring.cloud.kubernetes.config.fail-fast=true) did not find property 'fail-fast', @ConditionalOnProperty (spring.cloud.kubernetes.config.enabled) found different value in property 'spring.cloud.kubernetes.config.enabled'; @ConditionalOnProperty (spring.cloud.kubernetes.config.fail-fast=true) did not find property 'fail-fast', @ConditionalOnProperty (spring.cloud.kubernetes.config.enabled) found different value in property 'spring.cloud.kubernetes.config.enabled'; @ConditionalOnProperty (spring.cloud.kubernetes.config.fail-fast=true) did not find property 'fail-fast' (ConditionalOnKubernetesConfigOrSecretsRetryEnabled.OnKubernetesConfigPropertiesRetryEnabled)
++[       Matched:
++[          - @ConditionalOnClass found required classes 'org.springframework.retry.annotation.Retryable', 'org.aspectj.lang.annotation.Aspect', 'org.springframework.boot.autoconfigure.aop.AopAutoConfiguration' (OnClassCondition)
++[
++[    KubernetesDiscoveryClientConfigClientBootstrapConfiguration:
++[       Did not match:
++[          - @ConditionalOnProperty (spring.cloud.config.discovery.enabled) did not find property 'spring.cloud.config.discovery.enabled' (OnPropertyCondition)
++[
++[
++[ Exclusions:
++[ -----------
++[
++[     None
++[
++[
++[ Unconditional classes:
++[ ----------------------
++[
++[     None
++[
++[
++[
+2026-04-17T14:01:34.536+07:00 DEBUG [restartedMain] [,,] o.s.boot.devtools.restart.Restarter - Creating new Restarter for thread Thread[#1,main,5,main]
+2026-04-17T14:01:34.536+07:00 DEBUG [restartedMain] [,,] o.s.boot.devtools.restart.Restarter - Immediately restarting application
+2026-04-17T14:01:34.536+07:00 DEBUG [restartedMain] [,,] o.s.boot.devtools.restart.Restarter - Starting application com.backbase.buildingblocks.auxiliaryconfig.InitContainerApplication with URLs [file:/app/resources/, file:/app/classes/]
+2026-04-17T14:01:34.542+07:00 DEBUG [restartedMain] [,,] o.s.b.w.s.c.ApplicationServletEnvironment - Activating profiles [kubernetes]
+2026-04-17T14:01:35.139+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring-boot.version' in PropertySource 'version' with value of type String
+2026-04-17T14:01:35.139+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring-cloud-stream.version' in PropertySource 'configurationProperties' with value of type String
+2026-04-17T14:01:35.139+07:00 DEBUG [restartedMain] [,,] o.s.c.e.PropertySourcesPropertyResolver - Found key 'spring-cloud-function.version' in PropertySource 'configurationProperties' with value of type String
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::   v3.5.11
+ :: Spring Cloud Stream ::   v4.3.0
+ :: Spring Cloud Function ::   v4.3.0
+2026-04-17T14:01:35.247+07:00 DEBUG [restartedMain] [,,] o.s.c.k.c.p.AbstractKubernetesProfileEnvironmentPostProcessor - 'kubernetes' already in list of active profiles
+2026-04-17T14:01:35.249+07:00 INFO  [restartedMain] [,,] c.b.b.a.InitContainerApplication - The following 1 profile is active: "kubernetes"
+2026-04-17T14:01:35.250+07:00 DEBUG [restartedMain] [,,] o.s.boot.SpringApplication - Loading source class com.backbase.buildingblocks.auxiliaryconfig.InitContainerApplication,class org.springframework.cloud.bootstrap.BootstrapApplicationListener$BootstrapMarkerConfiguration
+2026-04-17T14:01:35.258+07:00 DEBUG [restartedMain] [,,] c.a.s.c.a.i.k.e.KeyVaultEnvironmentPostProcessor - Skip configuring Key Vault PropertySource because spring.cloud.azure.keyvault.secret.property-sources is empty.
+2026-04-17T14:01:35.258+07:00 DEBUG [restartedMain] [,,] o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Refreshing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@49cf74d
+2026-04-17T14:01:35.267+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.context.annotation.internalConfigurationAnnotationProcessor'
+2026-04-17T14:01:35.268+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.internalCachingMetadataReaderFactory'
+2026-04-17T14:01:35.461+07:00 INFO  [restartedMain] [,,] c.b.b.a.InitContainerAutoConfigurationSelector - Initial configuration:
++[ org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration
++[ 	org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
++[ 	org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration
++[ 	org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration
++[ 	org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration
++[ 	org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryAutoConfiguration
++[
+2026-04-17T14:01:35.463+07:00 INFO  [restartedMain] [,,] c.b.b.a.InitContainerAutoConfigurationSelector - Requested exclusions:
++[ org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration
++[ 	org.springframework.boot.actuate.autoconfigure.tracing.zipkin.ZipkinAutoConfiguration
++[
+2026-04-17T14:01:35.463+07:00 WARN  [restartedMain] [,,] c.b.b.a.InitContainerAutoConfigurationSelector - The following classes could not be excluded because they are not auto-configuration classes:
++[ 	- org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration
++[ 	- org.springframework.boot.actuate.autoconfigure.tracing.zipkin.ZipkinAutoConfiguration
++[
+2026-04-17T14:01:35.539+07:00 INFO  [restartedMain] [,,] c.b.b.a.InitContainerAutoConfigurationSelector - Final auto-configurations loaded:
++[ org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration
++[ 	org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
++[ 	org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration
++[ 	org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration
++[ 	org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration
++[ 	org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryAutoConfiguration
++[
+2026-04-17T14:01:35.956+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.sql.init.dependency.DatabaseInitializationDependencyConfigurer$DependsOnDatabaseInitializationPostProcessor'
+2026-04-17T14:01:36.034+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.context.event.internalEventListenerProcessor'
+2026-04-17T14:01:36.035+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.context.event.internalEventListenerFactory'
+2026-04-17T14:01:36.036+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.context.annotation.internalAutowiredAnnotationProcessor'
+2026-04-17T14:01:36.038+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.context.annotation.internalCommonAnnotationProcessor'
+2026-04-17T14:01:36.039+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.context.annotation.internalPersistenceAnnotationProcessor'
+2026-04-17T14:01:36.039+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor'
+2026-04-17T14:01:36.040+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.context.internalConfigurationPropertiesBinder'
+2026-04-17T14:01:36.040+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'jdbcConnectionDetailsHikariBeanPostProcessor'
+2026-04-17T14:01:36.043+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'webServerFactoryCustomizerBeanPostProcessor'
+2026-04-17T14:01:36.044+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'errorPageRegistrarBeanPostProcessor'
+2026-04-17T14:01:36.048+07:00 DEBUG [restartedMain] [,,] o.s.u.c.s.UiApplicationContextUtils - Unable to locate ThemeSource with name 'themeSource': using default [org.springframework.ui.context.support.ResourceBundleThemeSource@6c33c15c]
+2026-04-17T14:01:36.048+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'tomcatServletWebServerFactory'
+2026-04-17T14:01:36.049+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryConfiguration$EmbeddedTomcat'
+2026-04-17T14:01:36.241+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'tomcatServletWebServerFactoryCustomizer'
+2026-04-17T14:01:36.242+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration$TomcatConfiguration'
+2026-04-17T14:01:36.246+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'server-org.springframework.boot.autoconfigure.web.ServerProperties'
+2026-04-17T14:01:36.256+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.context.properties.BoundConfigurationProperties'
+2026-04-17T14:01:36.345+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'tomcatServletWebServerFactoryCustomizer' via factory method to bean named 'server-org.springframework.boot.autoconfigure.web.ServerProperties'
+2026-04-17T14:01:36.346+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'servletWebServerFactoryCustomizer'
+2026-04-17T14:01:36.347+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration'
+2026-04-17T14:01:36.348+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'servletWebServerFactoryCustomizer' via factory method to bean named 'server-org.springframework.boot.autoconfigure.web.ServerProperties'
+2026-04-17T14:01:36.351+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'nettyWebServerFactoryCustomizer'
+2026-04-17T14:01:36.352+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration$NettyWebServerFactoryCustomizerConfiguration'
+2026-04-17T14:01:36.352+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'nettyWebServerFactoryCustomizer' via factory method to bean named 'environment'
+2026-04-17T14:01:36.353+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'nettyWebServerFactoryCustomizer' via factory method to bean named 'server-org.springframework.boot.autoconfigure.web.ServerProperties'
+2026-04-17T14:01:36.356+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'tomcatWebServerFactoryCustomizer'
+2026-04-17T14:01:36.356+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration$TomcatWebServerFactoryCustomizerConfiguration'
+2026-04-17T14:01:36.358+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'tomcatWebServerFactoryCustomizer' via factory method to bean named 'environment'
+2026-04-17T14:01:36.358+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'tomcatWebServerFactoryCustomizer' via factory method to bean named 'server-org.springframework.boot.autoconfigure.web.ServerProperties'
+2026-04-17T14:01:36.545+07:00 DEBUG [restartedMain] [,,] o.a.tomcat.util.compat.Jre22Compat - Class not found so assuming code is running on a pre-Java 22 JVM
+java.lang.ClassNotFoundException: java.text.ListFormat
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(Unknown Source)
+	at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(Unknown Source)
+	at java.base/java.lang.ClassLoader.loadClass(Unknown Source)
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Unknown Source)
+	at java.base/java.lang.Class.forName(Unknown Source)
+	at org.apache.tomcat.util.compat.Jre22Compat.<clinit>(Jre22Compat.java:37)
+	at org.apache.tomcat.util.compat.JreCompat.<clinit>(JreCompat.java:75)
+	at org.apache.catalina.startup.Tomcat.<clinit>(Tomcat.java:1196)
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getWebServer(TomcatServletWebServerFactory.java:200)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.createWebServer(ServletWebServerApplicationContext.java:193)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.onRefresh(ServletWebServerApplicationContext.java:167)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:622)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350)
+	at com.backbase.buildingblocks.auxiliaryconfig.InitContainerApplication.main(InitContainerApplication.java:21)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
+2026-04-17T14:01:36.734+07:00 DEBUG [restartedMain] [,,] o.apache.catalina.core.ContainerBase - Add container child [StandardHost[localhost]] to container [StandardEngine[Tomcat]]
+2026-04-17T14:01:36.735+07:00 DEBUG [restartedMain] [,,] o.s.b.w.e.t.TomcatServletWebServerFactory - Code archive: /app/libs/spring-boot-3.5.11.jar
+2026-04-17T14:01:36.735+07:00 DEBUG [restartedMain] [,,] o.s.b.w.e.t.TomcatServletWebServerFactory - Code archive: /app/libs/spring-boot-3.5.11.jar
+2026-04-17T14:01:36.736+07:00 DEBUG [restartedMain] [,,] o.s.b.w.e.t.TomcatServletWebServerFactory - None of the document roots [src/main/webapp, public, static] point to a directory and will be ignored.
+2026-04-17T14:01:36.769+07:00 DEBUG [restartedMain] [,,] o.apache.catalina.core.ContainerBase - Add container child [TomcatEmbeddedContext[]] to container [StandardEngine[Tomcat].StandardHost[localhost]]
+2026-04-17T14:01:37.870+07:00 INFO  [restartedMain] [,,] o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-04-17T14:01:37.950+07:00 INFO  [restartedMain] [,,] o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-17T14:01:37.950+07:00 INFO  [restartedMain] [,,] o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.52]
+2026-04-17T14:01:38.156+07:00 DEBUG [restartedMain] [,,] o.a.catalina.loader.WebappLoader - Starting this Loader
+2026-04-17T14:01:38.160+07:00 DEBUG [restartedMain] [,,] o.apache.catalina.webresources.Cache - Increased cache size by [531] for item [org.apache.catalina.webresources.CachedResource@5d499a2e] at [/WEB-INF/classes] making total cache size [531]
+2026-04-17T14:01:38.244+07:00 INFO  [restartedMain] [,,] o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-17T14:01:38.245+07:00 DEBUG [restartedMain] [,,] o.s.b.w.s.c.ServletWebServerApplicationContext - Published root WebApplicationContext as ServletContext attribute with name [org.springframework.web.context.WebApplicationContext.ROOT]
+2026-04-17T14:01:38.247+07:00 INFO  [restartedMain] [,,] o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2987 ms
+2026-04-17T14:01:38.251+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'dispatcherServletRegistration'
+2026-04-17T14:01:38.251+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration$DispatcherServletRegistrationConfiguration'
+2026-04-17T14:01:38.253+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'dispatcherServlet'
+2026-04-17T14:01:38.253+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration$DispatcherServletConfiguration'
+2026-04-17T14:01:38.255+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'spring.mvc-org.springframework.boot.autoconfigure.web.servlet.WebMvcProperties'
+2026-04-17T14:01:38.262+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'dispatcherServlet' via factory method to bean named 'spring.mvc-org.springframework.boot.autoconfigure.web.servlet.WebMvcProperties'
+2026-04-17T14:01:38.334+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'dispatcherServletRegistration' via factory method to bean named 'dispatcherServlet'
+2026-04-17T14:01:38.334+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'dispatcherServletRegistration' via factory method to bean named 'spring.mvc-org.springframework.boot.autoconfigure.web.servlet.WebMvcProperties'
+2026-04-17T14:01:38.348+07:00 DEBUG [restartedMain] [,,] o.s.b.w.s.ServletContextInitializerBeans - Mapping filters:
+2026-04-17T14:01:38.348+07:00 DEBUG [restartedMain] [,,] o.s.b.w.s.ServletContextInitializerBeans - Mapping servlets: dispatcherServlet urls=[/]
+2026-04-17T14:01:38.353+07:00 DEBUG [restartedMain] [,,] o.apache.catalina.core.ContainerBase - Add container child [StandardWrapper[dispatcherServlet]] to container [StandardEngine[Tomcat].StandardHost[localhost].TomcatEmbeddedContext[]]
+2026-04-17T14:01:38.358+07:00 DEBUG [restartedMain] [,,] o.a.catalina.session.StandardManager - Persisted data file [/tmp/0C338DD7848E3BFE542747361F29332F4E541E68/servlet-sessions/SESSIONS.ser] was not found
+java.io.FileNotFoundException: /tmp/0C338DD7848E3BFE542747361F29332F4E541E68/servlet-sessions/SESSIONS.ser (No such file or directory)
+	at java.base/java.io.FileInputStream.open0(Native Method)
+	at java.base/java.io.FileInputStream.open(Unknown Source)
+	at java.base/java.io.FileInputStream.<init>(Unknown Source)
+	at java.base/java.io.FileInputStream.<init>(Unknown Source)
+	at org.apache.catalina.session.StandardManager.doLoad(StandardManager.java:185)
+	at org.apache.catalina.session.StandardManager.load(StandardManager.java:154)
+	at org.apache.catalina.session.StandardManager.startInternal(StandardManager.java:343)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4479)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1201)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1191)
+	at java.base/java.util.concurrent.FutureTask.run(Unknown Source)
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:81)
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(Unknown Source)
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:747)
+	at org.apache.catalina.core.StandardHost.startInternal(StandardHost.java:783)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1201)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1191)
+	at java.base/java.util.concurrent.FutureTask.run(Unknown Source)
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:81)
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(Unknown Source)
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:747)
+	at org.apache.catalina.core.StandardEngine.startInternal(StandardEngine.java:201)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.StandardService.startInternal(StandardService.java:410)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.StandardServer.startInternal(StandardServer.java:868)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.startup.Tomcat.start(Tomcat.java:436)
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.initialize(TomcatWebServer.java:128)
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.<init>(TomcatWebServer.java:107)
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getTomcatWebServer(TomcatServletWebServerFactory.java:517)
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getWebServer(TomcatServletWebServerFactory.java:219)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.createWebServer(ServletWebServerApplicationContext.java:193)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.onRefresh(ServletWebServerApplicationContext.java:167)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:622)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350)
+	at com.backbase.buildingblocks.auxiliaryconfig.InitContainerApplication.main(InitContainerApplication.java:21)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
+2026-04-17T14:01:38.362+07:00 DEBUG [restartedMain] [,,] org.apache.catalina.mapper.Mapper - Registered host [localhost]
+2026-04-17T14:01:38.363+07:00 DEBUG [restartedMain] [,,] o.a.catalina.mapper.MapperListener - Register Wrapper [dispatcherServlet] in Context [] for service [StandardService[Tomcat]]
+2026-04-17T14:01:38.364+07:00 DEBUG [restartedMain] [,,] o.a.catalina.mapper.MapperListener - Register Context [] for service [StandardService[Tomcat]]
+2026-04-17T14:01:38.364+07:00 DEBUG [restartedMain] [,,] o.a.catalina.mapper.MapperListener - Register host [localhost] at domain [null] for service [StandardService[Tomcat]]
+2026-04-17T14:01:38.371+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'initContainerApplication'
+2026-04-17T14:01:38.373+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'bootstrapApplicationListener.BootstrapMarkerConfiguration'
+2026-04-17T14:01:38.374+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.context.properties.EnableConfigurationPropertiesRegistrar.methodValidationExcludeFilter'
+2026-04-17T14:01:38.431+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration'
+2026-04-17T14:01:38.432+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.jdbc.DataSourceConfiguration$Hikari'
+2026-04-17T14:01:38.432+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'dataSource'
+2026-04-17T14:01:38.433+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'spring.datasource-org.springframework.boot.autoconfigure.jdbc.DataSourceProperties'
+2026-04-17T14:01:38.446+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'jdbcConnectionDetails'
+2026-04-17T14:01:38.447+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration$PooledDataSourceConfiguration'
+2026-04-17T14:01:38.448+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'jdbcConnectionDetails' via factory method to bean named 'spring.datasource-org.springframework.boot.autoconfigure.jdbc.DataSourceProperties'
+2026-04-17T14:01:38.450+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'dataSource' via factory method to bean named 'spring.datasource-org.springframework.boot.autoconfigure.jdbc.DataSourceProperties'
+2026-04-17T14:01:38.450+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'dataSource' via factory method to bean named 'jdbcConnectionDetails'
+2026-04-17T14:01:38.450+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'dataSource' via factory method to bean named 'environment'
+2026-04-17T14:01:38.460+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - Class oracle.jdbc.OracleDriver found in Thread context class loader org.springframework.boot.devtools.restart.classloader.RestartClassLoader@4fb365b4
+2026-04-17T14:01:38.948+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.jdbc.metadata.DataSourcePoolMetadataProvidersConfiguration$HikariPoolDataSourceMetadataProviderConfiguration'
+2026-04-17T14:01:38.948+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'hikariPoolDataSourceMetadataProvider'
+2026-04-17T14:01:38.950+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.jdbc.metadata.DataSourcePoolMetadataProvidersConfiguration'
+2026-04-17T14:01:38.951+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration'
+2026-04-17T14:01:38.951+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration$CustomizerConfiguration'
+2026-04-17T14:01:38.952+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration$LiquibaseConfiguration'
+2026-04-17T14:01:38.953+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'liquibaseConnectionDetails'
+2026-04-17T14:01:38.954+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'spring.liquibase-org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties'
+2026-04-17T14:01:38.964+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'liquibaseConnectionDetails' via factory method to bean named 'spring.liquibase-org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties'
+2026-04-17T14:01:38.965+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'liquibase'
+2026-04-17T14:01:38.968+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'liquibase' via factory method to bean named 'spring.liquibase-org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties'
+2026-04-17T14:01:38.968+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Autowiring by type from bean name 'liquibase' via factory method to bean named 'liquibaseConnectionDetails'
+2026-04-17T14:01:39.060+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.configuration.AutoloadedConfigurations instance liquibase.GlobalConfiguration
+2026-04-17T14:01:39.064+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.configuration.AutoloadedConfigurations instance liquibase.integration.commandline.LiquibaseCommandLineConfiguration
+2026-04-17T14:01:39.065+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.configuration.AutoloadedConfigurations instance liquibase.logging.core.DefaultLoggerConfiguration
+2026-04-17T14:01:39.066+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.configuration.AutoloadedConfigurations instance liquibase.sql.SqlConfiguration
+2026-04-17T14:01:39.068+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.configuration.AutoloadedConfigurations instance liquibase.parser.ChangeLogParserConfiguration
+2026-04-17T14:01:39.070+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.configuration.AutoloadedConfigurations instance liquibase.analytics.configuration.AnalyticsArgs
+2026-04-17T14:01:39.070+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Found ConfigurationDefinitions in liquibase.GlobalConfiguration
+2026-04-17T14:01:39.070+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Found ConfigurationDefinitions in liquibase.integration.commandline.LiquibaseCommandLineConfiguration
+2026-04-17T14:01:39.071+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Found ConfigurationDefinitions in liquibase.logging.core.DefaultLoggerConfiguration
+2026-04-17T14:01:39.071+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Found ConfigurationDefinitions in liquibase.sql.SqlConfiguration
+2026-04-17T14:01:39.071+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Found ConfigurationDefinitions in liquibase.parser.ChangeLogParserConfiguration
+2026-04-17T14:01:39.071+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Found ConfigurationDefinitions in liquibase.analytics.configuration.AnalyticsArgs
+2026-04-17T14:01:39.073+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.configuration.ConfigurationValueProvider instance liquibase.configuration.core.DeprecatedConfigurationValueProvider
+2026-04-17T14:01:39.074+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.configuration.ConfigurationValueProvider instance liquibase.configuration.core.SystemPropertyValueProvider
+2026-04-17T14:01:39.074+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.configuration.ConfigurationValueProvider instance liquibase.configuration.core.ScopeValueProvider
+2026-04-17T14:01:39.075+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.configuration.ConfigurationValueProvider instance liquibase.configuration.core.EnvironmentValueProvider
+2026-04-17T14:01:39.079+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.logging.LogService instance liquibase.logging.core.BufferedLogService
+2026-04-17T14:01:39.080+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.logging.LogService instance liquibase.logging.core.CompositeLogService
+2026-04-17T14:01:39.081+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.logging.LogService instance liquibase.logging.core.JavaLogService
+2026-04-17T14:01:39.082+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.servicelocator.ServiceLocator instance liquibase.servicelocator.StandardServiceLocator
+2026-04-17T14:01:39.169+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.shouldRun aka should.run found
+2026-04-17T14:01:39.170+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.shouldRun is using the default value of true
+2026-04-17T14:01:39.172+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - HikariPool-1 - configuration:
+2026-04-17T14:01:39.176+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - allowPoolSuspension.............false
+2026-04-17T14:01:39.177+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - autoCommit......................true
+2026-04-17T14:01:39.177+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - catalog.........................none
+2026-04-17T14:01:39.177+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - connectionInitSql...............none
+2026-04-17T14:01:39.177+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - connectionTestQuery.............none
+2026-04-17T14:01:39.212+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - connectionTimeout...............30000
+2026-04-17T14:01:39.212+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - credentials.....................com.zaxxer.hikari.util.Credentials@b036053
+2026-04-17T14:01:39.213+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - dataSource......................none
+2026-04-17T14:01:39.213+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - dataSourceClassName.............none
+2026-04-17T14:01:39.229+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - dataSourceJNDI..................none
+2026-04-17T14:01:39.230+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - dataSourceProperties............{password=<masked>}
+2026-04-17T14:01:39.231+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - driverClassName................."oracle.jdbc.OracleDriver"
+2026-04-17T14:01:39.231+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - exceptionOverride...............none
+2026-04-17T14:01:39.233+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - exceptionOverrideClassName......none
+2026-04-17T14:01:39.234+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - healthCheckProperties...........{}
+2026-04-17T14:01:39.234+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - healthCheckRegistry.............none
+2026-04-17T14:01:39.234+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - idleTimeout.....................60000
+2026-04-17T14:01:39.234+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - initializationFailTimeout.......30000
+2026-04-17T14:01:39.235+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - isolateInternalQueries..........false
+2026-04-17T14:01:39.235+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - jdbcUrl.........................jdbc:oracle:thin:@10.160.22.8:1521/devret2
+2026-04-17T14:01:39.235+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - keepaliveTime...................120000
+2026-04-17T14:01:39.235+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - leakDetectionThreshold..........0
+2026-04-17T14:01:39.236+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - maxLifetime.....................300000
+2026-04-17T14:01:39.236+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - maximumPoolSize.................10
+2026-04-17T14:01:39.236+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - metricRegistry..................none
+2026-04-17T14:01:39.236+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - metricsTrackerFactory...........none
+2026-04-17T14:01:39.237+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - minimumIdle.....................5
+2026-04-17T14:01:39.237+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - password........................<masked>
+2026-04-17T14:01:39.237+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - poolName........................"HikariPool-1"
+2026-04-17T14:01:39.237+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - readOnly........................false
+2026-04-17T14:01:39.238+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - registerMbeans..................false
+2026-04-17T14:01:39.238+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - scheduledExecutor...............none
+2026-04-17T14:01:39.238+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - schema..........................none
+2026-04-17T14:01:39.238+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - threadFactory...................internal
+2026-04-17T14:01:39.239+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - transactionIsolation............default
+2026-04-17T14:01:39.239+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - username........................"APP_ABB_ENGAGEMENTS"
+2026-04-17T14:01:39.239+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.HikariConfig - validationTimeout...............5000
+2026-04-17T14:01:39.239+07:00 INFO  [restartedMain] [,,] com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-04-17T14:01:39.348+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Attempting to create/setup new connection (0197fea3-e2ee-403a-a7c8-b520050ae551)
+2026-04-17T14:01:40.671+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Established new connection (0197fea3-e2ee-403a-a7c8-b520050ae551)
+2026-04-17T14:01:40.673+07:00 INFO  [restartedMain] [,,] com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@7932f50b
+2026-04-17T14:01:40.675+07:00 INFO  [restartedMain] [,,] com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-04-17T14:01:40.739+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.jvm.ConnectionPatterns instance liquibase.database.jvm.JdbcConnectionPatterns
+2026-04-17T14:01:40.751+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.CockroachDatabase
+2026-04-17T14:01:40.753+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.DB2Database
+2026-04-17T14:01:40.755+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.Db2zDatabase
+2026-04-17T14:01:40.757+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.DerbyDatabase
+2026-04-17T14:01:40.758+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.EnterpriseDBDatabase
+2026-04-17T14:01:40.759+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.FirebirdDatabase
+2026-04-17T14:01:40.761+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.H2Database
+2026-04-17T14:01:40.763+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.HsqlDatabase
+2026-04-17T14:01:40.765+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.InformixDatabase
+2026-04-17T14:01:40.766+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.Ingres9Database
+2026-04-17T14:01:40.768+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.MSSQLDatabase
+2026-04-17T14:01:40.771+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.MariaDBDatabase
+2026-04-17T14:01:40.775+07:00 DEBUG [HikariPool-1:housekeeper] [,,] com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Before cleanup stats (total=1/10, idle=0/5, active=1, waiting=0)
+2026-04-17T14:01:40.776+07:00 DEBUG [HikariPool-1:housekeeper] [,,] com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - After  cleanup stats (total=1/10, idle=0/5, active=1, waiting=0)
+2026-04-17T14:01:40.812+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.MockDatabase
+2026-04-17T14:01:40.813+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.MySQLDatabase
+2026-04-17T14:01:40.831+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Attempting to create/setup new connection (7cd650d7-04e8-4c0d-a362-563f2c687c04)
+2026-04-17T14:01:40.832+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.OracleDatabase
+2026-04-17T14:01:40.832+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.PostgresDatabase
+2026-04-17T14:01:40.836+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.SQLiteDatabase
+2026-04-17T14:01:40.839+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.SybaseASADatabase
+2026-04-17T14:01:40.841+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.SybaseDatabase
+2026-04-17T14:01:40.842+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.UnsupportedDatabase
+2026-04-17T14:01:40.844+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.Database instance liquibase.database.core.SnowflakeDatabase
+2026-04-17T14:01:40.851+07:00 INFO  [restartedMain] [,,] liquibase.database - Could not set remarks reporting on OracleDatabase: com.zaxxer.hikari.pool.HikariProxyConnection.setRemarksReporting(boolean)
+2026-04-17T14:01:41.645+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Established new connection (7cd650d7-04e8-4c0d-a362-563f2c687c04)
+2026-04-17T14:01:41.645+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@7961e61a
+2026-04-17T14:01:41.676+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - After adding stats (total=2/10, idle=1/5, active=1, waiting=0)
+2026-04-17T14:01:41.676+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Attempting to create/setup new connection (e82a6144-5942-4897-98da-b18eabca4a40)
+2026-04-17T14:01:41.965+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Established new connection (e82a6144-5942-4897-98da-b18eabca4a40)
+2026-04-17T14:01:41.965+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@13094b5d
+2026-04-17T14:01:41.995+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - After adding stats (total=3/10, idle=2/5, active=1, waiting=0)
+2026-04-17T14:01:41.996+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Attempting to create/setup new connection (cc58063a-e072-43e9-87e4-3cef3acbfc86)
+2026-04-17T14:01:42.137+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.ddlLockTimeout aka ddl_lock_timeout aka liquibase.ddlLockTimeout aka liquibase.ddl_lock_timeout found
+2026-04-17T14:01:42.138+07:00 DEBUG [restartedMain] [,,] liquibase.database - Connected to APP_ABB_ENGAGEMENTS@jdbc:oracle:thin:@10.160.22.8:1521/devret2
+2026-04-17T14:01:42.138+07:00 DEBUG [restartedMain] [,,] liquibase.database - Setting auto commit to false from true
+2026-04-17T14:01:42.158+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.executor.Executor instance liquibase.executor.jvm.JdbcExecutor
+2026-04-17T14:01:42.159+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.executor.Executor instance liquibase.executor.jvm.SnowflakeJdbcExecutor
+2026-04-17T14:01:42.164+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Established new connection (cc58063a-e072-43e9-87e4-3cef3acbfc86)
+2026-04-17T14:01:42.229+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@306f483a
+2026-04-17T14:01:42.231+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddAutoIncrementGenerator
+2026-04-17T14:01:42.232+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddAutoIncrementGeneratorDB2
+2026-04-17T14:01:42.233+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddAutoIncrementGeneratorHsqlH2
+2026-04-17T14:01:42.233+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddAutoIncrementGeneratorInformix
+2026-04-17T14:01:42.234+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddAutoIncrementGeneratorMySQL
+2026-04-17T14:01:42.236+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddAutoIncrementGeneratorSQLite
+2026-04-17T14:01:42.238+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddColumnGenerator
+2026-04-17T14:01:42.239+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddColumnGeneratorDefaultClauseBeforeNotNull
+2026-04-17T14:01:42.240+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddColumnGeneratorSQLite
+2026-04-17T14:01:42.241+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGenerator
+2026-04-17T14:01:42.242+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorDerby
+2026-04-17T14:01:42.243+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorInformix
+2026-04-17T14:01:42.243+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorMSSQL
+2026-04-17T14:01:42.244+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorMySQL
+2026-04-17T14:01:42.245+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorOracle
+2026-04-17T14:01:42.246+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorPostgres
+2026-04-17T14:01:42.246+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorSQLite
+2026-04-17T14:01:42.247+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorSybase
+2026-04-17T14:01:42.248+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorSybaseASA
+2026-04-17T14:01:42.249+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddForeignKeyConstraintGenerator
+2026-04-17T14:01:42.250+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddPrimaryKeyGenerator
+2026-04-17T14:01:42.250+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddPrimaryKeyGeneratorInformix
+2026-04-17T14:01:42.251+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddUniqueConstraintGenerator
+2026-04-17T14:01:42.252+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddUniqueConstraintGeneratorInformix
+2026-04-17T14:01:42.253+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddUniqueConstraintGeneratorTDS
+2026-04-17T14:01:42.254+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AlterSequenceGenerator
+2026-04-17T14:01:42.254+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.BatchDmlExecutablePreparedStatementGenerator
+2026-04-17T14:01:42.255+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.ClearDatabaseChangeLogTableGenerator
+2026-04-17T14:01:42.256+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CommentGenerator
+2026-04-17T14:01:42.257+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CopyRowsGenerator
+2026-04-17T14:01:42.258+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateDatabaseChangeLogLockTableGenerator
+2026-04-17T14:01:42.259+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateDatabaseChangeLogTableGenerator
+2026-04-17T14:01:42.260+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - After adding stats (total=4/10, idle=3/5, active=1, waiting=0)
+2026-04-17T14:01:42.260+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateDatabaseChangeLogTableGeneratorSybase
+2026-04-17T14:01:42.261+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Attempting to create/setup new connection (8861bb5a-2e49-4141-bf5e-06b2a544b4e6)
+2026-04-17T14:01:42.262+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateIndexGenerator
+2026-04-17T14:01:42.265+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateIndexGeneratorFirebird
+2026-04-17T14:01:42.266+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateIndexGeneratorPostgres
+2026-04-17T14:01:42.267+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateProcedureGenerator
+2026-04-17T14:01:42.268+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateSequenceGenerator
+2026-04-17T14:01:42.270+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateTableGenerator
+2026-04-17T14:01:42.271+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateTableGeneratorInformix
+2026-04-17T14:01:42.312+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateViewGenerator
+2026-04-17T14:01:42.313+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateViewGeneratorInformix
+2026-04-17T14:01:42.314+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DeleteGenerator
+2026-04-17T14:01:42.330+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropColumnGenerator
+2026-04-17T14:01:42.333+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropDefaultValueGenerator
+2026-04-17T14:01:42.337+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropForeignKeyConstraintGenerator
+2026-04-17T14:01:42.339+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropIndexGenerator
+2026-04-17T14:01:42.341+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropPrimaryKeyGenerator
+2026-04-17T14:01:42.343+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropProcedureGenerator
+2026-04-17T14:01:42.344+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropSequenceGenerator
+2026-04-17T14:01:42.345+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropTableGenerator
+2026-04-17T14:01:42.346+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropUniqueConstraintGenerator
+2026-04-17T14:01:42.346+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropViewGenerator
+2026-04-17T14:01:42.348+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetNextChangeSetSequenceValueGenerator
+2026-04-17T14:01:42.349+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGenerator
+2026-04-17T14:01:42.349+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorDB2
+2026-04-17T14:01:42.350+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorDerby
+2026-04-17T14:01:42.351+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorFirebird
+2026-04-17T14:01:42.351+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorHsql
+2026-04-17T14:01:42.352+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorInformix
+2026-04-17T14:01:42.353+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorMSSQL
+2026-04-17T14:01:42.353+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorOracle
+2026-04-17T14:01:42.354+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorPostgres
+2026-04-17T14:01:42.354+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorSybase
+2026-04-17T14:01:42.355+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorSybaseASA
+2026-04-17T14:01:42.356+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InitializeDatabaseChangeLogLockTableGenerator
+2026-04-17T14:01:42.357+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertDataChangeGenerator
+2026-04-17T14:01:42.357+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertGenerator
+2026-04-17T14:01:42.359+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorDB2
+2026-04-17T14:01:42.360+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorH2
+2026-04-17T14:01:42.361+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorHsql
+2026-04-17T14:01:42.361+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorInformix
+2026-04-17T14:01:42.362+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorMSSQL
+2026-04-17T14:01:42.363+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorMySQL
+2026-04-17T14:01:42.364+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorOracle
+2026-04-17T14:01:42.365+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorPostgres
+2026-04-17T14:01:42.365+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorSQLite
+2026-04-17T14:01:42.366+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorSybaseASA
+2026-04-17T14:01:42.367+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertSetGenerator
+2026-04-17T14:01:42.368+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.LockDatabaseChangeLogGenerator
+2026-04-17T14:01:42.413+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.MarkChangeSetRanGenerator
+2026-04-17T14:01:42.430+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.ModifyDataTypeGenerator
+2026-04-17T14:01:42.431+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RawParameterizedSqlGenerator
+2026-04-17T14:01:42.432+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RawSqlGenerator
+2026-04-17T14:01:42.436+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.ReindexGeneratorSQLite
+2026-04-17T14:01:42.437+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RemoveChangeSetRanStatusGenerator
+2026-04-17T14:01:42.439+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RenameColumnGenerator
+2026-04-17T14:01:42.441+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RenameSequenceGenerator
+2026-04-17T14:01:42.442+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RenameTableGenerator
+2026-04-17T14:01:42.443+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RenameViewGenerator
+2026-04-17T14:01:42.444+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.ReorganizeTableGeneratorDB2
+2026-04-17T14:01:42.445+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RuntimeGenerator
+2026-04-17T14:01:42.446+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.SelectFromDatabaseChangeLogGenerator
+2026-04-17T14:01:42.447+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.SelectFromDatabaseChangeLogLockGenerator
+2026-04-17T14:01:42.448+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.SetColumnRemarksGenerator
+2026-04-17T14:01:42.449+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.SetNullableGenerator
+2026-04-17T14:01:42.450+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.SetTableRemarksGenerator
+2026-04-17T14:01:42.450+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Established new connection (8861bb5a-2e49-4141-bf5e-06b2a544b4e6)
+2026-04-17T14:01:42.450+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@7767994c
+2026-04-17T14:01:42.450+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.SetViewRemarksGenerator
+2026-04-17T14:01:42.451+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.StoredProcedureGenerator
+2026-04-17T14:01:42.452+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.TableIsEmptyGenerator
+2026-04-17T14:01:42.453+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.TableRowCountGenerator
+2026-04-17T14:01:42.454+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.TagDatabaseGenerator
+2026-04-17T14:01:42.454+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.UnlockDatabaseChangeLogGenerator
+2026-04-17T14:01:42.455+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.UpdateChangeSetChecksumGenerator
+2026-04-17T14:01:42.456+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.UpdateChangeSetFilenameGenerator
+2026-04-17T14:01:42.457+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.UpdateDataChangeGenerator
+2026-04-17T14:01:42.457+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.UpdateGenerator
+2026-04-17T14:01:42.458+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateSequenceGeneratorSnowflake
+2026-04-17T14:01:42.459+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropDefaultValueGeneratorSnowflake
+2026-04-17T14:01:42.459+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropProcedureGeneratorSnowflake
+2026-04-17T14:01:42.460+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorSnowflake
+2026-04-17T14:01:42.461+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RenameTableGeneratorSnowflake
+2026-04-17T14:01:42.461+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RenameViewGeneratorSnowflake
+2026-04-17T14:01:42.462+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.SetColumnRemarksGeneratorSnowflake
+2026-04-17T14:01:42.463+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.SetTableRemarksGeneratorSnowflake
+2026-04-17T14:01:42.463+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorSnowflake
+2026-04-17T14:01:42.529+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - After adding stats (total=5/10, idle=4/5, active=1, waiting=0)
+2026-04-17T14:01:42.530+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Attempting to create/setup new connection (86dbe2a7-fa14-4a03-a30b-4913e3728ab8)
+2026-04-17T14:01:42.571+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.preserveSchemaCase found
+2026-04-17T14:01:42.571+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.preserveSchemaCase is using the default value of false
+2026-04-17T14:01:42.576+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.liquibaseSchemaName aka liquibase.schemaName found
+2026-04-17T14:01:42.633+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.supportPropertyEscaping aka enableEscaping found
+2026-04-17T14:01:42.633+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.supportPropertyEscaping is using the default value of false
+2026-04-17T14:01:42.656+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.ChangeExecListenerCommandStep
+2026-04-17T14:01:42.657+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.LockServiceCommandStep
+2026-04-17T14:01:42.658+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.ReferenceDatabaseOutputWriterCommandStep
+2026-04-17T14:01:42.661+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.DiffOutputControlCommandStep
+2026-04-17T14:01:42.663+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.ShowSummaryArgument
+2026-04-17T14:01:42.665+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep
+2026-04-17T14:01:42.667+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.DbUrlConnectionCommandStep
+2026-04-17T14:01:42.667+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
+2026-04-17T14:01:42.730+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.DatabaseChangelogCommandStep
+2026-04-17T14:01:42.731+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.OutputWriterCommandStep
+2026-04-17T14:01:42.731+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Established new connection (86dbe2a7-fa14-4a03-a30b-4913e3728ab8)
+2026-04-17T14:01:42.732+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@6e5b65e3
+2026-04-17T14:01:42.733+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.PreCompareCommandStep
+2026-04-17T14:01:42.741+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.GenerateChangelogCommandStep
+2026-04-17T14:01:42.743+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.TagExistsCommandStep
+2026-04-17T14:01:42.747+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.RollbackToDateSqlCommandStep
+2026-04-17T14:01:42.748+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.FutureRollbackSqlCommandStep
+2026-04-17T14:01:42.750+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.SnapshotCommandStep
+2026-04-17T14:01:42.752+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.CalculateChecksumCommandStep
+2026-04-17T14:01:42.753+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.FutureRollbackCountSqlCommandStep
+2026-04-17T14:01:42.754+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.MarkNextChangesetRanSqlCommandStep
+2026-04-17T14:01:42.756+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.StatusCommandStep
+2026-04-17T14:01:42.757+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.ValidateCommandStep
+2026-04-17T14:01:42.758+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.StartH2CommandStep
+2026-04-17T14:01:42.759+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.ListLocksCommandStep
+2026-04-17T14:01:42.761+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.DiffCommandStep
+2026-04-17T14:01:42.762+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.UpdateTestingRollbackCommandStep
+2026-04-17T14:01:42.764+07:00 DEBUG [HikariPool-1:connection-adder] [,,] com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - After adding stats (total=6/10, idle=5/5, active=1, waiting=0)
+2026-04-17T14:01:42.765+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.DropAllCommandStep
+2026-04-17T14:01:42.766+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.SnapshotReferenceCommandStep
+2026-04-17T14:01:42.767+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.init.InitCopyCommandStep
+2026-04-17T14:01:42.772+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.init.InitProjectCommandStep
+2026-04-17T14:01:42.773+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.RollbackCommandStep
+2026-04-17T14:01:42.830+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.RollbackCountCommandStep
+2026-04-17T14:01:42.832+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.ChangelogSyncToTagSqlCommandStep
+2026-04-17T14:01:42.834+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.DbDocCommandStep
+2026-04-17T14:01:42.835+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.UnexpectedChangesetsCommandStep
+2026-04-17T14:01:42.837+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.UpdateToTagCommandStep
+2026-04-17T14:01:42.837+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.MarkNextChangesetRanCommandStep
+2026-04-17T14:01:42.837+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.RollbackToDateCommandStep
+2026-04-17T14:01:42.839+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.DiffChangelogCommandStep
+2026-04-17T14:01:42.839+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.ChangelogSyncCommandStep
+2026-04-17T14:01:42.841+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.RollbackSqlCommandStep
+2026-04-17T14:01:42.844+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.TagCommandStep
+2026-04-17T14:01:42.845+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.UpdateToTagSqlCommandStep
+2026-04-17T14:01:42.846+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.ReleaseLocksCommandStep
+2026-04-17T14:01:42.847+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.ClearChecksumsCommandStep
+2026-04-17T14:01:42.848+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.ChangelogSyncToTagCommandStep
+2026-04-17T14:01:42.848+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.UpdateCommandStep
+2026-04-17T14:01:42.850+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.UpdateSqlCommandStep
+2026-04-17T14:01:42.862+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.HistoryCommandStep
+2026-04-17T14:01:42.863+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.InternalSnapshotCommandStep
+2026-04-17T14:01:42.864+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.StopH2CommandStep
+2026-04-17T14:01:42.865+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.RollbackCountSqlCommandStep
+2026-04-17T14:01:42.866+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.FutureRollbackFromTagSqlCommandStep
+2026-04-17T14:01:42.867+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.UpdateCountCommandStep
+2026-04-17T14:01:42.868+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.UpdateCountSqlCommandStep
+2026-04-17T14:01:42.868+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.ChangelogSyncSqlCommandStep
+2026-04-17T14:01:42.930+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.command.CommandStep instance liquibase.command.core.ExecuteSqlCommandStep
+2026-04-17T14:01:42.941+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.logging.mdc.MdcManager instance liquibase.logging.mdc.NoOpMdcManager
+2026-04-17T14:01:42.956+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.strict found
+2026-04-17T14:01:42.956+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.strict is using the default value of false
+2026-04-17T14:01:42.966+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.update.changeExecListener found
+2026-04-17T14:01:42.969+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.changeExecListener found
+2026-04-17T14:01:43.013+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.update.changeExecListenerClass found
+2026-04-17T14:01:43.036+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.changeExecListenerClass found
+2026-04-17T14:01:43.041+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.update.changeExecListenerPropertiesFile found
+2026-04-17T14:01:43.045+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.changeExecListenerPropertiesFile found
+2026-04-17T14:01:43.050+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Found 'liquibase.command.update.changelogFile' configuration of 'classpath:/db/changelog/db.changelog-persistence.xml'
++[     command argument 'changelogFile' of 'classpath:/db/changelog/db.changelog-persistence.xml'
+2026-04-17T14:01:43.054+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Found 'liquibase.command.update.changelogParameters' configuration of 'liquibase.changelog.ChangeLogParameters@c254fc7'
++[     command argument 'changelogParameters' of 'liquibase.changelog.ChangeLogParameters@c254fc7'
+2026-04-17T14:01:43.058+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.update.contextFilter aka liquibase.command.update.contexts found
+2026-04-17T14:01:43.062+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.contextFilter aka liquibase.command.contexts found
+2026-04-17T14:01:43.067+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Found 'liquibase.command.update.database' configuration of 'APP_ABB_ENGAGEMENTS @ jdbc:oracle:thin:@10.160.22.8:1521/devret2 (Default Schema: APP_ABB_ENGAGEMENTS)'
++[     command argument 'database' of 'APP_ABB_ENGAGEMENTS @ jdbc:oracle:thin:@10.160.22.8:1521/devret2 (Default Schema: APP_ABB_ENGAGEMENTS)'
+2026-04-17T14:01:43.070+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.update.databaseChangelog found
+2026-04-17T14:01:43.073+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.databaseChangelog found
+2026-04-17T14:01:43.146+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.update.defaultCatalogName found
+2026-04-17T14:01:43.150+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.defaultCatalogName found
+2026-04-17T14:01:43.153+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.update.defaultSchemaName found
+2026-04-17T14:01:43.157+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.defaultSchemaName found
+2026-04-17T14:01:43.160+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.update.driver found
+2026-04-17T14:01:43.162+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.driver found
+2026-04-17T14:01:43.166+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.update.driverPropertiesFile found
+2026-04-17T14:01:43.169+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.driverPropertiesFile found
+2026-04-17T14:01:43.175+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.update.labelFilter aka liquibase.command.update.labels found
+2026-04-17T14:01:43.230+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.labelFilter aka liquibase.command.labels found
+2026-04-17T14:01:43.234+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.update.password found
+2026-04-17T14:01:43.237+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.password found
+2026-04-17T14:01:43.241+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.update.showSummary found
+2026-04-17T14:01:43.241+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.command.update.showSummary is using the default value of SUMMARY
+2026-04-17T14:01:43.245+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.showSummary found
+2026-04-17T14:01:43.245+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.command.showSummary is using the default value of SUMMARY
+2026-04-17T14:01:43.249+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Found 'liquibase.command.update.showSummaryOutput' configuration of 'LOG'
++[     command argument 'showSummaryOutput' of 'LOG'
+2026-04-17T14:01:43.253+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.update.skipDatabaseStep found
+2026-04-17T14:01:43.253+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.command.update.skipDatabaseStep is using the default value of false
+2026-04-17T14:01:43.256+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.skipDatabaseStep found
+2026-04-17T14:01:43.256+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.command.skipDatabaseStep is using the default value of false
+2026-04-17T14:01:43.259+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.update.updateNullChecksums found
+2026-04-17T14:01:43.260+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.command.update.updateNullChecksums is using the default value of false
+2026-04-17T14:01:43.262+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.updateNullChecksums found
+2026-04-17T14:01:43.262+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.command.updateNullChecksums is using the default value of false
+2026-04-17T14:01:43.264+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.update.url found
+2026-04-17T14:01:43.266+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.url found
+2026-04-17T14:01:43.269+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.update.username found
+2026-04-17T14:01:43.271+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.command.username found
+2026-04-17T14:01:43.272+07:00 DEBUG [restartedMain] [,,] liquibase.command - Pipeline for command 'update: liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep then liquibase.command.core.helpers.ShowSummaryArgument then liquibase.command.core.helpers.DbUrlConnectionCommandStep then liquibase.command.core.helpers.DatabaseChangelogCommandStep then liquibase.command.core.helpers.ChangeExecListenerCommandStep then liquibase.command.core.UpdateCommandStep
+2026-04-17T14:01:43.275+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.outputFile found
+2026-04-17T14:01:43.277+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.outputFileEncoding found
+2026-04-17T14:01:43.277+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.outputFileEncoding is using the default value of UTF-8
+2026-04-17T14:01:43.277+07:00 DEBUG [restartedMain] [,,] liquibase.command - Writing output with encoding 'UTF-8'
+2026-04-17T14:01:43.278+07:00 DEBUG [restartedMain] [,,] liquibase.command - Executing internal command dbUrlConnectionArguments
+2026-04-17T14:01:43.278+07:00 DEBUG [restartedMain] [,,] liquibase.command - Executing internal command showSummary
+2026-04-17T14:01:43.330+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.command.update.showSummary is using the default value of SUMMARY
+2026-04-17T14:01:43.330+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.command.showSummary is using the default value of SUMMARY
+2026-04-17T14:01:43.331+07:00 DEBUG [restartedMain] [,,] liquibase.command - Executing internal command dbUrlConnectionCommandStep
+2026-04-17T14:01:43.332+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.command.update.skipDatabaseStep is using the default value of false
+2026-04-17T14:01:43.332+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.command.skipDatabaseStep is using the default value of false
+2026-04-17T14:01:43.339+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.liquibaseCatalogName aka liquibase.catalogName found
+2026-04-17T14:01:43.343+07:00 DEBUG [restartedMain] [,,] liquibase.command - Executing internal command changelogCommandStep
+2026-04-17T14:01:43.360+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.parser.ChangeLogParser instance liquibase.parser.core.formattedsql.FormattedSqlChangeLogParser
+2026-04-17T14:01:43.362+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.parser.ChangeLogParser instance liquibase.parser.core.json.JsonChangeLogParser
+2026-04-17T14:01:43.367+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.parser.ChangeLogParser instance liquibase.parser.core.sql.SqlChangeLogParser
+2026-04-17T14:01:43.374+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.validateXmlChangelogFiles found
+2026-04-17T14:01:43.375+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.validateXmlChangelogFiles is using the default value of true
+2026-04-17T14:01:43.412+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.secureParsing found
+2026-04-17T14:01:43.412+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.secureParsing is using the default value of true
+2026-04-17T14:01:43.412+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.parser.ChangeLogParser instance liquibase.parser.core.xml.XMLChangeLogSAXParser
+2026-04-17T14:01:43.413+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.parser.ChangeLogParser instance liquibase.parser.core.yaml.YamlChangeLogParser
+2026-04-17T14:01:43.432+07:00 DEBUG [restartedMain] [,,] liquibase.parser - Matched file 'classpath:/db/changelog/db.changelog-persistence.xml' to parser 'XMLChangeLogSAXParser'
+2026-04-17T14:01:43.450+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.CustomPreconditionWrapper
+2026-04-17T14:01:43.451+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.AndPrecondition
+2026-04-17T14:01:43.451+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.ChangeLogPropertyDefinedPrecondition
+2026-04-17T14:01:43.452+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.ChangeSetExecutedPrecondition
+2026-04-17T14:01:43.453+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.ColumnExistsPrecondition
+2026-04-17T14:01:43.454+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.DBMSPrecondition
+2026-04-17T14:01:43.455+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.ForeignKeyExistsPrecondition
+2026-04-17T14:01:43.456+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.IndexExistsPrecondition
+2026-04-17T14:01:43.456+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.NotPrecondition
+2026-04-17T14:01:43.457+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.ObjectQuotingStrategyPrecondition
+2026-04-17T14:01:43.458+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.OrPrecondition
+2026-04-17T14:01:43.458+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.PreconditionContainer
+2026-04-17T14:01:43.459+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.PrimaryKeyExistsPrecondition
+2026-04-17T14:01:43.461+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.RowCountPrecondition
+2026-04-17T14:01:43.461+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.RunningAsPrecondition
+2026-04-17T14:01:43.462+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.SequenceExistsPrecondition
+2026-04-17T14:01:43.463+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.SqlPrecondition
+2026-04-17T14:01:43.463+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.TableExistsPrecondition
+2026-04-17T14:01:43.464+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.TableIsEmptyPrecondition
+2026-04-17T14:01:43.465+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.UniqueConstraintExistsPrecondition
+2026-04-17T14:01:43.466+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.ViewExistsPrecondition
+2026-04-17T14:01:43.563+07:00 DEBUG [restartedMain] [,,] liquibase.parser - Resolving XML entity name='null', publicId='null', baseURI='null', systemId='http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd'
+2026-04-17T14:01:43.869+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.preserveClasspathPrefixInNormalizedPaths found
+2026-04-17T14:01:43.870+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.preserveClasspathPrefixInNormalizedPaths is using the default value of false
+2026-04-17T14:01:43.941+07:00 DEBUG [restartedMain] [,,] liquibase.parser - Matched file 'db/changelog/db.changelog-1.0.0.xml' to parser 'XMLChangeLogSAXParser'
+2026-04-17T14:01:43.944+07:00 DEBUG [restartedMain] [,,] liquibase.parser - Resolving XML entity name='null', publicId='null', baseURI='null', systemId='http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd'
+2026-04-17T14:01:44.282+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.changeset.ChangeSetService instance liquibase.changeset.StandardChangeSetService
+2026-04-17T14:01:44.289+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.AddAutoIncrementChange
+2026-04-17T14:01:44.292+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.AddColumnChange
+2026-04-17T14:01:44.293+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.AddDefaultValueChange
+2026-04-17T14:01:44.295+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.AddForeignKeyConstraintChange
+2026-04-17T14:01:44.312+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.AddLookupTableChange
+2026-04-17T14:01:44.313+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.AddNotNullConstraintChange
+2026-04-17T14:01:44.315+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.AddPrimaryKeyChange
+2026-04-17T14:01:44.316+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.AddUniqueConstraintChange
+2026-04-17T14:01:44.317+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.AlterSequenceChange
+2026-04-17T14:01:44.318+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.CreateIndexChange
+2026-04-17T14:01:44.333+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.CreateProcedureChange
+2026-04-17T14:01:44.335+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.CreateSequenceChange
+2026-04-17T14:01:44.336+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.CreateTableChange
+2026-04-17T14:01:44.338+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.CreateViewChange
+2026-04-17T14:01:44.339+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.DeleteDataChange
+2026-04-17T14:01:44.341+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.DropAllForeignKeyConstraintsChange
+2026-04-17T14:01:44.342+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.DropColumnChange
+2026-04-17T14:01:44.343+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.DropDefaultValueChange
+2026-04-17T14:01:44.344+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.DropForeignKeyConstraintChange
+2026-04-17T14:01:44.345+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.DropIndexChange
+2026-04-17T14:01:44.346+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.DropNotNullConstraintChange
+2026-04-17T14:01:44.346+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.DropPrimaryKeyChange
+2026-04-17T14:01:44.347+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.DropProcedureChange
+2026-04-17T14:01:44.347+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.DropSequenceChange
+2026-04-17T14:01:44.348+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.DropTableChange
+2026-04-17T14:01:44.349+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.DropUniqueConstraintChange
+2026-04-17T14:01:44.350+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.DropViewChange
+2026-04-17T14:01:44.350+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.EmptyChange
+2026-04-17T14:01:44.352+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.ExecuteShellCommandChange
+2026-04-17T14:01:44.353+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.InsertDataChange
+2026-04-17T14:01:44.361+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.LoadDataChange
+2026-04-17T14:01:44.362+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.LoadUpdateDataChange
+2026-04-17T14:01:44.363+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.MergeColumnChange
+2026-04-17T14:01:44.364+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.ModifyDataTypeChange
+2026-04-17T14:01:44.365+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.OutputChange
+2026-04-17T14:01:44.365+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.RawSQLChange
+2026-04-17T14:01:44.366+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.RenameColumnChange
+2026-04-17T14:01:44.367+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.RenameSequenceChange
+2026-04-17T14:01:44.368+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.RenameTableChange
+2026-04-17T14:01:44.368+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.RenameViewChange
+2026-04-17T14:01:44.369+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.SQLFileChange
+2026-04-17T14:01:44.374+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.SetColumnRemarksChange
+2026-04-17T14:01:44.375+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.SetTableRemarksChange
+2026-04-17T14:01:44.377+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.StopChange
+2026-04-17T14:01:44.377+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.TagDatabaseChange
+2026-04-17T14:01:44.383+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.core.UpdateDataChange
+2026-04-17T14:01:44.385+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.change.Change instance liquibase.change.custom.CustomChangeWrapper
+2026-04-17T14:01:44.841+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.changelog.ChangeLogHistoryService instance liquibase.changelog.MockChangeLogHistoryService
+2026-04-17T14:01:44.844+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.changelog.ChangeLogHistoryService instance liquibase.changelog.StandardChangeLogHistoryService
+2026-04-17T14:01:44.849+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.CatalogSnapshotGenerator
+2026-04-17T14:01:44.852+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.ColumnSnapshotGenerator
+2026-04-17T14:01:44.853+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.ColumnSnapshotGeneratorH2
+2026-04-17T14:01:44.853+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.ColumnSnapshotGeneratorInformix
+2026-04-17T14:01:44.854+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.ColumnSnapshotGeneratorOracle
+2026-04-17T14:01:44.855+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.DataSnapshotGenerator
+2026-04-17T14:01:44.856+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.ForeignKeySnapshotGenerator
+2026-04-17T14:01:44.859+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.IndexSnapshotGenerator
+2026-04-17T14:01:44.860+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.PrimaryKeySnapshotGenerator
+2026-04-17T14:01:44.861+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.SchemaSnapshotGenerator
+2026-04-17T14:01:44.863+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.SequenceSnapshotGenerator
+2026-04-17T14:01:44.863+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.TableSnapshotGenerator
+2026-04-17T14:01:44.865+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.UniqueConstraintSnapshotGenerator
+2026-04-17T14:01:44.912+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.ViewSnapshotGenerator
+2026-04-17T14:01:44.913+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.SchemaSnapshotGeneratorSnowflake
+2026-04-17T14:01:44.914+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.SequenceSnapshotGeneratorSnowflake
+2026-04-17T14:01:44.914+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.UniqueConstraintSnapshotGeneratorSnowflake
+2026-04-17T14:01:44.917+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.supportsMethodValidationLevel found
+2026-04-17T14:01:44.917+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.supportsMethodValidationLevel is using the default value of WARN
+2026-04-17T14:01:44.940+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.database.LiquibaseTableNames instance liquibase.database.StandardLiquibaseTableNames
+2026-04-17T14:01:44.947+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.CatalogComparator
+2026-04-17T14:01:44.948+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.ColumnComparator
+2026-04-17T14:01:44.949+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.DefaultDatabaseObjectComparator
+2026-04-17T14:01:44.950+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.ForeignKeyComparator
+2026-04-17T14:01:44.950+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.IndexComparator
+2026-04-17T14:01:44.951+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.PrimaryKeyComparator
+2026-04-17T14:01:44.952+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.SchemaComparator
+2026-04-17T14:01:44.952+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.TableComparator
+2026-04-17T14:01:44.953+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.UniqueConstraintComparator
+2026-04-17T14:01:44.957+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.includeCatalogInSpecification found
+2026-04-17T14:01:44.957+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.includeCatalogInSpecification is using the default value of false
+2026-04-17T14:01:44.960+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for 1776409304958 as 2a62dfd5ddb60000abc387554b0a04d0
+2026-04-17T14:01:45.330+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.sql.alwaysSetFetchSize found
+2026-04-17T14:01:45.330+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.sql.alwaysSetFetchSize is using the default value of true
+2026-04-17T14:01:45.339+07:00 DEBUG [restartedMain] [,,] liquibase.executor - Changelog query completed.
+2026-04-17T14:01:45.347+07:00 INFO  [restartedMain] [,,] liquibase.changelog - Reading from APP_ABB_ENGAGEMENTS.DATABASECHANGELOG
+2026-04-17T14:01:45.356+07:00 DEBUG [restartedMain] [,,] liquibase.executor - Changelog query completed.
+2026-04-17T14:01:45.360+07:00 DEBUG [restartedMain] [,,] liquibase.parser - Matched file 'db/changelog/db.changelog-lookback.xml' to parser 'XMLChangeLogSAXParser'
+2026-04-17T14:01:45.364+07:00 DEBUG [restartedMain] [,,] liquibase.parser - Resolving XML entity name='null', publicId='null', baseURI='null', systemId='http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd'
+2026-04-17T14:01:45.456+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Found 'liquibase.command.update.updateNullChecksums' configuration of 'true'
++[     command argument 'updateNullChecksums' of 'true'
+2026-04-17T14:01:45.516+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.lockservice.LockService instance liquibase.lockservice.LockServiceImpl
+2026-04-17T14:01:45.517+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.lockservice.LockService instance liquibase.lockservice.MockLockService
+2026-04-17T14:01:45.518+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.lockservice.LockService instance liquibase.lockservice.OfflineLockService
+2026-04-17T14:01:45.518+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.lockservice.LockService instance liquibase.lockservice.StandardLockService
+2026-04-17T14:01:45.540+07:00 DEBUG [restartedMain] [,,] liquibase.executor - Changelog query completed.
+2026-04-17T14:01:45.544+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.allowDuplicatedChangesetIdentifiers found
+2026-04-17T14:01:45.544+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.allowDuplicatedChangesetIdentifiers is using the default value of false
+2026-04-17T14:01:45.547+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.changelog.visitor.ValidatingVisitorGenerator instance liquibase.changelog.visitor.StandardValidatingVisitorGenerator
+2026-04-17T14:01:45.614+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for createTable:[
++[     columns=[
++[         [
++[             [
++[                 nullable="false"
++[                 primaryKey="true"
++[                 primaryKeyName="pk_document_metadata"
++[             ]
++[             name="ID"
++[             type="varchar(255)"
++[         ],
++[         [
++[             [
++[                 nullable="false"
++[             ]
++[             name="USER_ID"
++[             type="VARCHAR2(255)"
++[         ],
++[         [
++[             [
++[                 nullable="false"
++[             ]
++[             name="FILE_NAME"
++[       ... [truncated in log] as 362e9a2baa4413d4abd36aa77fbba961
+2026-04-17T14:01:45.614+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for 9:362e9a2baa4413d4abd36aa77fbba961: as 837ee5a61016bbfa93de4b9a7c0ef091
+2026-04-17T14:01:45.629+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for createIndex:[
++[     columns=[
++[         [
++[             name="USER_ID"
++[         ]
++[     ]
++[     indexName="idx_document_metadata_user_id"
++[     tableName="DOCUMENT_METADATA"
++[ ] as 221808f6dd86953f87e415e3b093ca08
+2026-04-17T14:01:45.631+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for createIndex:[
++[     columns=[
++[         [
++[             name="FILE_ID"
++[         ]
++[     ]
++[     indexName="idx_document_metadata_file_id"
++[     tableName="DOCUMENT_METADATA"
++[ ] as d240cfc3c621f8685760f9f52a13d588
+2026-04-17T14:01:45.634+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for createIndex:[
++[     columns=[
++[         [
++[             name="FILE_PATH"
++[         ]
++[     ]
++[     indexName="idx_document_metadata_file_path"
++[     tableName="DOCUMENT_METADATA"
++[ ] as 23ebe9df4ff0abf9646eeb60afd5b316
+2026-04-17T14:01:45.634+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for 9:221808f6dd86953f87e415e3b093ca08:9:d240cfc3c621f8685760f9f52a13d588:9:23ebe9df4ff0abf9646eeb60afd5b316: as bd3800edd3c115d263b8f77aaa468a55
+2026-04-17T14:01:45.641+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for addColumn:[
++[     columns=[
++[         [
++[             name="OVERALL_CASHIN"
++[             type="CLOB"
++[         ],
++[         [
++[             name="OVERALL_DEPOSIT"
++[             type="CLOB"
++[         ],
++[         [
++[             name="OVERALL_BENEFIT"
++[             type="CLOB"
++[         ],
++[         [
++[             name="OVERALL_ABBY"
++[             type="CLOB"
++[         ],
++[         [
++[             name="OVERALL_MERCHANT"
++[             type="CLOB"
++[         ],
++[         [
++[             name="OVERALL_BADGE"
++[             type="CLOB"
++[         ]
++[ ... [truncated in log] as 02ec58f29c4990702d86b261dfacc0d6
+2026-04-17T14:01:45.641+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for 9:02ec58f29c4990702d86b261dfacc0d6: as 7e3fb28d4125ed974f9601b892b7f399
+2026-04-17T14:01:45.643+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for dropNotNullConstraint:[
++[     columnDataType="VARCHAR2(500)"
++[     columnName="FULL_NAME"
++[     tableName="ABB_LOOKBACKS"
++[ ] as 8aebb5e725562472d29bc187a4ef2493
+2026-04-17T14:01:45.643+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for dropNotNullConstraint:[
++[     columnDataType="VARCHAR2(255)"
++[     columnName="DATE_TOGETHER"
++[     tableName="ABB_LOOKBACKS"
++[ ] as e0c8f6c74272d7d346ebee3b9600dac7
+2026-04-17T14:01:45.644+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for dropNotNullConstraint:[
++[     columnDataType="VARCHAR2(255)"
++[     columnName="HOUR_TOGETHER"
++[     tableName="ABB_LOOKBACKS"
++[ ] as 0514fd4e1cdfdf59747c0a24c58869ce
+2026-04-17T14:01:45.644+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for dropNotNullConstraint:[
++[     columnDataType="VARCHAR2(255)"
++[     columnName="MINUTE_TOGETHER"
++[     tableName="ABB_LOOKBACKS"
++[ ] as 3d8e46d4cf4df1a76e7968fd4b641156
+2026-04-17T14:01:45.645+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for dropNotNullConstraint:[
++[     columnDataType="VARCHAR2(50)"
++[     columnName="TRANSACTION_TIME_FRAME"
++[     tableName="ABB_LOOKBACKS"
++[ ] as b5a746515690f1d87be64b1b54901d8b
+2026-04-17T14:01:45.646+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for dropNotNullConstraint:[
++[     columnDataType="VARCHAR2(255)"
++[     columnName="TRANSACTION_SEASON"
++[     tableName="ABB_LOOKBACKS"
++[ ] as 7e3ece1621048828c6fe62175acd98c3
+2026-04-17T14:01:45.646+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for dropNotNullConstraint:[
++[     columnDataType="VARCHAR2(255)"
++[     columnName="TRANSACTION_VOLUME"
++[     tableName="ABB_LOOKBACKS"
++[ ] as 942362d9105ebac4e2f290f21ba9a770
+2026-04-17T14:01:45.647+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for dropNotNullConstraint:[
++[     columnDataType="VARCHAR2(255)"
++[     columnName="MEDAL"
++[     tableName="ABB_LOOKBACKS"
++[ ] as d3e83680519843d64fc9776c0519cfc2
+2026-04-17T14:01:45.647+07:00 DEBUG [restartedMain] [,,] liquibase.util - Computed checksum for 9:8aebb5e725562472d29bc187a4ef2493:9:e0c8f6c74272d7d346ebee3b9600dac7:9:0514fd4e1cdfdf59747c0a24c58869ce:9:3d8e46d4cf4df1a76e7968fd4b641156:9:b5a746515690f1d87be64b1b54901d8b:9:7e3ece1621048828c6fe62175acd98c3:9:942362d9105ebac4e2f290f21ba9a770:9:d3e83680519843d64fc9776c0519cfc2: as 5861ab2677ea23fd3f5c35be60356509
+2026-04-17T14:01:45.648+07:00 DEBUG [restartedMain] [,,] liquibase.command - Executing internal command changeExecListener
+2026-04-17T14:01:45.650+07:00 DEBUG [restartedMain] [,,] liquibase.command - Executing internal command update migrate
+2026-04-17T14:01:45.736+07:00 DEBUG [restartedMain] [,,] liquibase.changelog - Fast check found no un-run changesets
+2026-04-17T14:01:45.736+07:00 INFO  [restartedMain] [,,] liquibase.ui - Database is up to date, no changesets to execute
+2026-04-17T14:01:45.742+07:00 INFO  [restartedMain] [,,] liquibase.changelog - Reading from APP_ABB_ENGAGEMENTS.DATABASECHANGELOG
+2026-04-17T14:01:45.748+07:00 DEBUG [restartedMain] [,,] liquibase.executor - Changelog query completed.
+2026-04-17T14:01:45.761+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.report.ShowSummaryGenerator instance liquibase.report.StandardShowSummaryGenerator
+2026-04-17T14:01:45.765+07:00 INFO  [restartedMain] [,,] liquibase.util - UPDATE SUMMARY
+2026-04-17T14:01:45.765+07:00 INFO  [restartedMain] [,,] liquibase.util - Run:                          0
+2026-04-17T14:01:45.765+07:00 INFO  [restartedMain] [,,] liquibase.util - Previously run:               4
+2026-04-17T14:01:45.765+07:00 INFO  [restartedMain] [,,] liquibase.util - Filtered out:                 0
+2026-04-17T14:01:45.765+07:00 INFO  [restartedMain] [,,] liquibase.util - -------------------------------
+2026-04-17T14:01:45.765+07:00 INFO  [restartedMain] [,,] liquibase.util - Total change sets:            4
+2026-04-17T14:01:45.766+07:00 INFO  [restartedMain] [,,] liquibase.util - Update summary generated
+2026-04-17T14:01:45.768+07:00 INFO  [restartedMain] [,,] liquibase.command - Command execution complete
+2026-04-17T14:01:45.812+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.analytics.devOverride found
+2026-04-17T14:01:45.812+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.analytics.devOverride is using the default value of false
+2026-04-17T14:01:45.815+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.analytics.configEndpointUrl found
+2026-04-17T14:01:45.815+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.analytics.configEndpointUrl is using the default value of https://config.liquibase.com/analytics.yaml
+2026-04-17T14:01:45.817+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.analytics.enabled found
+2026-04-17T14:01:45.837+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.analytics.configCacheTimeoutMillis found
+2026-04-17T14:01:45.837+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.analytics.configCacheTimeoutMillis is using the default value of 3600000
+2026-04-17T14:01:45.837+07:00 DEBUG [restartedMain] [,,] liquibase.servicelocator - Loaded liquibase.analytics.configuration.AnalyticsConfiguration instance liquibase.analytics.configuration.LiquibaseRemoteAnalyticsConfiguration
+2026-04-17T14:01:45.840+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.analytics.logLevel found
+2026-04-17T14:01:45.840+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.analytics.logLevel is using the default value of OFF
+2026-04-17T14:01:45.845+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - No configuration value for liquibase.analytics.configEndpointTimeoutMillis found
+2026-04-17T14:01:45.845+07:00 DEBUG [restartedMain] [,,] liquibase.configuration - Configuration liquibase.analytics.configEndpointTimeoutMillis is using the default value of 1500
+2026-04-17T14:01:46.319+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration'
+2026-04-17T14:01:46.321+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'liquibaseDefaultDdlModeProvider'
+2026-04-17T14:01:46.330+07:00 DEBUG [restartedMain] [,,] o.s.b.f.s.DefaultListableBeanFactory - Creating shared instance of singleton bean 'org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration'
+2026-04-17T14:01:46.345+07:00 DEBUG [restartedMain] [,,] o.s.c.s.DefaultLifecycleProcessor - Starting beans in phase 2147481599
+2026-04-17T14:01:46.362+07:00 INFO  [restartedMain] [,,] o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-04-17T14:01:46.363+07:00 DEBUG [restartedMain] [,,] o.s.c.s.DefaultLifecycleProcessor - Successfully started bean 'webServerStartStop'
+2026-04-17T14:01:46.364+07:00 DEBUG [restartedMain] [,,] o.s.c.s.DefaultLifecycleProcessor - Starting beans in phase 2147482623
+2026-04-17T14:01:46.364+07:00 DEBUG [restartedMain] [,,] o.s.c.s.DefaultLifecycleProcessor - Successfully started bean 'webServerGracefulShutdown'
+2026-04-17T14:01:46.416+07:00 DEBUG [restartedMain] [,,] o.s.b.a.l.ConditionEvaluationReportLogger -
++[
++[
++[ ============================
++[ CONDITIONS EVALUATION REPORT
++[ ============================
++[
++[
++[ Positive matches:
++[ -----------------
++[
++[    DataSourceAutoConfiguration matched:
++[       - @ConditionalOnClass found required classes 'javax.sql.DataSource', 'org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType' (OnClassCondition)
++[       - @ConditionalOnMissingBean (types: io.r2dbc.spi.ConnectionFactory; SearchStrategy: all) did not find any beans (OnBeanCondition)
++[
++[    DataSourceAutoConfiguration.PooledDataSourceConfiguration matched:
++[       - AnyNestedCondition 1 matched 1 did not; NestedCondition on DataSourceAutoConfiguration.PooledDataSourceCondition.PooledDataSourceAvailable PooledDataSource found supported DataSource; NestedCondition on DataSourceAutoConfiguration.PooledDataSourceCondition.ExplicitType @ConditionalOnProperty (spring.datasource.type) did not find property 'spring.datasource.type' (DataSourceAutoConfiguration.PooledDataSourceCondition)
++[       - @ConditionalOnMissingBean (types: javax.sql.DataSource,javax.sql.XADataSource; SearchStrategy: all) did not find any beans (OnBeanCondition)
++[
++[    DataSourceAutoConfiguration.PooledDataSourceConfiguration#jdbcConnectionDetails matched:
++[       - @ConditionalOnMissingBean (types: org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails; SearchStrategy: all) did not find any beans (OnBeanCondition)
++[
++[    DataSourceConfiguration.Hikari matched:
++[       - @ConditionalOnClass found required class 'com.zaxxer.hikari.HikariDataSource' (OnClassCondition)
++[       - @ConditionalOnProperty (spring.datasource.type=com.zaxxer.hikari.HikariDataSource) matched (OnPropertyCondition)
++[       - @ConditionalOnMissingBean (types: javax.sql.DataSource; SearchStrategy: all) did not find any beans (OnBeanCondition)
++[
++[    DataSourcePoolMetadataProvidersConfiguration.HikariPoolDataSourceMetadataProviderConfiguration matched:
++[       - @ConditionalOnClass found required class 'com.zaxxer.hikari.HikariDataSource' (OnClassCondition)
++[
++[    DispatcherServletAutoConfiguration matched:
++[       - @ConditionalOnClass found required class 'org.springframework.web.servlet.DispatcherServlet' (OnClassCondition)
++[       - found 'session' scope (OnWebApplicationCondition)
++[
++[    DispatcherServletAutoConfiguration.DispatcherServletConfiguration matched:
++[       - @ConditionalOnClass found required class 'jakarta.servlet.ServletRegistration' (OnClassCondition)
++[       - Default DispatcherServlet did not find dispatcher servlet beans (DispatcherServletAutoConfiguration.DefaultDispatcherServletCondition)
++[
++[    DispatcherServletAutoConfiguration.DispatcherServletRegistrationConfiguration matched:
++[       - @ConditionalOnClass found required class 'jakarta.servlet.ServletRegistration' (OnClassCondition)
++[       - DispatcherServlet Registration did not find servlet registration bean (DispatcherServletAutoConfiguration.DispatcherServletRegistrationCondition)
++[
++[    DispatcherServletAutoConfiguration.DispatcherServletRegistrationConfiguration#dispatcherServletRegistration matched:
++[       - @ConditionalOnBean (names: dispatcherServlet types: org.springframework.web.servlet.DispatcherServlet; SearchStrategy: all) found bean 'dispatcherServlet' (OnBeanCondition)
++[
++[    EmbeddedWebServerFactoryCustomizerAutoConfiguration matched:
++[       - @ConditionalOnWebApplication (required) found 'session' scope (OnWebApplicationCondition)
++[       - @ConditionalOnWarDeployment the application is not deployed as a WAR file. (OnWarDeploymentCondition)
++[
++[    EmbeddedWebServerFactoryCustomizerAutoConfiguration.NettyWebServerFactoryCustomizerConfiguration matched:
++[       - @ConditionalOnClass found required class 'reactor.netty.http.server.HttpServer' (OnClassCondition)
++[
++[    EmbeddedWebServerFactoryCustomizerAutoConfiguration.TomcatWebServerFactoryCustomizerConfiguration matched:
++[       - @ConditionalOnClass found required classes 'org.apache.catalina.startup.Tomcat', 'org.apache.coyote.UpgradeProtocol' (OnClassCondition)
++[
++[    LiquibaseAutoConfiguration matched:
++[       - @ConditionalOnClass found required classes 'liquibase.integration.spring.SpringLiquibase', 'liquibase.change.DatabaseChange' (OnClassCondition)
++[       - @ConditionalOnBooleanProperty (spring.liquibase.enabled=true) matched (OnPropertyCondition)
++[       - AnyNestedCondition 2 matched 1 did not; NestedCondition on LiquibaseAutoConfiguration.LiquibaseDataSourceCondition.LiquibaseUrlCondition @ConditionalOnProperty (spring.liquibase.url) did not find property 'spring.liquibase.url'; NestedCondition on LiquibaseAutoConfiguration.LiquibaseDataSourceCondition.JdbcConnectionDetailsCondition @ConditionalOnBean (types: org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails; SearchStrategy: all) found bean 'jdbcConnectionDetails'; NestedCondition on LiquibaseAutoConfiguration.LiquibaseDataSourceCondition.DataSourceBeanCondition @ConditionalOnBean (types: javax.sql.DataSource; SearchStrategy: all) found bean 'dataSource' (LiquibaseAutoConfiguration.LiquibaseDataSourceCondition)
++[
++[    LiquibaseAutoConfiguration.CustomizerConfiguration matched:
++[       - @ConditionalOnClass found required class 'liquibase.integration.spring.Customizer' (OnClassCondition)
++[
++[    LiquibaseAutoConfiguration.LiquibaseConfiguration matched:
++[       - @ConditionalOnClass found required class 'org.springframework.jdbc.core.ConnectionCallback' (OnClassCondition)
++[       - @ConditionalOnMissingBean (types: liquibase.integration.spring.SpringLiquibase; SearchStrategy: all) did not find any beans (OnBeanCondition)
++[
++[    LiquibaseAutoConfiguration.LiquibaseConfiguration#liquibaseConnectionDetails matched:
++[       - @ConditionalOnMissingBean (types: org.springframework.boot.autoconfigure.liquibase.LiquibaseConnectionDetails; SearchStrategy: all) did not find any beans (OnBeanCondition)
++[
++[    ServletWebServerFactoryAutoConfiguration matched:
++[       - @ConditionalOnClass found required class 'jakarta.servlet.ServletRequest' (OnClassCondition)
++[       - found 'session' scope (OnWebApplicationCondition)
++[
++[    ServletWebServerFactoryAutoConfiguration.TomcatConfiguration matched:
++[       - @ConditionalOnClass found required class 'org.apache.catalina.startup.Tomcat' (OnClassCondition)
++[
++[    ServletWebServerFactoryConfiguration.EmbeddedTomcat matched:
++[       - @ConditionalOnClass found required classes 'jakarta.servlet.Servlet', 'org.apache.catalina.startup.Tomcat', 'org.apache.coyote.UpgradeProtocol' (OnClassCondition)
++[       - @ConditionalOnMissingBean (types: org.springframework.boot.web.servlet.server.ServletWebServerFactory; SearchStrategy: current) did not find any beans (OnBeanCondition)
++[
++[
++[ Negative matches:
++[ -----------------
++[
++[    DataSourceAutoConfiguration.EmbeddedDatabaseConfiguration:
++[       Did not match:
++[          - EmbeddedDataSource spring.datasource.url is set (DataSourceAutoConfiguration.EmbeddedDatabaseCondition)
++[
++[    DataSourceCheckpointRestoreConfiguration:
++[       Did not match:
++[          - @ConditionalOnClass did not find required class 'org.crac.Resource' (OnClassCondition)
++[
++[    DataSourceConfiguration.Dbcp2:
++[       Did not match:
++[          - @ConditionalOnClass did not find required class 'org.apache.commons.dbcp2.BasicDataSource' (OnClassCondition)
++[
++[    DataSourceConfiguration.Generic:
++[       Did not match:
++[          - @ConditionalOnProperty (spring.datasource.type) did not find property 'spring.datasource.type' (OnPropertyCondition)
++[
++[    DataSourceConfiguration.OracleUcp:
++[       Did not match:
++[          - @ConditionalOnClass did not find required class 'oracle.ucp.jdbc.PoolDataSourceImpl' (OnClassCondition)
++[
++[    DataSourceConfiguration.Tomcat:
++[       Did not match:
++[          - @ConditionalOnClass did not find required class 'org.apache.tomcat.jdbc.pool.DataSource' (OnClassCondition)
++[
++[    DataSourceJmxConfiguration:
++[       Did not match:
++[          - @ConditionalOnBooleanProperty (spring.jmx.enabled=true) did not find property 'spring.jmx.enabled' (OnPropertyCondition)
++[
++[    DataSourcePoolMetadataProvidersConfiguration.CommonsDbcp2PoolDataSourceMetadataProviderConfiguration:
++[       Did not match:
++[          - @ConditionalOnClass did not find required class 'org.apache.commons.dbcp2.BasicDataSource' (OnClassCondition)
++[
++[    DataSourcePoolMetadataProvidersConfiguration.OracleUcpPoolDataSourceMetadataProviderConfiguration:
++[       Did not match:
++[          - @ConditionalOnClass did not find required class 'oracle.ucp.jdbc.PoolDataSource' (OnClassCondition)
++[
++[    DataSourcePoolMetadataProvidersConfiguration.TomcatDataSourcePoolMetadataProviderConfiguration:
++[       Did not match:
++[          - @ConditionalOnClass did not find required class 'org.apache.tomcat.jdbc.pool.DataSource' (OnClassCondition)
++[
++[    DispatcherServletAutoConfiguration.DispatcherServletConfiguration#multipartResolver:
++[       Did not match:
++[          - @ConditionalOnBean (types: org.springframework.web.multipart.MultipartResolver; SearchStrategy: all) did not find any beans of type org.springframework.web.multipart.MultipartResolver (OnBeanCondition)
++[
++[    EmbeddedWebServerFactoryCustomizerAutoConfiguration.JettyWebServerFactoryCustomizerConfiguration:
++[       Did not match:
++[          - @ConditionalOnClass did not find required classes 'org.eclipse.jetty.server.Server', 'org.eclipse.jetty.util.Loader', 'org.eclipse.jetty.ee10.webapp.WebAppContext' (OnClassCondition)
++[
++[    EmbeddedWebServerFactoryCustomizerAutoConfiguration.TomcatWebServerFactoryCustomizerConfiguration#tomcatVirtualThreadsProtocolHandlerCustomizer:
++[       Did not match:
++[          - @ConditionalOnThreading did not find VIRTUAL (OnThreadingCondition)
++[
++[    EmbeddedWebServerFactoryCustomizerAutoConfiguration.UndertowWebServerFactoryCustomizerConfiguration:
++[       Did not match:
++[          - @ConditionalOnClass did not find required classes 'io.undertow.Undertow', 'org.xnio.SslClientAuthMode' (OnClassCondition)
++[
++[    LiquibaseAutoConfiguration.CustomizerConfiguration#springLiquibaseCustomizer:
++[       Did not match:
++[          - @ConditionalOnBean (types: liquibase.integration.spring.Customizer; SearchStrategy: all) did not find any beans of type liquibase.integration.spring.Customizer (OnBeanCondition)
++[
++[    ReactiveWebServerFactoryAutoConfiguration:
++[       Did not match:
++[          - not a reactive web application (OnWebApplicationCondition)
++[       Matched:
++[          - @ConditionalOnClass found required class 'org.springframework.http.ReactiveHttpInputMessage' (OnClassCondition)
++[
++[    ServletWebServerFactoryAutoConfiguration.ForwardedHeaderFilterConfiguration:
++[       Did not match:
++[          - @ConditionalOnProperty (server.forward-headers-strategy=framework) did not find property 'server.forward-headers-strategy' (OnPropertyCondition)
++[
++[    ServletWebServerFactoryConfiguration.EmbeddedJetty:
++[       Did not match:
++[          - @ConditionalOnClass did not find required classes 'org.eclipse.jetty.server.Server', 'org.eclipse.jetty.util.Loader', 'org.eclipse.jetty.ee10.webapp.WebAppContext' (OnClassCondition)
++[
++[    ServletWebServerFactoryConfiguration.EmbeddedUndertow:
++[       Did not match:
++[          - @ConditionalOnClass did not find required classes 'io.undertow.Undertow', 'org.xnio.SslClientAuthMode' (OnClassCondition)
++[
++[
++[ Exclusions:
++[ -----------
++[
++[     org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration
++[
++[     org.springframework.boot.actuate.autoconfigure.tracing.zipkin.ZipkinAutoConfiguration
++[
++[     org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration
++[
++[     org.springframework.boot.actuate.autoconfigure.tracing.zipkin.ZipkinAutoConfiguration
++[
++[
++[ Unconditional classes:
++[ ----------------------
++[
++[     com.backbase.buildingblocks.auxiliaryconfig.InitContainerAutoConfigurationSelector
++[
++[
++[
+2026-04-17T14:01:46.432+07:00 INFO  [restartedMain] [,,] c.b.b.a.InitContainerApplication - Started InitContainerApplication in 18.471 seconds (process running for 21.098)
+2026-04-17T14:01:46.441+07:00 DEBUG [restartedMain] [,,] o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Closing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@49cf74d, started on Fri Apr 17 14:01:35 ICT 2026, parent: org.springframework.context.annotation.AnnotationConfigApplicationContext@7b1b2e3e
+2026-04-17T14:01:46.444+07:00 DEBUG [restartedMain] [,,] i.f.k.client.impl.BaseClient - The client and associated httpclient io.fabric8.kubernetes.client.vertx.VertxHttpClient have been closed, the usage of this or any client using the httpclient will not work after this
+2026-04-17T14:01:46.446+07:00 DEBUG [restartedMain] [,,] o.s.c.s.DefaultLifecycleProcessor - Stopping beans in phase 2147482623
+2026-04-17T14:01:46.450+07:00 INFO  [restartedMain] [,,] o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-04-17T14:01:46.453+07:00 INFO  [tomcat-shutdown] [,,] o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-04-17T14:01:46.453+07:00 DEBUG [restartedMain] [,,] o.s.c.s.DefaultLifecycleProcessor - Stopping beans in phase 2147481599
+2026-04-17T14:01:46.453+07:00 DEBUG [tomcat-shutdown] [,,] o.s.c.s.DefaultLifecycleProcessor - Bean 'webServerGracefulShutdown' completed its stop procedure
+2026-04-17T14:01:46.455+07:00 DEBUG [restartedMain] [,,] o.s.c.s.DefaultLifecycleProcessor - Bean 'webServerStartStop' completed its stop procedure
+2026-04-17T14:01:46.456+07:00 INFO  [restartedMain] [,,] com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-04-17T14:01:46.456+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Before shutdown stats (total=6/10, idle=6/5, active=0, waiting=0)
+2026-04-17T14:01:46.457+07:00 DEBUG [HikariPool-1:connection-closer] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Closing connection oracle.jdbc.driver.T4CConnection@7932f50b: (connection evicted)
+2026-04-17T14:01:46.461+07:00 DEBUG [HikariPool-1:connection-closer] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Closing connection oracle.jdbc.driver.T4CConnection@7961e61a: (connection evicted)
+2026-04-17T14:01:46.464+07:00 DEBUG [HikariPool-1:connection-closer] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Closing connection oracle.jdbc.driver.T4CConnection@13094b5d: (connection evicted)
+2026-04-17T14:01:46.468+07:00 DEBUG [HikariPool-1:connection-closer] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Closing connection oracle.jdbc.driver.T4CConnection@306f483a: (connection evicted)
+2026-04-17T14:01:46.471+07:00 DEBUG [HikariPool-1:connection-closer] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Closing connection oracle.jdbc.driver.T4CConnection@7767994c: (connection evicted)
+2026-04-17T14:01:46.473+07:00 DEBUG [HikariPool-1:connection-closer] [,,] com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Closing connection oracle.jdbc.driver.T4CConnection@6e5b65e3: (connection evicted)
+2026-04-17T14:01:46.512+07:00 DEBUG [restartedMain] [,,] com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - After  shutdown stats (total=0/10, idle=0/5, active=0, waiting=0)
+2026-04-17T14:01:46.512+07:00 INFO  [restartedMain] [,,] com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-04-17T14:01:46.514+07:00 INFO  [restartedMain] [,,] o.a.catalina.core.StandardService - Stopping service [Tomcat]
+2026-04-17T14:01:46.515+07:00 DEBUG [restartedMain] [,,] o.a.catalina.mapper.MapperListener - Unregister host [localhost] at domain [null] for service [StandardService[Tomcat]]
+2026-04-17T14:01:46.515+07:00 DEBUG [restartedMain] [,,] o.a.catalina.mapper.MapperListener - Unregister Context [] for service [StandardService[Tomcat]]
+2026-04-17T14:01:46.516+07:00 DEBUG [restartedMain] [,,] o.a.catalina.mapper.MapperListener - Unregister Wrapper [dispatcherServlet] in Context [] for service [StandardService[Tomcat]]
+2026-04-17T14:01:46.516+07:00 DEBUG [restartedMain] [,,] o.a.catalina.session.StandardManager - No persisted sessions to unload
+2026-04-17T14:01:46.517+07:00 DEBUG [restartedMain] [,,] o.a.catalina.loader.WebappLoader - Stopping this Loader
