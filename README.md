@@ -64,3 +64,76 @@ Ket qua tra ve se cho biet:
 
 - `GET /health`
 - `POST /crawl`
+- `POST /tts/story`
+- `POST /tts/story/clone`
+
+## 5) TTS tu story-content
+
+API se doc file markdown trong `story-content/<ten-truyen>/` theo chapter ban truyen vao,
+ghep noi dung roi tao file audio `.wav`.
+
+Vi du request:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/tts/story" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "story_name": "muc-than-ky",
+    "chapters": [1, 2],
+    "mode": "turbo"
+  }'
+```
+
+`mode` ho tro:
+
+- `turbo` (mac dinh, nhanh hon)
+- `standard` (chat luong uu tien hon, cham hon)
+
+Voi request tren, service se lay:
+
+- `story-content/muc-than-ky/0001-*.md`
+- `story-content/muc-than-ky/0002-*.md`
+
+Va luu audio vao:
+
+- `outputs/audio/muc-than-ky/muc-than-ky_chuong-1-2.wav`
+- `outputs/audio/muc-than-ky/muc-than-ky_chuong-1,2.wav`
+
+Chapter duoc phep >= 0. Service uu tien tim theo:
+
+- `000x-*.md` (vi du `0001-*.md`)
+- `chuong-x.md` (vi du `chuong-0.md`)
+
+## 6) TTS Zero-shot Voice Cloning (SDK)
+
+API clone giong tu sample audio (mac dinh su dung file:
+`input/sample-voice/nguyen-ngoc-ngan/nguyen_ngoc_ngan.mp3`).
+
+```bash
+curl -X POST "http://127.0.0.1:8000/tts/story/clone" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "story_name": "muc-than-ky",
+    "chapters": [0],
+    "mode": "turbo",
+    "reference_audio_path": "input/sample-voice/nguyen-ngoc-ngan/nguyen_ngoc_ngan.mp3"
+  }'
+```
+
+Ket qua audio duoc luu vao `outputs/audio/<ten-truyen>/` voi ten:
+`<ten-truyen>_chuong-x,y_voice-<ten-sample>.wav`
+
+Luu y voi `mode: "standard"`:
+
+- Can truyen them `reference_text` (dung transcript cua file audio sample)
+- Vi du:
+
+```json
+{
+  "story_name": "muc-than-ky",
+  "chapters": [0],
+  "mode": "standard",
+  "reference_audio_path": "input/sample-voice/nguyen-ngoc-ngan/nguyen_ngoc_ngan.mp3",
+  "reference_text": "Noi dung dung voi audio mau"
+}
+```

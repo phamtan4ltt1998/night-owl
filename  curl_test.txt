@@ -1,0 +1,18 @@
+curl -X POST "http://127.0.0.1:8000/tts/story" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "story_name": "muc-than-ky",
+    "chapters": [1, 2]
+  }'
+
+
+
+  curl -X POST "http://127.0.0.1:8000/tts/story/clone" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "story_name":"muc-than-ky",
+    "chapters":[0],
+    "mode":"standard",
+    "reference_audio_path":"input/sample-voice/nguyen-ngoc-ngan/nguyen_ngoc_ngan.mp3",
+    "reference_text":"<noi dung chinh xac cua audio mau>"
+  }'
