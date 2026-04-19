@@ -1,0 +1,22 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: nightowl_root
+      MYSQL_DATABASE: nightowl
+      MYSQL_USER: nightowl
+      MYSQL_PASSWORD: nightowl
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "nightowl", "-pnightowl"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+volumes:
+  mysql_data:

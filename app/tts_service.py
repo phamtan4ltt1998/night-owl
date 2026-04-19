@@ -23,28 +23,54 @@ class StoryTTSService:
     def synthesize_story_chapters(
         self, story_name: str, chapters: Iterable[int], mode: str = "turbo"
     ) -> dict[str, object]:
-        story_slug, chapter_numbers, chapter_files, merged_text = self._load_story_chapter_texts(
-            story_name=story_name, chapters=chapters
-        )
+        chapter_numbers = sorted(set(chapters))
+        if not chapter_numbers:
+            raise ValueError("chapters khong duoc rong.")
         normalized_mode = self._normalize_mode(mode)
         tts = self._get_tts(normalized_mode)
-        audio = tts.infer(text=merged_text, speed=0.8, temperature=0.7, top_p=0.9)
+
+        story_slug = self._slugify(story_name)
+        story_dir = self.story_content_root / story_slug
+        if not story_dir.exists():
+            raise ValueError(f"Khong tim thay thu muc truyen: {story_dir}")
 
         output_dir = self.output_root / story_slug
         output_dir.mkdir(parents=True, exist_ok=True)
-        chapter_suffix = ",".join(str(chapter) for chapter in chapter_numbers)
-        output_name = f"{story_slug}_chuong-{chapter_suffix}.wav"
-        output_path = output_dir / output_name
-        tts.save(audio, str(output_path))
+
+        output_files: list[str] = []
+        chapter_files: list[str] = []
+        for chapter in chapter_numbers:
+            chapter_file = self._resolve_chapter_file(story_dir, chapter)
+            if chapter_file is None:
+                raise ValueError(
+                    f"Khong tim thay file cho chuong {chapter} trong truyen '{story_slug}'."
+                )
+            chapter_text = chapter_file.read_text(encoding="utf-8").strip()
+            if not chapter_text:
+                continue
+            chapter_files.append(str(chapter_file))
+            audio = tts.infer(text=chapter_text, speed=0.8, temperature=0.7, top_p=0.9)
+            output_name = f"{story_slug}_chuong-{chapter}.wav"
+            output_path = output_dir / output_name
+            tts.save(audio, str(output_path))
+            output_files.append(str(output_path))
+
+        if not output_files:
+            raise ValueError("Khong co noi dung chuong de tao audio.")
 
         return {
             "story_name": story_slug,
             "mode": normalized_mode,
             "chapters": chapter_numbers,
             "chapter_files": chapter_files,
-            "output_file": str(output_path),
+            "output_files": output_files,
             "output_dir": str(output_dir),
         }
+
+    def get_chapter_audio_path(self, story_name: str, chapter_number: int) -> Path:
+        story_slug = self._slugify(story_name)
+        output_path = self.output_root / story_slug / f"{story_slug}_chuong-{chapter_number}.wav"
+        return output_path
 
     def synthesize_story_chapters_with_clone_voice(
         self,

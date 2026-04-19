@@ -92,59 +92,111 @@ class StoryScraper:
             "stories": stories,
         }
 
+    def _fetch_story_title(self, story_url: str) -> str:
+        """Lấy tên truyện từ trang HTML. Thử các selector phổ biến trên truyencom.com."""
+        html = self._fetch_html(story_url)
+        if not html:
+            return ""
+        soup = BeautifulSoup(html, "html.parser")
+        for selector in ("h1.book-name", "h1.story-title", ".book-name h1", "h1"):
+            tag = soup.select_one(selector)
+            if tag:
+                return tag.get_text(strip=True)
+        return ""
+
+    @staticmethod
+    def _existing_chapter_numbers(content_dir: Path) -> Set[int]:
+        """Parse chapter numbers từ tên file đã có trong content_dir."""
+        existing: Set[int] = set()
+        if not content_dir.exists():
+            return existing
+        for f in content_dir.glob("*.md"):
+            m = re.search(r"chuong-(\d+)", f.name)
+            if m:
+                existing.add(int(m.group(1)))
+                continue
+            m = re.match(r"^0*(\d+)-", f.name)
+            if m:
+                existing.add(int(m.group(1)))
+        return existing
+
     async def _save_story(
         self, story_url: str, chapters: List[ChapterLink]
     ) -> Dict[str, object]:
         story_slug = self._story_slug_from_url(story_url)
-        output_dir = self.output_root / f"{story_slug}-clone"
+        story_name = self._fetch_story_title(story_url)
         content_dir = self.content_root / story_slug
-        output_dir.mkdir(parents=True, exist_ok=True)
         content_dir.mkdir(parents=True, exist_ok=True)
 
         chapters = self._sort_chapters(chapters)
-        saved_files = await self._crawl_and_save_chapters(chapters, output_dir)
-        content_files = self._extract_story_content_files(output_dir, content_dir)
-        metadata = {
-            "story_url": story_url,
-            "story_slug": story_slug,
-            "chapter_count": len(chapters),
-            "saved_files": saved_files,
-            "content_files": content_files,
-        }
-        metadata_path = output_dir / "metadata.json"
-        metadata_path.write_text(
-            json.dumps(metadata, ensure_ascii=False, indent=2),
-            encoding="utf-8",
+
+        # Chỉ crawl chương chưa có trong content_dir
+        existing_numbers = self._existing_chapter_numbers(content_dir)
+        new_chapters = [ch for ch in chapters if ch.chapter_number not in existing_numbers]
+
+        if not new_chapters:
+            return {
+                "story_url": story_url,
+                "story_slug": story_slug,
+                "story_name": story_name,
+                "chapter_count": len(chapters),
+                "new_chapter_count": 0,
+                "status": "already_updated",
+                "content_output_dir": str(content_dir),
+            }
+
+        # Tiếp tục đánh số file từ sau số file hiện có
+        existing_file_count = len(list(content_dir.glob("*.md")))
+        content_files = await self._crawl_and_save_chapters(
+            new_chapters, content_dir, start_index=existing_file_count + 1
         )
         return {
             "story_url": story_url,
-            "output_dir": str(output_dir),
             "story_slug": story_slug,
+            "story_name": story_name,
             "chapter_count": len(chapters),
-            "metadata_file": str(metadata_path),
+            "new_chapter_count": len(content_files),
+            "status": "updated",
             "content_output_dir": str(content_dir),
             "content_file_count": len(content_files),
         }
 
     async def _crawl_and_save_chapters(
-        self, chapters: List[ChapterLink], output_dir: Path
+        self, chapters: List[ChapterLink], content_dir: Path, start_index: int = 1
     ) -> List[str]:
         browser_config = BrowserConfig(headless=True, verbose=False)
         run_config = CrawlerRunConfig()
         saved_files: List[str] = []
 
         async with AsyncWebCrawler(config=browser_config) as crawler:
-            for index, chapter in enumerate(chapters, start=1):
+            for index, chapter in enumerate(chapters, start=start_index):
                 result = await crawler.arun(url=chapter.url, config=run_config)
                 markdown = self._extract_markdown(result)
                 if not markdown:
                     markdown = f"# {chapter.title}\n\nKhong trich xuat duoc noi dung."
                 markdown = self._replace_branding(markdown)
 
+                # Trích nội dung sạch rồi ghi thẳng vào story-content/
+                content = self._extract_chapter_content(markdown)
+                if not content:
+                    content = markdown
+
+                # Ưu tiên lấy tên chương từ nội dung trang (heading đầu tiên),
+                # fallback về title từ trang listing nếu không tìm thấy.
+                page_title = self._extract_heading_title(markdown)
+                chapter_title = page_title or chapter.title
+
+                # Ghi tên chương thật làm dòng đầu để DB đọc lại
+                content_with_title = f"# {chapter_title}\n\n{content}"
+
                 file_name = f"{index:04d}-{chapter.slug}.md"
-                chapter_path = output_dir / file_name
-                chapter_path.write_text(markdown, encoding="utf-8")
+                chapter_path = content_dir / file_name
+                chapter_path.write_text(content_with_title, encoding="utf-8")
                 saved_files.append(str(chapter_path))
+
+                # Lưu file raw markdown vào thư mục /story (tạm thời tắt)
+                # raw_path = self.output_root / f"{content_dir.name}-clone" / file_name
+                # raw_path.write_text(markdown, encoding="utf-8")
 
                 # Nhe tay de han che bi chan bot
                 await asyncio.sleep(0.3)
@@ -184,6 +236,16 @@ class StoryScraper:
     def _replace_branding(self, content: str) -> str:
         return content.replace("Truyencom.com", "nightowl.com")
 
+    def _extract_heading_title(self, markdown: str) -> str:
+        """Lấy tiêu đề đầu tiên (# hoặc ##) từ markdown của trang chương."""
+        for line in markdown.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("## "):
+                return stripped[3:].strip()
+            if stripped.startswith("# "):
+                return stripped[2:].strip()
+        return ""
+
     def _extract_markdown(self, crawl_result: object) -> str:
         markdown = getattr(crawl_result, "markdown", "")
         if isinstance(markdown, str):
@@ -199,7 +261,12 @@ class StoryScraper:
         pages_to_visit: List[str] = [story_url]
         collected: Dict[str, ChapterLink] = {}
         story_key = self._story_key_from_url(story_url)
-        story_key_re = re.compile(rf"/{re.escape(story_key)}/chuong-(\d+)\.html$", re.IGNORECASE)
+        allowed_domain = urlparse(story_url).netloc
+        # Khớp cả /chuong-N.html (truyencom) lẫn /chuong-N/ (truyenfull, v.v.)
+        story_key_re = re.compile(
+            rf"/{re.escape(story_key)}/chuong-(\d+)(?:\.html|/?)$",
+            re.IGNORECASE,
+        )
 
         while pages_to_visit:
             page_url = pages_to_visit.pop(0)
@@ -212,7 +279,8 @@ class StoryScraper:
                 continue
 
             chapters, pagination_pages = self._extract_story_links_and_pages(
-                html=html, base_url=story_url, story_key_re=story_key_re
+                html=html, base_url=story_url, story_key_re=story_key_re,
+                allowed_domain=allowed_domain,
             )
             for chapter_link in chapters:
                 collected[chapter_link.url] = chapter_link
@@ -223,7 +291,11 @@ class StoryScraper:
         return list(collected.values())
 
     def _extract_story_links_and_pages(
-        self, html: str, base_url: str, story_key_re: re.Pattern[str]
+        self,
+        html: str,
+        base_url: str,
+        story_key_re: re.Pattern[str],
+        allowed_domain: str = "",
     ) -> Tuple[List[ChapterLink], List[str]]:
         soup = BeautifulSoup(html, "html.parser")
         anchors = soup.select("a[href]")
@@ -236,13 +308,15 @@ class StoryScraper:
                 continue
             full_url = self._normalize_url(urljoin(base_url, href))
             parsed = urlparse(full_url)
-            if not parsed.netloc.endswith("truyencom.com"):
+            # Lọc theo domain của URL đầu vào (không hardcode truyencom.com)
+            if allowed_domain and parsed.netloc != allowed_domain:
                 continue
             chapter_match = story_key_re.search(parsed.path)
             if chapter_match:
                 chapter_number = int(chapter_match.group(1))
                 title = " ".join(anchor.get_text(" ", strip=True).split()) or f"Chuong {chapter_number}"
-                slug = self._slugify(parsed.path.strip("/").split("/")[-1].replace(".html", ""))
+                last_seg = parsed.path.strip("/").split("/")[-1].replace(".html", "")
+                slug = self._slugify(last_seg) if last_seg else f"chuong-{chapter_number}"
                 chapters.append(
                     ChapterLink(
                         title=title,
@@ -260,6 +334,7 @@ class StoryScraper:
         visited_pages: Set[str] = set()
         pages_to_visit: List[str] = [listing_url]
         story_urls: Set[str] = set()
+        allowed_domain = urlparse(listing_url).netloc
 
         while pages_to_visit:
             page_url = pages_to_visit.pop(0)
@@ -270,7 +345,9 @@ class StoryScraper:
             html = self._fetch_html(page_url)
             if not html:
                 continue
-            page_stories, pagination_pages = self._extract_story_listing_links(html, listing_url)
+            page_stories, pagination_pages = self._extract_story_listing_links(
+                html, listing_url, allowed_domain=allowed_domain
+            )
             story_urls.update(page_stories)
             for pagination_url in pagination_pages:
                 if pagination_url not in visited_pages:
@@ -279,7 +356,7 @@ class StoryScraper:
         return sorted(story_urls)
 
     def _extract_story_listing_links(
-        self, html: str, listing_root_url: str
+        self, html: str, listing_root_url: str, allowed_domain: str = ""
     ) -> Tuple[List[str], List[str]]:
         soup = BeautifulSoup(html, "html.parser")
         stories: Set[str] = set()
@@ -291,16 +368,19 @@ class StoryScraper:
                 continue
             full_url = self._normalize_url(urljoin(listing_root_url, href))
             parsed = urlparse(full_url)
-            if not parsed.netloc.endswith("truyencom.com"):
+            if allowed_domain and parsed.netloc != allowed_domain:
                 continue
 
-            if re.search(r"/truyen-[a-z0-9-]+/full/trang-\d+/?$", parsed.path):
+            if re.search(r"/trang-\d+/?$", parsed.path):
                 pages.add(full_url)
                 continue
 
-            # Trang truyện thường có dạng: /ten-truyen.1234/
-            if re.fullmatch(r"/[a-z0-9-]+\.\d+/?", parsed.path):
-                stories.add(full_url)
+            # Trang truyện: /ten-truyen.1234/ (truyencom) hoặc /ten-truyen/ (truyenfull, v.v.)
+            if re.fullmatch(r"/[a-z0-9-]+(?:\.\d+)?/?", parsed.path):
+                # Bỏ qua các path quá ngắn hoặc là trang hệ thống
+                parts = [p for p in parsed.path.split("/") if p]
+                if parts and len(parts[0]) > 3 and "-" in parts[0]:
+                    stories.add(full_url)
 
         return list(stories), list(pages)
 
