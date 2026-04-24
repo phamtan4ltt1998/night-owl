@@ -1,0 +1,38 @@
+{
+  "_comment": "Config file cho scheduled scrape job. Chỉnh schedule và sources rồi restart server.",
+  "schedule": {
+    "type": "interval",
+    "_comment_type": "interval = chạy mỗi N giờ/phút | cron = theo lịch cố định",
+    "hours": 2,
+    "_comment_interval": "Dùng khi type=interval. Có thể dùng: minutes, hours, days.",
+    "_comment_cron": "Dùng khi type=cron. Ví dụ: hour=2, minute=0 = 2h sáng mỗi ngày.",
+
+    "_comment_dates": "start_date/end_date: APScheduler nhận trực tiếp — job chỉ được lên lịch trong khoảng này.",
+    "_comment_dates2": "Format: 'YYYY-MM-DD HH:MM:SS'. Bỏ trống = không giới hạn.",
+    "start_date": "",
+    "end_date": "",
+
+    "_comment_window": "active_window: cửa sổ GIỜ hàng ngày — job bị skip nếu ngoài khung giờ này.",
+    "_comment_window2": "Format HH:MM. Hỗ trợ qua đêm, vd start=22:00 end=06:00. Bỏ trống = chạy cả ngày.",
+    "active_window": {
+      "start": "",
+      "end": ""
+    }
+  },
+  "sources": [
+    {
+      "url": "https://truyencom.com/truyen-xuyen-nhanh/full/",
+      "target_count": 5,
+      "free_chapter_threshold": 20,
+      "concurrency": 2,
+      "enabled": true
+    },
+    {
+      "url": "https://truyencom.com/truyen-ngon-tinh/full/",
+      "target_count": 3,
+      "free_chapter_threshold": 20,
+      "concurrency": 2,
+      "enabled": true
+    }
+  ]
+}

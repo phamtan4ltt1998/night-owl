@@ -29,6 +29,10 @@ from app.config import (
     RATE_LIMIT_BOOKS, RATE_LIMIT_CHAPTERS, RATE_LIMIT_CONTENT,
     SESSION_TOKEN_ENABLED, SESSION_TOKEN_TTL,
 )
+from app.logging_setup import setup_logging
+from app.scrape_job import get_schedule_kwargs, load_config, run_scheduled_scrape
+
+setup_logging()
 from app.middleware.bot_guard import BANNED_IPS, _is_private, bot_guard_middleware
 from app.scraper import DEFAULT_STORY_URL, StoryScraper
 from app.tts_service import StoryTTSService
@@ -135,6 +139,7 @@ async def _retry_failed_crawls() -> None:
 
 @app.on_event("startup")
 async def _start_scheduler() -> None:
+    # Job 1: retry failed crawls
     _scheduler.add_job(
         _retry_failed_crawls,
         "interval",
@@ -142,6 +147,22 @@ async def _start_scheduler() -> None:
         id="crawl_retry",
         replace_existing=True,
     )
+
+    # Job 2: scheduled scrape từ scrape_sources.json
+    scrape_config = load_config()
+    enabled_sources = [s for s in scrape_config.get("sources", []) if s.get("enabled", True)]
+    if not enabled_sources:
+        logger.warning("[scheduler] Không có source nào trong config — bỏ qua đăng ký scheduled_scrape job.")
+    else:
+        schedule_kwargs = get_schedule_kwargs(scrape_config)
+        _scheduler.add_job(
+            run_scheduled_scrape,
+            id="scheduled_scrape",
+            replace_existing=True,
+            **schedule_kwargs,
+        )
+        logger.info("[scheduler] Scheduled scrape job registered — sources=%d %s", len(enabled_sources), schedule_kwargs)
+
     _scheduler.start()
     logger.info("[scheduler] Crawl retry job started — interval=%dm max_attempts=%d",
                 CRAWL_RETRY_INTERVAL_MINUTES, CRAWL_RETRY_MAX_ATTEMPTS)

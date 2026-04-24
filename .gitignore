@@ -2,6 +2,7 @@
 story/
 story-content/
 outputs/audio/
+logs/
 
 # Python
 .venv/
