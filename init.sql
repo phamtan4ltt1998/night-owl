@@ -25,7 +25,27 @@ CREATE TABLE IF NOT EXISTS books (
     tags         VARCHAR(255)  NOT NULL DEFAULT '',
     words        VARCHAR(50)   NOT NULL DEFAULT '0',
     updated      VARCHAR(100)  NOT NULL DEFAULT '',
-    source_url   VARCHAR(1000) NOT NULL DEFAULT ''
+    source_url   VARCHAR(1000) NOT NULL DEFAULT '',
+    cover_image  VARCHAR(1000) NOT NULL DEFAULT '',
+    status       VARCHAR(50)   NOT NULL DEFAULT '',
+    read_count   BIGINT        NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ── Failed Crawl Requests ──────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS failed_crawl_requests (
+    id                     INT AUTO_INCREMENT PRIMARY KEY,
+    story_url              VARCHAR(1000) NOT NULL,
+    story_limit            INT           DEFAULT NULL,
+    start_story_from       INT           NOT NULL DEFAULT 1,
+    free_chapter_threshold INT           NOT NULL DEFAULT 20,
+    error_message          TEXT          NOT NULL,
+    retry_count            INT           NOT NULL DEFAULT 0,
+    last_tried_at          DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at             DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    resolved               TINYINT(1)    NOT NULL DEFAULT 0,
+    INDEX idx_resolved (resolved),
+    INDEX idx_retry    (resolved, retry_count)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── Chapters ───────────────────────────────────────────────────────────────────
@@ -37,6 +57,7 @@ CREATE TABLE IF NOT EXISTS chapters (
     title          VARCHAR(500) NOT NULL,
     file_path      TEXT         NOT NULL,
     free           TINYINT(1)   NOT NULL DEFAULT 1,
+    view_count     BIGINT       NOT NULL DEFAULT 0,
     UNIQUE KEY uq_book_chapter (book_id, chapter_number),
     FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

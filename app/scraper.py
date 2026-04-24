@@ -24,6 +24,16 @@ class ChapterLink:
     chapter_number: int | None
 
 
+@dataclass
+class StoryMetadata:
+    title: str = ""
+    author: str = ""
+    genre: str = ""
+    status: str = ""
+    description: str = ""
+    cover_image: str = ""
+
+
 class StoryScraper:
     def __init__(self, output_root: str = "story") -> None:
         self.output_root = Path(output_root)
@@ -92,17 +102,73 @@ class StoryScraper:
             "stories": stories,
         }
 
-    def _fetch_story_title(self, story_url: str) -> str:
-        """Lấy tên truyện từ trang HTML. Thử các selector phổ biến trên truyencom.com."""
+    def _fetch_story_metadata(self, story_url: str) -> StoryMetadata:
+        """Lấy metadata truyện: tiêu đề, tác giả, thể loại, trạng thái, mô tả, ảnh bìa."""
         html = self._fetch_html(story_url)
         if not html:
-            return ""
+            return StoryMetadata()
         soup = BeautifulSoup(html, "html.parser")
-        for selector in ("h1.book-name", "h1.story-title", ".book-name h1", "h1"):
-            tag = soup.select_one(selector)
+
+        # Title
+        title = ""
+        for sel in ("h1.book-name", "h1.story-title", ".book-name h1", "h1"):
+            tag = soup.select_one(sel)
             if tag:
-                return tag.get_text(strip=True)
-        return ""
+                title = tag.get_text(strip=True)
+                break
+
+        # Cover image — ưu tiên data-pc (full size), fallback src
+        cover_image = ""
+        info_holder = soup.select_one("div.info-holder")
+        if info_holder:
+            img = info_holder.find("img")
+            if img:
+                cover_image = (
+                    img.get("data-pc")
+                    or img.get("data-mb")
+                    or img.get("src")
+                    or ""
+                )
+                if cover_image and cover_image.startswith("/"):
+                    cover_image = urljoin(story_url, cover_image)
+
+        # Author, genre, status từ div.info
+        author = genre = status = ""
+        info_div = soup.select_one("div.info")
+        if info_div:
+            for row in info_div.find_all("div"):
+                h3 = row.find("h3")
+                if not h3:
+                    continue
+                label = h3.get_text(strip=True).lower()
+                if "tác giả" in label:
+                    a = row.find("a")
+                    author = a.get_text(strip=True) if a else ""
+                elif "thể loại" in label:
+                    genres = [a.get_text(strip=True) for a in row.find_all("a")]
+                    genre = ", ".join(genres)
+                elif "trạng thái" in label:
+                    span = row.find("span")
+                    status = span.get_text(strip=True) if span else ""
+
+        # Description
+        description = ""
+        for sel in ("div.desc-text", "div.desc", ".book-intro", ".summary"):
+            tag = soup.select_one(sel)
+            if tag:
+                raw = tag.get_text(strip=True)
+                # Bỏ prefix "Giới Thiệu:" nếu có
+                description = re.sub(r"^Giới Thiệu\s*:\s*", "", raw, flags=re.IGNORECASE).strip()
+                break
+
+        return StoryMetadata(
+            title=title,
+            author=author,
+            genre=genre,
+            status=status,
+            description=description,
+            cover_image=cover_image,
+        )
 
     @staticmethod
     def _existing_chapter_numbers(content_dir: Path) -> Set[int]:
@@ -124,7 +190,7 @@ class StoryScraper:
         self, story_url: str, chapters: List[ChapterLink]
     ) -> Dict[str, object]:
         story_slug = self._story_slug_from_url(story_url)
-        story_name = self._fetch_story_title(story_url)
+        meta = self._fetch_story_metadata(story_url)
         content_dir = self.content_root / story_slug
         content_dir.mkdir(parents=True, exist_ok=True)
 
@@ -134,15 +200,24 @@ class StoryScraper:
         existing_numbers = self._existing_chapter_numbers(content_dir)
         new_chapters = [ch for ch in chapters if ch.chapter_number not in existing_numbers]
 
+        meta_dict = {
+            "story_name": meta.title,
+            "story_author": meta.author,
+            "story_genre": meta.genre,
+            "story_status": meta.status,
+            "story_description": meta.description,
+            "story_cover": meta.cover_image,
+        }
+
         if not new_chapters:
             return {
                 "story_url": story_url,
                 "story_slug": story_slug,
-                "story_name": story_name,
                 "chapter_count": len(chapters),
                 "new_chapter_count": 0,
                 "status": "already_updated",
                 "content_output_dir": str(content_dir),
+                **meta_dict,
             }
 
         # Tiếp tục đánh số file từ sau số file hiện có
@@ -153,12 +228,12 @@ class StoryScraper:
         return {
             "story_url": story_url,
             "story_slug": story_slug,
-            "story_name": story_name,
             "chapter_count": len(chapters),
             "new_chapter_count": len(content_files),
             "status": "updated",
             "content_output_dir": str(content_dir),
             "content_file_count": len(content_files),
+            **meta_dict,
         }
 
     async def _crawl_and_save_chapters(

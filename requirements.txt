@@ -8,3 +8,4 @@ google-auth
 python-jose[cryptography]
 PyMySQL[rsa]
 slowapi
+apscheduler

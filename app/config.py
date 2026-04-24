@@ -65,3 +65,7 @@ _UNLIMITED = "10000/minute"  # effective no-op when rate limiting disabled
 RATE_LIMIT_BOOKS: str    = _str("RATE_LIMIT_BOOKS",    "60/minute")    if RATE_LIMIT_ENABLED else _UNLIMITED
 RATE_LIMIT_CHAPTERS: str = _str("RATE_LIMIT_CHAPTERS", "30/minute")    if RATE_LIMIT_ENABLED else _UNLIMITED
 RATE_LIMIT_CONTENT: str  = _str("RATE_LIMIT_CONTENT",  "20/minute")    if RATE_LIMIT_ENABLED else _UNLIMITED
+
+# ── Crawl retry job ────────────────────────────────────────────────────────────
+CRAWL_RETRY_INTERVAL_MINUTES: int = _int("CRAWL_RETRY_INTERVAL_MINUTES", 10)
+CRAWL_RETRY_MAX_ATTEMPTS: int     = _int("CRAWL_RETRY_MAX_ATTEMPTS", 5)

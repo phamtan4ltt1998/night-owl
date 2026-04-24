@@ -331,7 +331,98 @@ def update_book(book_id: int, title: str | None, author: str | None, free_chapte
         conn.close()
 
 
-def upsert_story_from_dir(slug: str, story_name: str = "", free_chapter_threshold: int = 20, source_url: str = "") -> dict:
+def get_existing_slugs(slugs: list[str]) -> set[str]:
+    """Trả về subset slugs đã tồn tại trong bảng books."""
+    if not slugs:
+        return set()
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            placeholders = ",".join(["%s"] * len(slugs))
+            cur.execute(f"SELECT slug FROM books WHERE slug IN ({placeholders})", slugs)
+            return {r["slug"] for r in cur.fetchall()}
+    finally:
+        conn.close()
+
+
+def save_failed_crawl(
+    story_url: str,
+    error_message: str,
+    story_limit: int | None = None,
+    start_story_from: int = 1,
+    free_chapter_threshold: int = 20,
+) -> int:
+    """Lưu request crawl bị lỗi. Trả về id."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO failed_crawl_requests
+                   (story_url, story_limit, start_story_from, free_chapter_threshold, error_message)
+                   VALUES (%s, %s, %s, %s, %s)""",
+                (story_url, story_limit, start_story_from, free_chapter_threshold, error_message),
+            )
+            conn.commit()
+            return cur.lastrowid
+    finally:
+        conn.close()
+
+
+def get_pending_failed_crawls(max_retries: int = 5) -> list[dict]:
+    """Lấy danh sách request lỗi chưa resolve và chưa vượt max_retries."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """SELECT * FROM failed_crawl_requests
+                   WHERE resolved = 0 AND retry_count < %s
+                   ORDER BY created_at ASC""",
+                (max_retries,),
+            )
+            return [dict(r) for r in cur.fetchall()]
+    finally:
+        conn.close()
+
+
+def mark_crawl_resolved(record_id: int) -> None:
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE failed_crawl_requests SET resolved = 1 WHERE id = %s",
+                (record_id,),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def increment_crawl_retry(record_id: int, error_message: str) -> None:
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """UPDATE failed_crawl_requests
+                   SET retry_count = retry_count + 1, error_message = %s
+                   WHERE id = %s""",
+                (error_message, record_id),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def upsert_story_from_dir(
+    slug: str,
+    story_name: str = "",
+    free_chapter_threshold: int = 20,
+    source_url: str = "",
+    story_author: str = "",
+    story_genre: str = "",
+    story_status: str = "",
+    story_description: str = "",
+    story_cover: str = "",
+) -> dict:
     story_dir = os.path.join(STORY_CONTENT_ROOT, slug)
     if not os.path.isdir(story_dir):
         raise ValueError(f"Khong tim thay thu muc: {story_dir}")
@@ -353,6 +444,17 @@ def upsert_story_from_dir(slug: str, story_name: str = "", free_chapter_threshol
         "rating": 4.5,
     })
 
+    # Scraped metadata overrides defaults (but not BOOK_META hardcoded entries)
+    if slug not in BOOK_META:
+        if story_author:
+            meta["author"] = story_author
+        if story_genre:
+            meta["genre"] = story_genre
+        if story_description:
+            meta["desc"] = story_description
+        if story_status:
+            meta["tags"] = story_status
+
     conn = get_conn()
     try:
         with conn.cursor() as cur:
@@ -365,20 +467,37 @@ def upsert_story_from_dir(slug: str, story_name: str = "", free_chapter_threshol
                 if source_url:
                     update_fields += ", source_url=%s"
                     update_params.append(source_url)
+                if story_cover:
+                    update_fields += ", cover_image=%s"
+                    update_params.append(story_cover)
+                if story_author:
+                    update_fields += ", author=%s"
+                    update_params.append(story_author)
+                if story_genre:
+                    update_fields += ", genre=%s"
+                    update_params.append(story_genre)
+                if story_status:
+                    update_fields += ", status=%s"
+                    update_params.append(story_status)
+                if story_description:
+                    update_fields += ", description=%s"
+                    update_params.append(story_description)
                 update_params.append(book_id)
                 cur.execute(f"UPDATE books SET {update_fields} WHERE id=%s", update_params)
             else:
                 cur.execute(
                     """INSERT INTO books
                        (slug, title, author, genre, chapter_count, `reads`, rating,
-                        c1, c2, emoji, description, tags, words, updated, source_url)
-                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                        c1, c2, emoji, description, tags, words, updated, source_url,
+                        cover_image, status)
+                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
                     (
                         slug, meta["title"], meta["author"], meta["genre"],
                         chapter_count, meta["reads"], meta["rating"],
                         meta["c1"], meta["c2"], meta["emoji"],
                         meta["desc"], meta["tags"], meta["words"],
                         f"{chapter_count} chương", source_url,
+                        story_cover, story_status,
                     ),
                 )
                 book_id = cur.lastrowid
@@ -414,5 +533,38 @@ def upsert_story_from_dir(slug: str, story_name: str = "", free_chapter_threshol
 
         conn.commit()
         return {"book_id": book_id, "slug": slug, "new_chapters": len(new_rows), "total_chapters": chapter_count}
+    finally:
+        conn.close()
+
+
+def increment_chapter_view(book_id: int, chapter_number: int) -> None:
+    """Increment view_count on chapter and read_count on book (fire-and-forget)."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE chapters SET view_count = view_count + 1 WHERE book_id = %s AND chapter_number = %s",
+                (book_id, chapter_number),
+            )
+            cur.execute(
+                "UPDATE books SET read_count = read_count + 1 WHERE id = %s",
+                (book_id,),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_chapter_views(book_id: int) -> dict[int, int]:
+    """Return {chapter_number: view_count} for all chapters of a book."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT chapter_number, view_count FROM chapters WHERE book_id = %s",
+                (book_id,),
+            )
+            rows = cur.fetchall()
+        return {r["chapter_number"]: r["view_count"] for r in rows}
     finally:
         conn.close()

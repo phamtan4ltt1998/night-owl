@@ -1,0 +1,108 @@
+Picked up JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=60.0 -XX:+UseContainerSupport -javaagent:/tmp/apm-agent/opentelemetry-javaagent.jar -Dspring.config.additional-location=file:/customfiles/transaction-pull-integration-service-application-kubernetes.yml
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+[otel.javaagent 2026-04-20 07:08:01:446 +0700] [main] INFO io.opentelemetry.javaagent.tooling.VersionLogger - opentelemetry-javaagent - version: 2.26.0
+ ________  ________  ________  ___  __    ________  ________  ________  _______
+|\   __  \|\   __  \|\   ____\|\  \|\  \ |\   __  \|\   __  \|\   ____\|\  ___ \
+\ \  \|\ /\ \  \|\  \ \  \___|\ \  \/  /|\ \  \|\ /\ \  \|\  \ \  \___|\ \   __/|
+ \ \   __  \ \   __  \ \  \    \ \   ___  \ \   __  \ \   __  \ \_____  \ \  \_|/__
+  \ \  \|\  \ \  \ \  \ \  \____\ \  \\ \  \ \  \|\  \ \  \ \  \|____|\  \ \  \_|\ \
+   \ \_______\ \__\ \__\ \_______\ \__\\ \__\ \_______\ \__\ \__\____\_\  \ \_______\
+    \|_______|\|__|\|__|\|_______|\|__| \|__|\|_______|\|__|\|__|\_________\|_______|
+                                                                \|_________|
+
+
+2026-04-20T07:09:03.486+07:00 INFO  [main] [,,] com.abb.transaction.Application - The following 1 profile is active: "kubernetes"
+2026-04-20T07:09:15.995+07:00 INFO  [main] [,,] o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2026-04-20T07:09:15.996+07:00 INFO  [main] [,,] o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-20T07:09:18.040+07:00 INFO  [main] [,,] o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 1976 ms. Found 1 JPA repository interface.
+2026-04-20T07:09:27.952+07:00 INFO  [main] [,,] o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2026-04-20T07:09:27.961+07:00 INFO  [main] [,,] o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-04-20T07:09:28.167+07:00 INFO  [main] [,,] o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.abb.transaction.repositories.TransactionPullTraceRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-04-20T07:09:28.172+07:00 INFO  [main] [,,] o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 97 ms. Found 0 Redis repository interfaces.
+2026-04-20T07:09:31.349+07:00 INFO  [main] [,,] o.s.i.c.DefaultConfiguringBeanFactoryPostProcessor - No bean named 'errorChannel' has been explicitly defined. Therefore, a default PublishSubscribeChannel will be created.
+2026-04-20T07:09:31.481+07:00 INFO  [main] [,,] o.s.i.c.DefaultConfiguringBeanFactoryPostProcessor - No bean named 'integrationHeaderChannelRegistry' has been explicitly defined. Therefore, a default DefaultHeaderChannelRegistry will be created.
+2026-04-20T07:09:32.072+07:00 WARN  [main] [,,] o.s.c.a.ConfigurationClassPostProcessor - Cannot enhance @Configuration bean definition 'com.backbase.buildingblocks.resilience.circuitbreaker.http.client.ClientHttpResponsePredicateConfiguration' since its singleton instance has been created too early. The typical cause is a non-static @Bean method with a BeanDefinitionRegistryPostProcessor return type: Consider declaring such methods as 'static' and/or marking the containing configuration class as 'proxyBeanMethods=false'.
+2026-04-20T07:09:34.019+07:00 INFO  [main] [,,] o.s.cloud.context.scope.GenericScope - BeanFactory id=d2994a70-d657-3f35-bac6-b8148e2e868e
+2026-04-20T07:09:46.711+07:00 INFO  [main] [,,] o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-04-20T07:09:46.973+07:00 INFO  [main] [,,] o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-20T07:09:46.973+07:00 INFO  [main] [,,] o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.52]
+2026-04-20T07:09:47.686+07:00 INFO  [main] [,,] o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-20T07:09:47.693+07:00 INFO  [main] [,,] o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 44049 ms
+2026-04-20T07:10:01.525+07:00 INFO  [main] [,,] com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-04-20T07:10:06.722+07:00 INFO  [main] [,,] com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@9086215
+2026-04-20T07:10:06.814+07:00 INFO  [main] [,,] com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-04-20T07:10:09.027+07:00 INFO  [main] [,,] liquibase.database - Could not set remarks reporting on OracleDatabase: jdk.proxy3.$Proxy207.setRemarksReporting(boolean)
+2026-04-20T07:10:19.535+07:00 INFO  [main] [,,] liquibase.changelog - Reading from APP_TRANSACTION_PULL.DATABASECHANGELOG
+2026-04-20T07:10:19.918+07:00 INFO  [main] [,,] liquibase.ui - Database is up to date, no changesets to execute
+2026-04-20T07:10:19.970+07:00 INFO  [main] [,,] liquibase.changelog - Reading from APP_TRANSACTION_PULL.DATABASECHANGELOG
+2026-04-20T07:10:20.095+07:00 INFO  [main] [,,] liquibase.util - UPDATE SUMMARY
+2026-04-20T07:10:20.096+07:00 INFO  [main] [,,] liquibase.util - Run:                          0
+2026-04-20T07:10:20.096+07:00 INFO  [main] [,,] liquibase.util - Previously run:               1
+2026-04-20T07:10:20.096+07:00 INFO  [main] [,,] liquibase.util - Filtered out:                 0
+2026-04-20T07:10:20.096+07:00 INFO  [main] [,,] liquibase.util - -------------------------------
+2026-04-20T07:10:20.096+07:00 INFO  [main] [,,] liquibase.util - Total change sets:            1
+2026-04-20T07:10:20.100+07:00 INFO  [main] [,,] liquibase.util - Update summary generated
+2026-04-20T07:10:20.102+07:00 INFO  [main] [,,] liquibase.command - Command execution complete
+2026-04-20T07:10:23.453+07:00 INFO  [main] [,,] o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-04-20T07:10:24.019+07:00 INFO  [main] [,,] org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.42.Final
+2026-04-20T07:10:24.379+07:00 INFO  [main] [,,] o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-04-20T07:10:26.910+07:00 INFO  [main] [,,] o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-20T07:10:27.411+07:00 WARN  [main] [,,] org.hibernate.orm.deprecation - HHH90000025: OracleDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-04-20T07:10:27.627+07:00 INFO  [main] [,,] o.hibernate.orm.connections.pooling - HHH10001005: Database info:
++[ 	Database JDBC URL [Connecting through datasource 'HikariDataSource [HikariDataSource (HikariPool-1)]']
++[ 	Database driver: undefined/unknown
++[ 	Database version: 19.1
++[ 	Autocommit mode: undefined/unknown
++[ 	Isolation level: undefined/unknown
++[ 	Minimum pool size: undefined/unknown
++[ 	Maximum pool size: undefined/unknown
+2026-04-20T07:10:33.507+07:00 INFO  [main] [,,] o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-20T07:10:33.529+07:00 INFO  [main] [,,] o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-20T07:10:37.436+07:00 INFO  [main] [,,] c.b.b.c.h.ConverterInterServiceCustomizer - Couldn't set MappingJackson2HttpMessageConverter as the first HttpMessageConverter
+2026-04-20T07:10:41.404+07:00 INFO  [main] [,,] o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-04-20T07:10:47.463+07:00 WARN  [main] [,,] o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-20T07:10:51.449+07:00 INFO  [main] [,,] c.b.b.c.h.g.ConverterGrandCentralCustomizer - Couldn't set MappingJackson2HttpMessageConverter as the first HttpMessageConverter
+2026-04-20T07:10:53.507+07:00 INFO  [main] [,,] o.s.b.a.e.web.EndpointLinksResolver - Exposing 4 endpoints beneath base path '/actuator'
+2026-04-20T07:10:54.809+07:00 INFO  [main] [,,] c.b.b.s.CoreHttpSecurityConfigurerAdapter - **CoreHttpSecurityConfigurerAdapter**
++[ 1. Configuring ErrorHttpSecurityConfigurer Allow anonymous access to /error endpoint, configures 401 response for invalid tokens
++[ 2. Configuring StatelessHttpSecurityConfigurer: sessionCreationPolicy(SessionCreationPolicy.STATELESS)
++[ 3. Configuring PublicPathsHttpSecurityConfigurer: all requests permitAll() for paths [/actuator/**]
++[ 4. Configuring PrometheusSecurityConfigurer: httpBasic() for roles [ACTUATOR]
++[ 5. Configuring ActuatorHttpSecurityConfigurer: authorizeRequests() for roles [ACTUATOR]
++[ 6. Configuring ServiceApiHttpSecurityConfigurer: authorizeRequests() with DefaultPeerServiceExpressionHandler: scope: "api:service" for paths [/service-api/**]
++[ 7. Configuring AuthorizedHttpSecurityConfigurer: authorizeRequests.anyRequest().authenticated()
++[ 8. Configuring http.csrf().disable()
++[
+2026-04-20T07:10:54.930+07:00 INFO  [main] [,,] c.b.b.s.PublicPathsHttpSecurityConfigurer - permitting all requests to paths [[/actuator/**]]
+2026-04-20T07:10:55.073+07:00 INFO  [main] [,,] c.b.b.s.CsrfDisabledHttpSecurityConfigurer - CSRF is disabled
+2026-04-20T07:11:11.040+07:00 INFO  [main] [,,] o.s.c.n.e.c.DiscoveryClientOptionalArgsConfiguration - Eureka HTTP Client uses RestTemplate.
+2026-04-20T07:11:11.473+07:00 WARN  [main] [,,] o.s.c.l.c.LoadBalancerCacheAutoConfiguration$LoadBalancerCaffeineWarnLogger - Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2026-04-20T07:11:12.769+07:00 INFO  [main] [,,] o.s.i.endpoint.EventDrivenConsumer - Adding {logging-channel-adapter:_org.springframework.integration.errorLogger} as a subscriber to the 'errorChannel' channel
+2026-04-20T07:11:12.774+07:00 INFO  [main] [,,] o.s.i.c.PublishSubscribeChannel - Channel 'transaction-pull-integration-service-1.errorChannel' has 1 subscriber(s).
+2026-04-20T07:11:12.775+07:00 INFO  [main] [,,] o.s.i.endpoint.EventDrivenConsumer - started bean '_org.springframework.integration.errorLogger'
+2026-04-20T07:11:13.129+07:00 INFO  [main] [,,] o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-04-20T07:11:13.312+07:00 INFO  [main] [,,] o.s.i.config.IdGeneratorConfigurer - Message IDs will be generated using custom IdGenerator [class org.springframework.util.JdkIdGenerator]
+2026-04-20T07:11:13.330+07:00 INFO  [main] [,,] com.abb.transaction.Application - Started Application in 162.124 seconds (process running for 195.729)
+2026-04-20T07:11:13.370+07:00 WARN  [main] [,,] c.b.b.l.BetaLibraryWarningAutoConfiguration - The applications contains dependencies considered to be not in production-ready version: redis-authx-core-0.1.1-beta2.jar
+2026-04-20T07:11:17.368+07:00 INFO  [http-nio-8080-exec-1] [02a3503ecebb717b2bad90c7e41a67d3,5dbd9d15ceaaf944,] o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-20T07:11:17.372+07:00 INFO  [http-nio-8080-exec-1] [02a3503ecebb717b2bad90c7e41a67d3,5dbd9d15ceaaf944,] o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-04-20T07:11:17.378+07:00 INFO  [http-nio-8080-exec-1] [02a3503ecebb717b2bad90c7e41a67d3,5dbd9d15ceaaf944,] o.s.web.servlet.DispatcherServlet - Completed initialization in 6 ms
+2026-04-20T09:18:13.419+07:00 INFO  [http-nio-8080-exec-10] [fe50c19e3ca1f427235e6cde1bfd1b7a,465c8041aa136d6c,] c.a.t.s.impl.TransactionServiceImpl - Start updateTransaction arrangementId 03779def-fc35-4e7f-857d-8835731a6885
+2026-04-20T09:18:25.609+07:00 WARN  [lettuce-epollEventLoop-6-1] [fe50c19e3ca1f427235e6cde1bfd1b7a,465c8041aa136d6c,] io.lettuce.core.RedisClient - Cannot connect Redis Sentinel at redis://redis-node-0.redis-headless.redis.svc.cluster.local:26379: java.util.concurrent.CompletionException: io.netty.channel.ConnectTimeoutException: connection timed out after 10000 ms: redis-node-0.redis-headless.redis.svc.cluster.local/10.162.115.10:26379
+2026-04-20T09:18:36.481+07:00 WARN  [lettuce-epollEventLoop-6-2] [fe50c19e3ca1f427235e6cde1bfd1b7a,465c8041aa136d6c,] i.l.c.m.MasterReplicaTopologyRefresh - Unable to connect to redis-node-0.redis-headless.redis.svc.cluster.local/<unresolved>:6379
+2026-04-20T09:18:37.182+07:00 INFO  [http-nio-8080-exec-10] [fe50c19e3ca1f427235e6cde1bfd1b7a,465c8041aa136d6c,] c.a.t.s.intergration.EsbIntegration - Request to getAccountTrans {"AccountToken":"0011000181769","BenAccount":"","BenBank":"","FromDate":"20250823","ToDate":"20260520","PageNo":"1","PageSize":"100"}
+2026-04-20T09:18:37.376+07:00 INFO  [http-nio-8080-exec-10] [fe50c19e3ca1f427235e6cde1bfd1b7a,465c8041aa136d6c,] c.a.t.auth.service.AuthService - Request token with scope accounts transactions transfers savings cards
+2026-04-20T09:18:38.578+07:00 INFO  [http-nio-8080-exec-10] [fe50c19e3ca1f427235e6cde1bfd1b7a,465c8041aa136d6c,] c.a.t.s.intergration.EsbIntegration - getAccountTrans 0011000181769 res with size: 0
+2026-04-20T09:18:45.958+07:00 INFO  [http-nio-8080-exec-1] [db05c78b8eb51551c53730c86f74cb19,657aa218f2d94d1a,] c.a.t.s.impl.TransactionServiceImpl - Start updateTransaction arrangementId 03779def-fc35-4e7f-857d-8835731a6885
+2026-04-20T09:18:45.978+07:00 INFO  [http-nio-8080-exec-1] [db05c78b8eb51551c53730c86f74cb19,657aa218f2d94d1a,] c.a.t.s.intergration.EsbIntegration - Request to getAccountTrans {"AccountToken":"0011000181769","BenAccount":"","BenBank":"","FromDate":"20250823","ToDate":"20260520","PageNo":"1","PageSize":"100"}
+2026-04-20T09:18:46.222+07:00 INFO  [http-nio-8080-exec-1] [db05c78b8eb51551c53730c86f74cb19,657aa218f2d94d1a,] c.a.t.s.intergration.EsbIntegration - getAccountTrans 0011000181769 res with size: 0
+2026-04-20T09:19:05.597+07:00 WARN  [lettuce-epollEventLoop-6-1] [,,] io.lettuce.core.RedisClient - Cannot connect Redis Sentinel at redis://redis-node-0.redis-headless.redis.svc.cluster.local:26379: java.util.concurrent.CompletionException: io.netty.resolver.dns.DnsResolveContext$SearchDomainUnknownHostException: Failed to resolve 'redis-node-0.redis-headless.redis.svc.cluster.local' [A(1)] and search domain query for configured domains failed as well: [retail-poc.svc.cluster.local, svc.cluster.local, cluster.local, asia-southeast1-b.c.prj-abb-dev1-shared.internal, c.prj-abb-dev1-shared.internal, google.internal]
+2026-04-20T09:19:15.524+07:00 INFO  [http-nio-8080-exec-1] [fad5a83b8a62b6736154d3fa12a6c6cb,edf45a0541f88d3f,] c.a.t.s.impl.TransactionServiceImpl - Start updateTransaction arrangementId 03779def-fc35-4e7f-857d-8835731a6885
+2026-04-20T09:19:15.543+07:00 INFO  [http-nio-8080-exec-1] [fad5a83b8a62b6736154d3fa12a6c6cb,edf45a0541f88d3f,] c.a.t.s.intergration.EsbIntegration - Request to getAccountTrans {"AccountToken":"0011000181769","BenAccount":"","BenBank":"","FromDate":"20250823","ToDate":"20260520","PageNo":"1","PageSize":"100"}
+2026-04-20T09:19:15.794+07:00 INFO  [http-nio-8080-exec-1] [fad5a83b8a62b6736154d3fa12a6c6cb,edf45a0541f88d3f,] c.a.t.s.intergration.EsbIntegration - getAccountTrans 0011000181769 res with size: 0
+2026-04-20T09:31:01.666+07:00 INFO  [http-nio-8080-exec-5] [ed3553bbf12be857415b9f6508f02f2a,f47a31ff71bc8cbe,] c.a.t.s.impl.TransactionServiceImpl - Start updateTransaction arrangementId 03779def-fc35-4e7f-857d-8835731a6885
+2026-04-20T09:31:01.692+07:00 INFO  [http-nio-8080-exec-5] [ed3553bbf12be857415b9f6508f02f2a,f47a31ff71bc8cbe,] c.a.t.s.intergration.EsbIntegration - Request to getAccountTrans {"AccountToken":"0011000181769","BenAccount":"","BenBank":"","FromDate":"20250823","ToDate":"20260520","PageNo":"1","PageSize":"100"}
+2026-04-20T09:31:02.086+07:00 INFO  [http-nio-8080-exec-5] [ed3553bbf12be857415b9f6508f02f2a,f47a31ff71bc8cbe,] c.a.t.s.intergration.EsbIntegration - getAccountTrans 0011000181769 res with size: 0
+2026-04-20T09:31:03.971+07:00 INFO  [http-nio-8080-exec-6] [1b0e164aa905056094b30090451d5446,53986b9343715f97,] c.a.t.s.impl.TransactionServiceImpl - Start updateTransaction arrangementId 03779def-fc35-4e7f-857d-8835731a6885
+2026-04-20T09:31:03.992+07:00 INFO  [http-nio-8080-exec-6] [1b0e164aa905056094b30090451d5446,53986b9343715f97,] c.a.t.s.intergration.EsbIntegration - Request to getAccountTrans {"AccountToken":"0011000181769","BenAccount":"","BenBank":"","FromDate":"20250823","ToDate":"20260520","PageNo":"1","PageSize":"100"}
+2026-04-20T09:31:04.243+07:00 INFO  [http-nio-8080-exec-6] [1b0e164aa905056094b30090451d5446,53986b9343715f97,] c.a.t.s.intergration.EsbIntegration - getAccountTrans 0011000181769 res with size: 0

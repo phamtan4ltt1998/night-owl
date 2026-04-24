@@ -2,9 +2,14 @@ import asyncio
 import base64
 import hashlib
 import hmac
+import logging
 import os
+import random
 import time
+import uuid
 from datetime import datetime, timedelta, timezone
+
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,6 +24,7 @@ from slowapi.util import get_remote_address
 from starlette.concurrency import run_in_threadpool
 
 from app.config import (
+    CRAWL_RETRY_INTERVAL_MINUTES, CRAWL_RETRY_MAX_ATTEMPTS,
     HONEYPOT_ENABLED,
     RATE_LIMIT_BOOKS, RATE_LIMIT_CHAPTERS, RATE_LIMIT_CONTENT,
     SESSION_TOKEN_ENABLED, SESSION_TOKEN_TTL,
@@ -32,7 +38,27 @@ from app.database import (
     add_linh_thach, get_linh_thach_history, claim_daily_reward,
     unlock_chapter, get_unlocked_chapter_numbers,
     upsert_reading_progress, get_reading_history,
+    save_failed_crawl, get_pending_failed_crawls,
+    mark_crawl_resolved, increment_crawl_retry,
+    get_existing_slugs,
+    increment_chapter_view,
 )
+
+logger = logging.getLogger("nightowl.crawl")
+
+# ── In-memory category crawl jobs ─────────────────────────────────────────────
+_crawl_jobs: dict[str, dict] = {}
+
+
+def _meta_kwargs(src: dict) -> dict:
+    return {
+        "story_name": src.get("story_name", ""),
+        "story_author": src.get("story_author", ""),
+        "story_genre": src.get("story_genre", ""),
+        "story_status": src.get("story_status", ""),
+        "story_description": src.get("story_description", ""),
+        "story_cover": src.get("story_cover", ""),
+    }
 
 # ── Rate limiter ───────────────────────────────────────────────────────────────
 limiter = Limiter(key_func=get_remote_address)
@@ -45,7 +71,7 @@ app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "https://localhost:5173", "https://127.0.0.1:5173"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -55,6 +81,75 @@ app.middleware("http")(bot_guard_middleware)
 init_db()
 
 scraper = StoryScraper(output_root="story")
+
+# ── Crawl retry scheduler ──────────────────────────────────────────────────────
+
+_scheduler = AsyncIOScheduler()
+
+
+async def _retry_failed_crawls() -> None:
+    """Chạy định kỳ: thử lại các request crawl bị lỗi chưa resolve."""
+    pending = get_pending_failed_crawls(max_retries=CRAWL_RETRY_MAX_ATTEMPTS)
+    if not pending:
+        return
+    logger.info("[retry] Found %d pending failed crawl(s)", len(pending))
+    for rec in pending:
+        rec_id = rec["id"]
+        try:
+            result = await scraper.scrape_story(
+                story_url=rec["story_url"],
+                story_limit=rec["story_limit"],
+                start_story_from=rec["start_story_from"],
+            )
+
+            if result.get("mode") == "single_story":
+                slug = result.get("story_slug")
+                if slug and result.get("status") != "already_updated":
+                    upsert_story_from_dir(
+                        slug,
+                        free_chapter_threshold=rec["free_chapter_threshold"],
+                        source_url=rec["story_url"],
+                        **_meta_kwargs(result),
+                    )
+            elif result.get("mode") == "listing_page":
+                for story in result.get("stories", []):
+                    slug = story.get("story_slug")
+                    if slug and story.get("status") != "already_updated":
+                        try:
+                            upsert_story_from_dir(
+                                slug,
+                                free_chapter_threshold=rec["free_chapter_threshold"],
+                                source_url=story.get("story_url", rec["story_url"]),
+                                **_meta_kwargs(story),
+                            )
+                        except Exception:  # noqa: BLE001
+                            pass
+
+            mark_crawl_resolved(rec_id)
+            logger.info("[retry] Resolved failed crawl id=%d url=%s", rec_id, rec["story_url"])
+        except Exception as exc:  # noqa: BLE001
+            increment_crawl_retry(rec_id, str(exc))
+            logger.warning("[retry] Still failing id=%d attempt=%d err=%s",
+                           rec_id, rec["retry_count"] + 1, exc)
+
+
+@app.on_event("startup")
+async def _start_scheduler() -> None:
+    _scheduler.add_job(
+        _retry_failed_crawls,
+        "interval",
+        minutes=CRAWL_RETRY_INTERVAL_MINUTES,
+        id="crawl_retry",
+        replace_existing=True,
+    )
+    _scheduler.start()
+    logger.info("[scheduler] Crawl retry job started — interval=%dm max_attempts=%d",
+                CRAWL_RETRY_INTERVAL_MINUTES, CRAWL_RETRY_MAX_ATTEMPTS)
+
+
+@app.on_event("shutdown")
+async def _stop_scheduler() -> None:
+    _scheduler.shutdown(wait=False)
 tts_service = StoryTTSService(story_content_root="story-content", output_root="outputs/audio")
 
 # ── Content session token (anti-scraping) ──────────────────────────────────────
@@ -160,38 +255,36 @@ async def crawl_story(request: CrawlRequest) -> dict:
             start_story_from=request.start_story_from,
         )
 
-        # Upsert vào DB sau khi crawl xong, truyền story_name + free_chapter_threshold
+        # Upsert vào DB sau khi crawl xong
         db_results: list[dict] = []
+
         if result.get("mode") == "single_story":
             slug = result.get("story_slug")
-            story_name = result.get("story_name", "")
             story_url = result.get("story_url", "")
             if slug:
                 if result.get("status") == "already_updated":
                     result["message"] = "Đã cập nhật truyện, không có chương mới."
-                else:
-                    db_results.append(upsert_story_from_dir(
-                        slug,
-                        story_name=story_name,
-                        free_chapter_threshold=request.free_chapter_threshold,
-                        source_url=story_url,
-                    ))
+                # Always upsert — ensures metadata (cover/author/genre/status) saved even when no new chapters
+                db_results.append(upsert_story_from_dir(
+                    slug,
+                    free_chapter_threshold=request.free_chapter_threshold,
+                    source_url=story_url,
+                    **_meta_kwargs(result),
+                ))
         elif result.get("mode") == "listing_page":
             for story in result.get("stories", []):
                 slug = story.get("story_slug")
-                story_name = story.get("story_name", "")
                 story_url = story.get("story_url", "")
                 if slug:
                     try:
                         if story.get("status") == "already_updated":
                             story["message"] = "Đã cập nhật truyện, không có chương mới."
-                        else:
-                            db_results.append(upsert_story_from_dir(
-                                slug,
-                                story_name=story_name,
-                                free_chapter_threshold=request.free_chapter_threshold,
-                                source_url=story_url,
-                            ))
+                        db_results.append(upsert_story_from_dir(
+                            slug,
+                            free_chapter_threshold=request.free_chapter_threshold,
+                            source_url=story_url,
+                            **_meta_kwargs(story),
+                        ))
                     except Exception:  # noqa: BLE001
                         pass
 
@@ -200,7 +293,180 @@ async def crawl_story(request: CrawlRequest) -> dict:
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:  # noqa: BLE001
+        try:
+            save_failed_crawl(
+                story_url=request.story_url,
+                error_message=str(exc),
+                story_limit=request.story_limit,
+                start_story_from=request.start_story_from,
+                free_chapter_threshold=request.free_chapter_threshold,
+            )
+        except Exception:  # noqa: BLE001
+            pass
         raise HTTPException(status_code=500, detail=f"Loi crawl: {exc}") from exc
+
+
+class CategoryCrawlRequest(BaseModel):
+    listing_url: str = Field(..., description="URL danh mục, vd: https://truyencom.com/truyen-ngon-tinh/full/")
+    target_count: int = Field(default=5, ge=1, le=100, description="Số truyện MỚI cần crawl (chưa có trong DB)")
+    free_chapter_threshold: int = Field(default=20, ge=0)
+    concurrency: int = Field(default=2, ge=1, le=4, description="Số truyện crawl song song (tối đa 4 tránh bot)")
+
+
+async def _run_category_crawl(job_id: str, req: CategoryCrawlRequest) -> None:
+    """Background runner: collect listing → filter existing → parallel crawl với semaphore + jitter."""
+    job = _crawl_jobs[job_id]
+    try:
+        # 1. Thu thập tất cả URL truyện từ trang danh mục (sync → threadpool)
+        job["phase"] = "collecting_urls"
+        all_story_urls: list[str] = await run_in_threadpool(
+            scraper._collect_story_urls_from_listing, req.listing_url
+        )
+
+        # 2. Lọc slug đã có trong DB
+        slugs = [scraper._story_slug_from_url(u) for u in all_story_urls]
+        existing: set[str] = await run_in_threadpool(get_existing_slugs, slugs)
+        new_urls = [u for u, s in zip(all_story_urls, slugs) if s not in existing]
+
+        job["total_in_listing"] = len(all_story_urls)
+        job["already_in_db"] = len(all_story_urls) - len(new_urls)
+        job["new_available"] = len(new_urls)
+        job["phase"] = "crawling"
+
+        if not new_urls:
+            job["status"] = "done"
+            job["message"] = "Tất cả truyện trong danh mục đã có trong DB."
+            return
+
+        # 3. Semaphore-limited parallel crawl cho đến khi đủ target_count
+        sem = asyncio.Semaphore(req.concurrency)
+        success_lock = asyncio.Lock()
+        stop_event = asyncio.Event()
+        success_count = 0
+
+        async def crawl_one(url: str, position: int) -> None:
+            nonlocal success_count
+            if stop_event.is_set():
+                return
+            async with sem:
+                if stop_event.is_set():
+                    return
+                # Jitter: mỗi slot trì hoãn khác nhau để tránh bot detection
+                jitter = random.uniform(1.0, 3.0) + (position % req.concurrency) * 0.8
+                await asyncio.sleep(jitter)
+                try:
+                    result = await scraper.scrape_story(story_url=url)
+                    slug = result.get("story_slug")
+                    story_url_r = result.get("story_url", url)
+                    if slug:
+                        db_result = await run_in_threadpool(
+                            upsert_story_from_dir,
+                            slug,
+                            free_chapter_threshold=req.free_chapter_threshold,
+                            source_url=story_url_r,
+                            **_meta_kwargs(result),
+                        )
+                        async with success_lock:
+                            success_count += 1
+                            job["done"] = success_count
+                            job["results"].append({
+                                "slug": slug,
+                                "story_name": result.get("story_name", ""),
+                                "story_cover": result.get("story_cover", ""),
+                                "new_chapters": result.get("new_chapter_count", 0),
+                                "chapter_count": result.get("chapter_count", 0),
+                                "crawl_status": result.get("status", ""),
+                                "book_id": db_result.get("book_id"),
+                            })
+                            if success_count >= req.target_count:
+                                stop_event.set()
+                except Exception as exc:  # noqa: BLE001
+                    job["errors"].append({"url": url, "error": str(exc)})
+                    logger.warning("[category] Failed url=%s err=%s", url, exc)
+
+        # Chỉ gửi tối đa target_count * 3 candidates (buffer cho failures)
+        candidates = new_urls[: req.target_count * 3]
+        await asyncio.gather(*[crawl_one(u, i) for i, u in enumerate(candidates)], return_exceptions=True)
+
+        job["status"] = "done"
+        job["phase"] = "done"
+        job["message"] = f"Hoàn thành {success_count}/{req.target_count} truyện mới."
+
+    except Exception as exc:  # noqa: BLE001
+        job["status"] = "error"
+        job["phase"] = "error"
+        job["error"] = str(exc)
+        logger.error("[category] Job %s failed: %s", job_id, exc)
+
+
+@app.post("/crawl/category", status_code=202)
+async def crawl_category(req: CategoryCrawlRequest, background_tasks: BackgroundTasks) -> dict:
+    """
+    Crawl truyện theo danh mục. Bỏ qua truyện đã có trong DB.
+    Chạy background — poll `GET /crawl/category/jobs/{job_id}` để theo dõi tiến độ.
+    """
+    job_id = uuid.uuid4().hex[:10]
+    _crawl_jobs[job_id] = {
+        "job_id": job_id,
+        "status": "running",
+        "phase": "queued",
+        "listing_url": req.listing_url,
+        "target_count": req.target_count,
+        "done": 0,
+        "total_in_listing": 0,
+        "already_in_db": 0,
+        "new_available": 0,
+        "results": [],
+        "errors": [],
+        "message": "",
+    }
+    background_tasks.add_task(_run_category_crawl, job_id, req)
+    return {"job_id": job_id, "status": "running", "poll": f"/crawl/category/jobs/{job_id}"}
+
+
+@app.get("/crawl/category/jobs/{job_id}")
+async def get_category_job(job_id: str) -> dict:
+    """Kiểm tra tiến độ crawl danh mục."""
+    job = _crawl_jobs.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job {job_id} không tồn tại hoặc đã hết hạn.")
+    return job
+
+
+@app.get("/crawl/category/jobs")
+async def list_category_jobs() -> list:
+    """Danh sách tất cả jobs (in-memory, mất khi restart server)."""
+    return sorted(_crawl_jobs.values(), key=lambda j: j.get("job_id", ""), reverse=True)
+
+
+@app.get("/crawl/failed")
+async def list_failed_crawls(
+    resolved: bool = Query(default=False, description="true = xem đã resolve"),
+) -> list:
+    """Danh sách request crawl bị lỗi (chưa/đã resolve)."""
+    conn = get_conn()
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT * FROM failed_crawl_requests WHERE resolved = %s ORDER BY created_at DESC",
+            (1 if resolved else 0,),
+        )
+        rows = cur.fetchall()
+    conn.close()
+    return [
+        {
+            "id": r["id"],
+            "story_url": r["story_url"],
+            "story_limit": r["story_limit"],
+            "start_story_from": r["start_story_from"],
+            "free_chapter_threshold": r["free_chapter_threshold"],
+            "error_message": r["error_message"],
+            "retry_count": r["retry_count"],
+            "last_tried_at": r["last_tried_at"].isoformat() if r["last_tried_at"] else None,
+            "created_at": r["created_at"].isoformat() if r["created_at"] else None,
+            "resolved": bool(r["resolved"]),
+        }
+        for r in rows
+    ]
 
 
 async def _run_tts_background(story_name: str, chapters: list[int], mode: str) -> None:
@@ -368,6 +634,40 @@ async def google_login(req: GoogleLoginRequest) -> dict:
     }
 
 
+class FacebookLoginRequest(BaseModel):
+    email: str | None = None
+    name: str | None = None
+    username: str | None = None
+    picture: str | None = None
+    facebook_id: str | None = None
+
+
+@app.post("/auth/facebook")
+async def facebook_login(req: FacebookLoginRequest) -> dict:
+    """Upsert user from Facebook userinfo, return JWT + profile."""
+    email = req.email
+    if not email:
+        if req.username:
+            email = f"fb_{req.username}@nightowl.local"
+        elif req.facebook_id:
+            email = f"fb_{req.facebook_id}@nightowl.local"
+        else:
+            raise HTTPException(status_code=400, detail="Email, username hoặc facebook_id là bắt buộc")
+    user = get_or_create_user(email, req.name or "", req.picture or "")
+    token = _create_token(email, user["id"])
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {
+            "email": user["email"],
+            "name": user["name"],
+            "linh_thach": user["linh_thach"],
+            "streak": user["streak"],
+            "picture": user.get("picture"),
+        },
+    }
+
+
 # ── Books ──────────────────────────────────────────────────────────────────────
 
 def _row_to_book(row) -> dict:
@@ -389,6 +689,9 @@ def _row_to_book(row) -> dict:
         "tags": tags,
         "words": row["words"],
         "updated": row["updated"],
+        "cover_image": row.get("cover_image") or "",
+        "status": row.get("status") or "",
+        "read_count": row.get("read_count") or 0,
     }
 
 
@@ -503,7 +806,7 @@ async def list_chapters(
             conn.close()
             raise HTTPException(status_code=404, detail="Book not found")
         cur.execute(
-            "SELECT id, chapter_number, title, free FROM chapters WHERE book_id = %s ORDER BY chapter_number",
+            "SELECT id, chapter_number, title, free, view_count FROM chapters WHERE book_id = %s ORDER BY chapter_number",
             (book_id,),
         )
         rows = cur.fetchall()
@@ -533,6 +836,7 @@ async def list_chapters(
                 "title": r["title"],
                 "free": bool(r["free"]),
                 "unlocked": bool(r["free"]) or r["chapter_number"] in unlocked,
+                "viewCount": r["view_count"],
             }
             for r in rows
         ],
@@ -556,6 +860,7 @@ async def unlock_chapter_endpoint(
 @limiter.limit(RATE_LIMIT_CONTENT)
 async def get_chapter_content(
     request: Request,
+    background_tasks: BackgroundTasks,
     book_id: int,
     chapter_number: int,
     session_token: str | None = Query(default=None, description="Token từ /books/{id}/chapters"),
@@ -601,6 +906,11 @@ async def get_chapter_content(
         raise HTTPException(status_code=404, detail=f"Content file not found: {file_path}")
     with open(file_path, encoding="utf-8") as f:
         content = f.read()
+
+    background_tasks.add_task(
+        run_in_threadpool, lambda: increment_chapter_view(book_id, chapter_number)
+    )
+
     return {
         "chapterNumber": chapter_number,
         "title": row["title"],
