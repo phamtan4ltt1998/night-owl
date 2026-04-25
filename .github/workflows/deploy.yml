@@ -1,0 +1,69 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - run: pip install -r requirements.txt
+      - run: pip install ruff pytest
+      - run: ruff check app/
+      - run: pytest tests/ -v --tb=short
+        continue-on-error: true
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Sync code
+        run: |
+          rsync -avz --delete \
+            --exclude='.git/' \
+            --exclude='.venv/' \
+            --exclude='.venv311/' \
+            --exclude='story/' \
+            --exclude='story-content/' \
+            --exclude='outputs/' \
+            --exclude='input/' \
+            --exclude='*.db' \
+            --exclude='.env' \
+            --exclude='__pycache__/' \
+            --exclude='*.pyc' \
+            ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/nightowl/night-owl/
+
+      - name: Install deps & restart
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/nightowl/night-owl
+            source .venv/bin/activate
+            pip install -r requirements.txt --quiet
+            sudo systemctl restart nightowl
+            sleep 3
+            sudo systemctl is-active nightowl && echo "OK" || echo "FAILED"

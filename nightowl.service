@@ -1,0 +1,17 @@
+[Unit]
+Description=NightOwl FastAPI
+After=network.target
+
+[Service]
+Type=exec
+User=nightowl
+WorkingDirectory=/home/nightowl/night-owl
+EnvironmentFile=/home/nightowl/night-owl/.env
+ExecStart=/home/nightowl/night-owl/.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 2
+Restart=on-failure
+RestartSec=5s
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
