@@ -1,6 +1,7 @@
 """Logging configuration for NightOwl API.
 
 Ghi log ra file theo ngày với rotation, đồng thời giữ output ra console.
+Format thống nhất cho tất cả loggers (nightowl + uvicorn).
 
 Environment variables:
   LOG_LEVEL         DEBUG | INFO | WARNING | ERROR   (default: INFO)
@@ -16,8 +17,6 @@ from pathlib import Path
 
 
 def setup_logging() -> None:
-    """Gọi một lần khi khởi động app. Cấu hình handler cho logger gốc 'nightowl'."""
-
     log_level_name = os.getenv("LOG_LEVEL", "INFO").upper()
     log_level = getattr(logging, log_level_name, logging.INFO)
 
@@ -31,7 +30,6 @@ def setup_logging() -> None:
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    # ── File handler (rotation theo ngày, giữ 10 ngày) ────────────────────────
     file_handler = logging.handlers.TimedRotatingFileHandler(
         filename=log_dir / "app.log",
         when="midnight",
@@ -44,23 +42,35 @@ def setup_logging() -> None:
     file_handler.setFormatter(fmt)
     file_handler.setLevel(log_level)
 
-    # ── Console handler ────────────────────────────────────────────────────────
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(fmt)
     console_handler.setLevel(log_level)
 
-    # ── Root logger "nightowl" — bắt tất cả sub-logger ────────────────────────
-    root_logger = logging.getLogger("nightowl")
-    root_logger.setLevel(log_level)
+    # ── Áp dụng format thống nhất cho nightowl + uvicorn ──────────────────────
+    for name in ("nightowl", "uvicorn", "uvicorn.access", "uvicorn.error"):
+        logger = logging.getLogger(name)
+        logger.setLevel(log_level)
+        # Xóa handler cũ của uvicorn (format khác) rồi gắn lại handler của ta
+        logger.handlers.clear()
+        logger.addHandler(file_handler)
+        logger.addHandler(console_handler)
+        logger.propagate = False
 
-    if not root_logger.handlers:
-        root_logger.addHandler(file_handler)
-        root_logger.addHandler(console_handler)
 
-    root_logger.propagate = False
+def get_uvicorn_log_config() -> dict:
+    """Trả về log_config cho uvicorn để disable formatter riêng của nó.
 
-    # ── Uvicorn loggers → cũng ghi vào file ───────────────────────────────────
-    for name in ("uvicorn", "uvicorn.access", "uvicorn.error"):
-        uvi = logging.getLogger(name)
-        if not any(isinstance(h, logging.handlers.TimedRotatingFileHandler) for h in uvi.handlers):
-            uvi.addHandler(file_handler)
+    Truyền vào uvicorn.run() hoặc --log-config để uvicorn không override
+    formatter sau khi setup_logging() đã chạy.
+    """
+    return {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {},
+        "handlers": {},
+        "loggers": {
+            "uvicorn": {"handlers": [], "propagate": True},
+            "uvicorn.access": {"handlers": [], "propagate": True},
+            "uvicorn.error": {"handlers": [], "propagate": True},
+        },
+    }
