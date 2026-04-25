@@ -1,12 +1,11 @@
 """Logging configuration for NightOwl API.
 
-Ghi log ra file với rotation, đồng thời giữ output ra console.
+Ghi log ra file theo ngày với rotation, đồng thời giữ output ra console.
 
 Environment variables:
-  LOG_LEVEL      DEBUG | INFO | WARNING | ERROR   (default: INFO)
-  LOG_DIR        Thư mục chứa file log             (default: logs/)
-  LOG_MAX_BYTES  Kích thước tối đa mỗi file        (default: 10485760 = 10 MB)
-  LOG_BACKUP_COUNT  Số file backup giữ lại         (default: 5)
+  LOG_LEVEL         DEBUG | INFO | WARNING | ERROR   (default: INFO)
+  LOG_DIR           Thư mục chứa file log             (default: logs/)
+  LOG_BACKUP_DAYS   Số ngày log giữ lại               (default: 10)
 """
 from __future__ import annotations
 
@@ -25,21 +24,23 @@ def setup_logging() -> None:
     log_dir = Path(os.getenv("LOG_DIR", "logs"))
     log_dir.mkdir(parents=True, exist_ok=True)
 
-    max_bytes = int(os.getenv("LOG_MAX_BYTES", str(10 * 1024 * 1024)))  # 10 MB
-    backup_count = int(os.getenv("LOG_BACKUP_COUNT", "5"))
+    backup_days = int(os.getenv("LOG_BACKUP_DAYS", "10"))
 
     fmt = logging.Formatter(
         fmt="%(asctime)s %(levelname)-8s %(name)s — %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    # ── File handler (rotation theo kích thước) ────────────────────────────────
-    file_handler = logging.handlers.RotatingFileHandler(
+    # ── File handler (rotation theo ngày, giữ 10 ngày) ────────────────────────
+    file_handler = logging.handlers.TimedRotatingFileHandler(
         filename=log_dir / "app.log",
-        maxBytes=max_bytes,
-        backupCount=backup_count,
+        when="midnight",
+        interval=1,
+        backupCount=backup_days,
         encoding="utf-8",
+        utc=False,
     )
+    file_handler.suffix = "%Y-%m-%d"
     file_handler.setFormatter(fmt)
     file_handler.setLevel(log_level)
 
@@ -52,10 +53,14 @@ def setup_logging() -> None:
     root_logger = logging.getLogger("nightowl")
     root_logger.setLevel(log_level)
 
-    # Tránh thêm handler trùng nếu hàm bị gọi nhiều lần
     if not root_logger.handlers:
         root_logger.addHandler(file_handler)
         root_logger.addHandler(console_handler)
 
-    # Không propagate lên root Python logger để tránh log trùng với uvicorn
     root_logger.propagate = False
+
+    # ── Uvicorn loggers → cũng ghi vào file ───────────────────────────────────
+    for name in ("uvicorn", "uvicorn.access", "uvicorn.error"):
+        uvi = logging.getLogger(name)
+        if not any(isinstance(h, logging.handlers.TimedRotatingFileHandler) for h in uvi.handlers):
+            uvi.addHandler(file_handler)
