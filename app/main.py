@@ -13,7 +13,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
+from fastapi.responses import PlainTextResponse, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from pydantic import BaseModel, Field
@@ -33,10 +33,10 @@ from app.logging_setup import setup_logging
 from app.scrape_job import get_schedule_kwargs, load_config, run_scheduled_scrape
 
 setup_logging()
-from app.middleware.bot_guard import BANNED_IPS, _is_private, bot_guard_middleware
-from app.scraper import DEFAULT_STORY_URL, StoryScraper
-from app.tts_service import StoryTTSService
-from app.database import (
+from app.middleware.bot_guard import BANNED_IPS, _is_private, bot_guard_middleware  # noqa: E402
+from app.scraper import DEFAULT_STORY_URL, StoryScraper  # noqa: E402
+from app.tts_service import StoryTTSService  # noqa: E402
+from app.database import (  # noqa: E402
     init_db, get_conn, upsert_story_from_dir, update_book,
     get_or_create_user, update_user_profile,
     add_linh_thach, get_linh_thach_history, claim_daily_reward,
