@@ -26,6 +26,7 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
+    environment: night-owl
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
