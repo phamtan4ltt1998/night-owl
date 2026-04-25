@@ -306,9 +306,11 @@ def update_book(book_id: int, title: str | None, author: str | None, free_chapte
             # Cập nhật metadata nếu có
             fields, params = [], []
             if title is not None:
-                fields.append("title = %s"); params.append(title)
+                fields.append("title = %s")
+                params.append(title)
             if author is not None:
-                fields.append("author = %s"); params.append(author)
+                fields.append("author = %s")
+                params.append(author)
             if fields:
                 params.append(book_id)
                 cur.execute(f"UPDATE books SET {', '.join(fields)} WHERE id = %s", params)
