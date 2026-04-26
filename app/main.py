@@ -46,6 +46,7 @@ from app.database import (  # noqa: E402
     mark_crawl_resolved, increment_crawl_retry,
     get_existing_slugs,
     increment_chapter_view,
+    get_books_paged,
 )
 
 logger = logging.getLogger("nightowl.crawl")
@@ -819,6 +820,28 @@ async def search_books(
         "limit": limit,
         "offset": offset,
     }
+
+
+@app.get("/books/paged")
+@limiter.limit(RATE_LIMIT_BOOKS)
+async def list_books_paged(
+    request: Request,
+    page: int = Query(1, ge=1, description="Trang hiện tại (bắt đầu từ 1)"),
+    page_size: int = Query(24, ge=1, le=100, description="Số truyện mỗi trang (tối đa 100)"),
+    genre: str | None = Query(None, description="Lọc theo thể loại"),
+    sort_by: str = Query("read_count", description="Sắp xếp theo: read_count | rating | id | title | chapter_count"),
+    sort_order: str = Query("desc", description="Thứ tự: asc | desc"),
+) -> dict:
+    result = await run_in_threadpool(
+        get_books_paged,
+        page=page,
+        page_size=page_size,
+        genre=genre if genre and genre != "Tất cả" else None,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
+    result["data"] = [_row_to_book(r) for r in result["data"]]
+    return result
 
 
 @app.get("/books/{book_id}")
