@@ -59,9 +59,31 @@ def _parse_chapter_number(filename: str) -> int:
     return int(m.group(1)) if m else 0
 
 
+def _ensure_ft_index(cur, index_name: str, columns: str) -> bool:
+    cur.execute(
+        "SELECT COUNT(*) AS cnt FROM information_schema.STATISTICS "
+        "WHERE table_schema = DATABASE() AND table_name = 'books' "
+        "AND index_name = %s",
+        (index_name,),
+    )
+    if cur.fetchone()["cnt"] == 0:
+        cur.execute(f"ALTER TABLE books ADD FULLTEXT KEY {index_name} ({columns})")
+        return True
+    return False
+
+
 def init_db() -> None:
-    """Schema managed by init.sql. No seeding here."""
-    pass
+    """Schema managed by init.sql. Ensure FTS indexes exist for running DBs."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            changed = False
+            changed |= _ensure_ft_index(cur, "ft_books_search", "title, author, description, tags")
+            changed |= _ensure_ft_index(cur, "ft_books_title", "title")
+            if changed:
+                conn.commit()
+    finally:
+        conn.close()
 
 
 # ── Users ──────────────────────────────────────────────────────────────────────
