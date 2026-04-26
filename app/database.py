@@ -72,14 +72,30 @@ def _ensure_ft_index(cur, index_name: str, columns: str) -> bool:
     return False
 
 
+def _ensure_btree_index(cur, index_name: str, columns: str) -> bool:
+    cur.execute(
+        "SELECT COUNT(*) AS cnt FROM information_schema.STATISTICS "
+        "WHERE table_schema = DATABASE() AND table_name = 'books' "
+        "AND index_name = %s",
+        (index_name,),
+    )
+    if cur.fetchone()["cnt"] == 0:
+        cur.execute(f"ALTER TABLE books ADD INDEX {index_name} ({columns})")
+        return True
+    return False
+
+
 def init_db() -> None:
-    """Schema managed by init.sql. Ensure FTS indexes exist for running DBs."""
+    """Schema managed by init.sql. Ensure FTS and btree indexes exist for running DBs."""
     conn = get_conn()
     try:
         with conn.cursor() as cur:
             changed = False
             changed |= _ensure_ft_index(cur, "ft_books_search", "title, author, description, tags")
             changed |= _ensure_ft_index(cur, "ft_books_title", "title")
+            changed |= _ensure_btree_index(cur, "idx_genre", "genre")
+            changed |= _ensure_btree_index(cur, "idx_read_count", "read_count")
+            changed |= _ensure_btree_index(cur, "idx_rating", "rating")
             if changed:
                 conn.commit()
     finally:
@@ -351,6 +367,55 @@ def update_book(book_id: int, title: str | None, author: str | None, free_chapte
             cur.execute("SELECT COUNT(*) AS cnt FROM chapters WHERE book_id = %s AND free = 1", (book_id,))
             free_count = cur.fetchone()["cnt"]
         return {"book": dict(row), "free_chapters": free_count}
+    finally:
+        conn.close()
+
+
+_VALID_SORT_COLS = {"read_count", "rating", "id", "title", "chapter_count"}
+_VALID_SORT_ORDERS = {"asc", "desc"}
+
+
+def get_books_paged(
+    page: int = 1,
+    page_size: int = 24,
+    genre: str | None = None,
+    sort_by: str = "read_count",
+    sort_order: str = "desc",
+) -> dict:
+    if sort_by not in _VALID_SORT_COLS:
+        sort_by = "read_count"
+    if sort_order not in _VALID_SORT_ORDERS:
+        sort_order = "desc"
+
+    offset = (page - 1) * page_size
+    where = "WHERE genre = %s" if genre else ""
+    params_filter: list = [genre] if genre else []
+
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"SELECT COUNT(*) AS cnt FROM books {where}",
+                params_filter,
+            )
+            total = cur.fetchone()["cnt"]
+
+            cur.execute(
+                f"SELECT * FROM books {where} "
+                f"ORDER BY {sort_by} {sort_order} "
+                f"LIMIT %s OFFSET %s",
+                params_filter + [page_size, offset],
+            )
+            rows = cur.fetchall()
+        return {
+            "data": [dict(r) for r in rows],
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total": total,
+                "total_pages": max(1, -(-total // page_size)),
+            },
+        }
     finally:
         conn.close()
 
