@@ -28,7 +28,9 @@ CREATE TABLE IF NOT EXISTS books (
     source_url   VARCHAR(1000) NOT NULL DEFAULT '',
     cover_image  VARCHAR(1000) NOT NULL DEFAULT '',
     status       VARCHAR(50)   NOT NULL DEFAULT '',
-    read_count   BIGINT        NOT NULL DEFAULT 0
+    read_count   BIGINT        NOT NULL DEFAULT 0,
+    FULLTEXT KEY ft_books_search (title, author, description, tags),
+    FULLTEXT KEY ft_books_title (title)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── Failed Crawl Requests ──────────────────────────────────────────────────────

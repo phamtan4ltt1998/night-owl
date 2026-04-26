@@ -730,6 +730,18 @@ async def list_books(request: Request, genre: str | None = None) -> list:
     return [_row_to_book(r) for r in rows]
 
 
+def _build_ft_query(q: str) -> str:
+    """Build MySQL boolean-mode FTS query: prefix-match each token."""
+    import re as _re
+    tokens = q.strip().split()
+    parts = []
+    for tok in tokens:
+        cleaned = _re.sub(r'[+\-><\(\)~*"@]', '', tok).strip()
+        if len(cleaned) >= 2:
+            parts.append(f'{cleaned}*')
+    return ' '.join(parts) if parts else q
+
+
 @app.get("/books/search")
 @limiter.limit(RATE_LIMIT_CHAPTERS)
 async def search_books(
@@ -739,35 +751,68 @@ async def search_books(
     limit: int = Query(20, le=50),
     offset: int = 0,
 ) -> dict:
+    q = q.strip()
     conn = get_conn()
-    with conn.cursor() as cur:
-        # Exact ID match shortcut
-        if q.strip().isdigit():
-            cur.execute("SELECT * FROM books WHERE id = %s", (q.strip(),))
-            row = cur.fetchone()
-            conn.close()
-            data = [_row_to_book(row)] if row else []
-            return {"data": data, "total": len(data), "limit": limit, "offset": offset}
+    try:
+        with conn.cursor() as cur:
+            # Exact ID match shortcut (only pure digit IDs, not "10 văn tiền")
+            if q.isdigit() and len(q) <= 6:
+                cur.execute("SELECT * FROM books WHERE id = %s", (q,))
+                row = cur.fetchone()
+                if row:
+                    return {"data": [_row_to_book(row)], "total": 1, "limit": limit, "offset": offset}
+                # no ID match → fall through to text search
 
-        # LIKE search on title + author
-        like_q = f"%{q.lower()}%"
-        where = "WHERE (LOWER(title) LIKE %s OR LOWER(author) LIKE %s)"
-        params: list = [like_q, like_q]
+            genre_filter = " AND genre = %s" if genre and genre != "Tất cả" else ""
+            genre_params: list = [genre] if genre and genre != "Tất cả" else []
 
-        if genre and genre != "Tất cả":
-            where += " AND genre = %s"
-            params.append(genre)
+            def _like_search(cur, q: str, genre_filter: str, genre_params: list, limit: int, offset: int):
+                like_q = f"%{q}%"
+                starts_q = f"{q}%"
+                like_where = "WHERE (title LIKE %s OR author LIKE %s)" + genre_filter
+                like_params = [like_q, like_q] + genre_params
+                cur.execute(f"SELECT COUNT(*) AS cnt FROM books {like_where}", like_params)
+                total = cur.fetchone()["cnt"]
+                # Sort: title starts-with query first, then contains, then author match
+                cur.execute(
+                    f"SELECT * FROM books {like_where} "
+                    f"ORDER BY CASE WHEN title LIKE %s THEN 0 ELSE 1 END, title "
+                    f"LIMIT %s OFFSET %s",
+                    like_params + [starts_q, limit, offset],
+                )
+                return total
 
-        cur.execute(f"SELECT COUNT(*) AS cnt FROM books {where}", params)
-        total = cur.fetchone()["cnt"]
+            # Short queries (≤2 chars): MySQL FTS min_token_size=3 ignores them → use LIKE directly
+            if len(q) <= 2:
+                total = _like_search(cur, q, genre_filter, genre_params, limit, offset)
+                rows = cur.fetchall()
+            else:
+                # Full-text search with title-boosted relevance ranking
+                ft_q = _build_ft_query(q)
+                ft_where = (
+                    "WHERE MATCH(title, author, description, tags) "
+                    "AGAINST (%s IN BOOLEAN MODE)" + genre_filter
+                )
+                ft_params = [ft_q] + genre_params
 
-        cur.execute(
-            f"SELECT * FROM books {where} LIMIT %s OFFSET %s",
-            params + [limit, offset],
-        )
-        rows = cur.fetchall()
+                cur.execute(f"SELECT COUNT(*) AS cnt FROM books {ft_where}", ft_params)
+                total = cur.fetchone()["cnt"]
 
-    conn.close()
+                if total == 0:
+                    total = _like_search(cur, q, genre_filter, genre_params, limit, offset)
+                else:
+                    cur.execute(
+                        f"SELECT *, "
+                        f"(MATCH(title) AGAINST (%s IN BOOLEAN MODE) * 3 + "
+                        f"MATCH(title, author, description, tags) AGAINST (%s IN BOOLEAN MODE)) AS _score "
+                        f"FROM books {ft_where} ORDER BY _score DESC LIMIT %s OFFSET %s",
+                        [ft_q, ft_q] + ft_params + [limit, offset],
+                    )
+
+                rows = cur.fetchall()
+    finally:
+        conn.close()
+
     return {
         "data": [_row_to_book(r) for r in rows],
         "total": total,
