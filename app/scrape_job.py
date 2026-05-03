@@ -176,7 +176,8 @@ async def _scrape_source(
         logger.info("[scrape_job] Tất cả truyện đã có trong DB.")
         return
 
-    # 3. Crawl song song có semaphore + jitter, dừng khi đủ target_count
+    # 3. Crawl song song có semaphore + jitter, dừng khi đủ target_count (hoặc unlimited nếu <= 0)
+    unlimited = target_count <= 0
     sem = asyncio.Semaphore(concurrency)
     success_lock = asyncio.Lock()
     stop_event = asyncio.Event()
@@ -214,17 +215,19 @@ async def _scrape_source(
                     async with success_lock:
                         success_count += 1
                         new_chapters = result.get("new_chapter_count", 0)
+                        target_disp = "∞" if unlimited else str(target_count)
                         logger.info(
-                            "[scrape_job] ✓ slug=%s new_chapters=%d (%d/%d)",
-                            slug, new_chapters, success_count, target_count,
+                            "[scrape_job] ✓ slug=%s new_chapters=%d (%d/%s)",
+                            slug, new_chapters, success_count, target_disp,
                         )
-                        if success_count >= target_count:
+                        if not unlimited and success_count >= target_count:
                             stop_event.set()
             except Exception as exc:
                 logger.warning("[scrape_job] Lỗi url=%s: %s", story_url, exc)
 
-    # Buffer: gửi tối đa target_count * 3 candidates để bù cho failures
-    candidates = new_urls[: target_count * 3]
+    # Buffer: limited mode gửi target_count * 3, unlimited mode gửi tất cả
+    candidates = new_urls if unlimited else new_urls[: target_count * 3]
     await asyncio.gather(*[crawl_one(u, i) for i, u in enumerate(candidates)], return_exceptions=True)
 
-    logger.info("[scrape_job] Source=%s xong — %d/%d truyện mới.", url, success_count, target_count)
+    target_disp = "∞" if unlimited else str(target_count)
+    logger.info("[scrape_job] Source=%s xong — %d/%s truyện mới.", url, success_count, target_disp)

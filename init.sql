@@ -133,6 +133,28 @@ CREATE TABLE IF NOT EXISTS reading_history (
     CONSTRAINT fk_rh_book FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ── Inline Comments (Wattpad-style paragraph comments) ──────────────────────────
+
+CREATE TABLE IF NOT EXISTS inline_comments (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    chapter_id      INT          NOT NULL,
+    paragraph_id    VARCHAR(100) NOT NULL,
+    user_id         INT          NOT NULL,
+    content         TEXT         NOT NULL,
+    parent_id       INT          DEFAULT NULL,
+    created_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    INDEX idx_chapter_para     (chapter_id, paragraph_id),
+    INDEX idx_chapter_para_time (chapter_id, paragraph_id, created_at DESC),
+    INDEX idx_user             (user_id),
+    INDEX idx_parent           (parent_id),
+
+    CONSTRAINT fk_ic_chapter FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ic_user    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ic_parent  FOREIGN KEY (parent_id) REFERENCES inline_comments(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ── Seed Notifications ─────────────────────────────────────────────────────────
 
 INSERT IGNORE INTO notifications (type, icon, title, body, time, unread) VALUES
