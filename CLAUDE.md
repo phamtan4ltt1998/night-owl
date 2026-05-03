@@ -67,14 +67,17 @@ Copy `.env.example` → `.env`. Key vars:
 - Removes markdown links `[text](url)` → keeps text only
 - Applied in `/books/{id}/chapters/{num}/content` endpoint before returning
 
-**Inline Comments** (Wattpad-style paragraph comments):
-- Database: `inline_comments` table with `chapter_id`, `paragraph_id`, `user_id`, `content`, `parent_id` (for replies)
-- APIs:
-  - `GET /books/{book_id}/chapters/{chapter_number}/comment-counts` → `{paragraph_id: count}`
-  - `GET /books/{book_id}/chapters/{chapter_number}/paragraphs/{paragraph_id}/comments?page=1&limit=10` → paginated comments + replies
-  - `POST /comments/inline` (auth required) → post new comment
-  - `DELETE /comments/inline/{comment_id}` (auth required, owner only) → delete comment
-- Paragraph IDs: String identifier (frontend assigns during render, e.g., `p1`, `p2`, `p_hash`)
+**Comments** (Wattpad-style paragraph + end-of-chapter):
+- Single table `inline_comments`: `chapter_id`, `paragraph_id`, `user_id`, `content`, `parent_id` (for replies), `created_at`
+- Paragraph ID convention:
+  - `p0`, `p1`, `p2`... → inline paragraph comments (frontend assigns by index)
+  - `_chapter` → sentinel for end-of-chapter comments (whole-chapter discussion)
+- APIs (shared for both modes):
+  - `GET /books/{book_id}/chapters/{chapter_number}/comment-counts` → `{paragraph_id: count}` (includes `_chapter` if present)
+  - `GET /books/{book_id}/chapters/{chapter_number}/paragraphs/{paragraph_id}/comments?page=1&limit=10` → paginated comments + nested replies
+  - `POST /comments/inline` (auth required) → body `{chapter_id, paragraph_id, content, parent_id?}`
+  - `DELETE /comments/inline/{comment_id}` (auth required, owner only)
+- DB function: `get_comment_counts(chapter_id)` excludes replies (only counts top-level via `parent_id IS NULL`)
 
 **TTS pipeline** (`app/tts_service.py`):
 - Reads markdown from `story-content/<slug>/`
