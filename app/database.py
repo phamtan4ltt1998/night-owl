@@ -609,7 +609,10 @@ def upsert_story_from_dir(
                     with open(file_path, encoding="utf-8") as fh:
                         first_line = fh.readline().strip()
                         if first_line.startswith("#"):
-                            ch_title = first_line.lstrip("#").strip() or ch_title
+                            raw_title = first_line.lstrip("#").strip()
+                            # Strip markdown link [label](url) → label
+                            cleaned = re.sub(r'\[([^\]]+)\]\([^\)]*\)', r'\1', raw_title).strip().strip('"').strip()
+                            ch_title = cleaned or ch_title
                 except OSError:
                     pass
                 new_rows.append((book_id, ch_num, ch_title, file_path, free))
@@ -655,5 +658,131 @@ def get_chapter_views(book_id: int) -> dict[int, int]:
             )
             rows = cur.fetchall()
         return {r["chapter_number"]: r["view_count"] for r in rows}
+    finally:
+        conn.close()
+
+
+# ── Inline Comments (Wattpad-style) ────────────────────────────────────────────
+
+def get_comment_counts(chapter_id: int) -> dict[str, int]:
+    """Get comment count per paragraph_id for a chapter. Only returns paragraphs with comments."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT paragraph_id, COUNT(*) AS cnt FROM inline_comments WHERE chapter_id = %s AND parent_id IS NULL GROUP BY paragraph_id",
+                (chapter_id,),
+            )
+            rows = cur.fetchall()
+        return {r["paragraph_id"]: r["cnt"] for r in rows}
+    finally:
+        conn.close()
+
+
+def get_paragraph_comments(chapter_id: int, paragraph_id: str, page: int = 1, limit: int = 10) -> dict:
+    """Get paginated comments for a specific paragraph (only top-level, not replies)."""
+    offset = (page - 1) * limit
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT COUNT(*) AS cnt FROM inline_comments WHERE chapter_id = %s AND paragraph_id = %s AND parent_id IS NULL",
+                (chapter_id, paragraph_id),
+            )
+            total = cur.fetchone()["cnt"]
+
+            cur.execute(
+                """SELECT c.id, c.user_id, c.content, c.created_at, u.name, u.picture
+                   FROM inline_comments c
+                   LEFT JOIN users u ON u.id = c.user_id
+                   WHERE c.chapter_id = %s AND c.paragraph_id = %s AND c.parent_id IS NULL
+                   ORDER BY c.created_at DESC
+                   LIMIT %s OFFSET %s""",
+                (chapter_id, paragraph_id, limit, offset),
+            )
+            comments = [dict(r) for r in cur.fetchall()]
+
+            # Fetch replies for each top-level comment
+            for comment in comments:
+                cur.execute(
+                    """SELECT c.id, c.user_id, c.content, c.created_at, u.name, u.picture
+                       FROM inline_comments c
+                       LEFT JOIN users u ON u.id = c.user_id
+                       WHERE c.parent_id = %s
+                       ORDER BY c.created_at ASC""",
+                    (comment["id"],),
+                )
+                comment["replies"] = [dict(r) for r in cur.fetchall()]
+
+        return {
+            "data": comments,
+            "pagination": {
+                "page": page,
+                "limit": limit,
+                "total": total,
+                "total_pages": max(1, -(-total // limit)),
+            },
+        }
+    finally:
+        conn.close()
+
+
+def post_inline_comment(chapter_id: int, paragraph_id: str, user_id: int, content: str, parent_id: int | None = None) -> dict:
+    """Post a new inline comment. Returns comment object with user info."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            # Verify chapter exists
+            cur.execute("SELECT id FROM chapters WHERE id = %s", (chapter_id,))
+            if not cur.fetchone():
+                raise ValueError("Chapter not found")
+
+            # Verify user exists
+            cur.execute("SELECT name, picture FROM users WHERE id = %s", (user_id,))
+            user = cur.fetchone()
+            if not user:
+                raise ValueError("User not found")
+
+            # Insert comment
+            cur.execute(
+                """INSERT INTO inline_comments (chapter_id, paragraph_id, user_id, content, parent_id)
+                   VALUES (%s, %s, %s, %s, %s)""",
+                (chapter_id, paragraph_id, user_id, content, parent_id),
+            )
+            comment_id = cur.lastrowid
+            conn.commit()
+
+            return {
+                "id": comment_id,
+                "chapter_id": chapter_id,
+                "paragraph_id": paragraph_id,
+                "user_id": user_id,
+                "content": content,
+                "parent_id": parent_id,
+                "created_at": datetime.datetime.now().isoformat(),
+                "name": user["name"],
+                "picture": user["picture"],
+            }
+    finally:
+        conn.close()
+
+
+def delete_inline_comment(comment_id: int, user_id: int) -> bool:
+    """Delete a comment (only if user is owner). Returns True if deleted, False if not found/not owner."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            # Check ownership
+            cur.execute("SELECT user_id FROM inline_comments WHERE id = %s", (comment_id,))
+            row = cur.fetchone()
+            if not row:
+                return False
+            if row["user_id"] != user_id:
+                return False
+
+            # Delete comment (will cascade delete replies via FK)
+            cur.execute("DELETE FROM inline_comments WHERE id = %s", (comment_id,))
+            conn.commit()
+            return True
     finally:
         conn.close()

@@ -15,6 +15,16 @@ from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig
 DEFAULT_STORY_URL = "https://truyencom.com/truyen-xuyen-nhanh/full/"
 
 
+def _strip_markdown_link(text: str) -> str:
+    """Strip markdown link syntax: '[label](url "title")' → 'label'. Also handle nested cases."""
+    if not text:
+        return text
+    # Match [text](url) or [text](url "title")
+    cleaned = re.sub(r'\[([^\]]+)\]\([^\)]*\)', r'\1', text)
+    # Strip stray quotes/brackets remaining
+    return cleaned.strip().strip('"').strip()
+
+
 @dataclass
 class ChapterLink:
     title: str
@@ -314,10 +324,13 @@ class StoryScraper:
         """Lấy tiêu đề đầu tiên (# hoặc ##) từ markdown của trang chương."""
         for line in markdown.splitlines():
             stripped = line.strip()
+            title = ""
             if stripped.startswith("## "):
-                return stripped[3:].strip()
-            if stripped.startswith("# "):
-                return stripped[2:].strip()
+                title = stripped[3:].strip()
+            elif stripped.startswith("# "):
+                title = stripped[2:].strip()
+            if title:
+                return _strip_markdown_link(title)
         return ""
 
     def _extract_markdown(self, crawl_result: object) -> str:

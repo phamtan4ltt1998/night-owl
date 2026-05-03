@@ -43,7 +43,7 @@ Copy `.env.example` → `.env`. Key vars:
 **Data flow for reading:**
 1. Client fetches `/books` → list from MySQL (`app/database.py`)
 2. Client fetches `/books/{id}/chapters` → chapter list + session token issued
-3. Client fetches chapter content with session token → HMAC-validated, rate-limited
+3. Client fetches chapter content with session token → HMAC-validated, rate-limited, content cleaned (title removed, links stripped to text)
 
 **Anti-scraping layers** (`app/config.py`, `app/middleware/bot_guard.py`):
 1. Honeypot IP ban
@@ -58,8 +58,23 @@ Copy `.env.example` → `.env`. Key vars:
 
 **Crawl pipeline** (`app/scraper.py`):
 - Uses `crawl4ai` + Playwright/Patchright for JS-rendered pages
-- Saves chapters as numbered markdown: `story/<slug>/0001-*.md`, `0002-*.md`, …
+- Saves chapters as numbered markdown with title heading: `story/<slug>/0001-*.md`, `0002-*.md`, …
 - After crawl: `upsert_story_from_dir()` syncs story+chapters into MySQL
+- Note: Each markdown file starts with `# {title}\n\n{content}` format
+
+**Content cleaning** (`app/main.py`, `_clean_chapter_content()`):
+- Strips title heading from markdown (first `#` line) to prevent duplication in reader
+- Removes markdown links `[text](url)` → keeps text only
+- Applied in `/books/{id}/chapters/{num}/content` endpoint before returning
+
+**Inline Comments** (Wattpad-style paragraph comments):
+- Database: `inline_comments` table with `chapter_id`, `paragraph_id`, `user_id`, `content`, `parent_id` (for replies)
+- APIs:
+  - `GET /books/{book_id}/chapters/{chapter_number}/comment-counts` → `{paragraph_id: count}`
+  - `GET /books/{book_id}/chapters/{chapter_number}/paragraphs/{paragraph_id}/comments?page=1&limit=10` → paginated comments + replies
+  - `POST /comments/inline` (auth required) → post new comment
+  - `DELETE /comments/inline/{comment_id}` (auth required, owner only) → delete comment
+- Paragraph IDs: String identifier (frontend assigns during render, e.g., `p1`, `p2`, `p_hash`)
 
 **TTS pipeline** (`app/tts_service.py`):
 - Reads markdown from `story-content/<slug>/`

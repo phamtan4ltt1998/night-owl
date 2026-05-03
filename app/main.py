@@ -5,6 +5,7 @@ import hmac
 import logging
 import os
 import random
+import re
 import time
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -210,6 +211,30 @@ def _verify_session_token(token: str, uid: int, book_id: int) -> bool:
         return hmac.compare_digest(sig, expected)
     except Exception:
         return False
+
+
+def _clean_chapter_title(title: str) -> str:
+    """Strip markdown link syntax from title: '[label](url "title")' → 'label'."""
+    if not title:
+        return title
+    cleaned = re.sub(r'\[([^\]]+)\]\([^\)]*\)', r'\1', title)
+    return cleaned.strip().strip('"').strip()
+
+
+def _clean_chapter_content(content: str, chapter_title: str) -> str:
+    # Remove title heading (first # or ## heading)
+    lines = content.split('\n')
+    start_idx = 0
+    if lines and lines[0].strip().startswith('# '):
+        start_idx = 1
+        # Skip empty lines after title
+        while start_idx < len(lines) and not lines[start_idx].strip():
+            start_idx += 1
+
+    cleaned = '\n'.join(lines[start_idx:])
+    # Remove markdown links [text](url) → keep only text
+    cleaned = re.sub(r'\[([^\]]+)\]\([^\)]*\)', r'\1', cleaned)
+    return cleaned.strip()
 
 
 class CrawlRequest(BaseModel):
@@ -922,7 +947,7 @@ async def list_chapters(
             {
                 "id": r["id"],
                 "chapterNumber": r["chapter_number"],
-                "title": r["title"],
+                "title": _clean_chapter_title(r["title"]),
                 "free": bool(r["free"]),
                 "unlocked": bool(r["free"]) or r["chapter_number"] in unlocked,
                 "viewCount": r["view_count"],
@@ -996,13 +1021,16 @@ async def get_chapter_content(
     with open(file_path, encoding="utf-8") as f:
         content = f.read()
 
+    content = _clean_chapter_content(content, row["title"])
+    clean_title = _clean_chapter_title(row["title"])
+
     background_tasks.add_task(
         run_in_threadpool, lambda: increment_chapter_view(book_id, chapter_number)
     )
 
     return {
         "chapterNumber": chapter_number,
-        "title": row["title"],
+        "title": clean_title,
         "free": bool(row["free"]),
         "content": content,
     }
@@ -1018,6 +1046,118 @@ async def list_genres() -> list:
         rows = cur.fetchall()
     conn.close()
     return [r["genre"] for r in rows]
+
+
+# ── Inline Comments (Wattpad-style) ────────────────────────────────────────────
+
+@app.get("/books/{book_id}/chapters/{chapter_number}/comment-counts")
+async def get_chapter_comment_counts(book_id: int, chapter_number: int) -> dict:
+    """Get comment count per paragraph for a chapter (optimized - only returns paragraphs with comments)."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            # Verify chapter exists
+            cur.execute(
+                "SELECT id FROM chapters WHERE book_id = %s AND chapter_number = %s",
+                (book_id, chapter_number),
+            )
+            ch = cur.fetchone()
+            if not ch:
+                raise HTTPException(status_code=404, detail="Chapter not found")
+            chapter_id = ch["id"]
+
+        from app.database import get_comment_counts
+        counts = get_comment_counts(chapter_id)
+        return counts
+    finally:
+        conn.close()
+
+
+@app.get("/books/{book_id}/chapters/{chapter_number}/paragraphs/{paragraph_id}/comments")
+async def get_paragraph_comments(
+    book_id: int,
+    chapter_number: int,
+    paragraph_id: str,
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=10, ge=1, le=50),
+) -> dict:
+    """Get paginated comments for a specific paragraph."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            # Verify chapter exists
+            cur.execute(
+                "SELECT id FROM chapters WHERE book_id = %s AND chapter_number = %s",
+                (book_id, chapter_number),
+            )
+            ch = cur.fetchone()
+            if not ch:
+                raise HTTPException(status_code=404, detail="Chapter not found")
+            chapter_id = ch["id"]
+
+        from app.database import get_paragraph_comments
+        result = get_paragraph_comments(chapter_id, paragraph_id, page, limit)
+        return result
+    finally:
+        conn.close()
+
+
+class InlineCommentRequest(BaseModel):
+    chapter_id: int
+    paragraph_id: str = Field(..., min_length=1, max_length=100)
+    content: str = Field(..., min_length=1, max_length=1000)
+    parent_id: int | None = None
+
+
+@app.post("/comments/inline")
+async def post_inline_comment(
+    request: Request,
+    body: InlineCommentRequest,
+    creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
+) -> dict:
+    """Post a new inline comment. Requires authentication."""
+    if not creds:
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    try:
+        payload = jwt.decode(creds.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        user_id = payload.get("uid")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Token không hợp lệ")
+
+    try:
+        from app.database import post_inline_comment
+        comment = post_inline_comment(body.chapter_id, body.paragraph_id, user_id, body.content, body.parent_id)
+        return comment
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.delete("/comments/inline/{comment_id}")
+async def delete_inline_comment(
+    comment_id: int,
+    creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
+) -> dict:
+    """Delete an inline comment (only author can delete). Requires authentication."""
+    if not creds:
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    try:
+        payload = jwt.decode(creds.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        user_id = payload.get("uid")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Token không hợp lệ")
+
+    from app.database import delete_inline_comment
+    deleted = delete_inline_comment(comment_id, user_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Comment not found or permission denied")
+
+    return {"status": "deleted", "comment_id": comment_id}
 
 
 # ── Notifications ──────────────────────────────────────────────────────────────
