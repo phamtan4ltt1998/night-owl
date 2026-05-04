@@ -1,31 +1,35 @@
 {
   "_comment": "Config file cho scheduled scrape job. Chỉnh schedule và sources rồi restart server.",
   "schedule": {
-    "type": "interval",
-    "_comment_type": "interval = chạy mỗi N giờ/phút | cron = theo lịch cố định",
-    "hours": 2,
+    "type": "continuous",
+    "_comment_type": "continuous = chạy liên tục đến khi tắt service | interval = mỗi N giờ/phút | cron = lịch cố định",
+    "_comment_continuous": "Continuous mode: scrape xong tất cả sources thì nghỉ idle_seconds rồi vào vòng tiếp. Dừng khi service shutdown.",
+    "idle_seconds": 30,
+
     "_comment_interval": "Dùng khi type=interval. Có thể dùng: minutes, hours, days.",
+    "hours": 2,
+
     "_comment_cron": "Dùng khi type=cron. Ví dụ: hour=2, minute=0 = 2h sáng mỗi ngày.",
 
-    "_comment_dates": "start_date/end_date: APScheduler nhận trực tiếp — job chỉ được lên lịch trong khoảng này.",
+    "_comment_dates": "start_date/end_date: APScheduler nhận trực tiếp — chỉ áp dụng cho interval/cron.",
     "_comment_dates2": "Format: 'YYYY-MM-DD HH:MM:SS'. Bỏ trống = không giới hạn.",
     "start_date": "",
     "end_date": "",
 
-    "_comment_window": "active_window: cửa sổ GIỜ hàng ngày — job bị skip nếu ngoài khung giờ này.",
+    "_comment_window": "active_window: cửa sổ GIỜ hàng ngày — vòng scrape bị skip nếu ngoài khung giờ này (áp dụng cho mọi mode).",
     "_comment_window2": "Format HH:MM. Hỗ trợ qua đêm, vd start=22:00 end=06:00. Bỏ trống = chạy cả ngày.",
     "active_window": {
       "start": "",
       "end": ""
     }
   },
-  "_comment_sources": "target_count <= 0 = unlimited (crawl toàn bộ truyện mới chưa có trong DB). concurrency tối đa 4.",
+  "_comment_sources": "target_count <= 0 = unlimited (crawl toàn bộ truyện mới chưa có trong DB). concurrency tối đa 4. free_chapter_threshold=0 = tất cả chương miễn phí.",
   "sources": [
     {
       "_genre": "Tiên hiệp",
       "url": "https://truyencom.com/truyen-tien-hiep/full/",
       "target_count": 0,
-      "free_chapter_threshold": 20,
+      "free_chapter_threshold": 0,
       "concurrency": 2,
       "enabled": true
     },
@@ -33,7 +37,7 @@
       "_genre": "Huyền huyễn",
       "url": "https://truyencom.com/truyen-huyen-huyen/full/",
       "target_count": 0,
-      "free_chapter_threshold": 20,
+      "free_chapter_threshold": 0,
       "concurrency": 2,
       "enabled": true
     },
@@ -41,7 +45,7 @@
       "_genre": "Đô thị",
       "url": "https://truyencom.com/truyen-do-thi/full/",
       "target_count": 0,
-      "free_chapter_threshold": 20,
+      "free_chapter_threshold": 0,
       "concurrency": 2,
       "enabled": true
     },
@@ -49,7 +53,7 @@
       "_genre": "Lịch sử",
       "url": "https://truyencom.com/truyen-lich-su/full/",
       "target_count": 0,
-      "free_chapter_threshold": 20,
+      "free_chapter_threshold": 0,
       "concurrency": 2,
       "enabled": true
     },
@@ -57,7 +61,7 @@
       "_genre": "Khoa huyễn",
       "url": "https://truyencom.com/truyen-khoa-huyen/full/",
       "target_count": 0,
-      "free_chapter_threshold": 20,
+      "free_chapter_threshold": 0,
       "concurrency": 2,
       "enabled": true
     },
@@ -65,7 +69,7 @@
       "_genre": "Võ hiệp",
       "url": "https://truyencom.com/truyen-vo-hiep/full/",
       "target_count": 0,
-      "free_chapter_threshold": 20,
+      "free_chapter_threshold": 0,
       "concurrency": 2,
       "enabled": true
     },
@@ -73,7 +77,7 @@
       "_genre": "Ngôn tình",
       "url": "https://truyencom.com/truyen-ngon-tinh/full/",
       "target_count": 0,
-      "free_chapter_threshold": 20,
+      "free_chapter_threshold": 0,
       "concurrency": 2,
       "enabled": true
     },
@@ -81,7 +85,7 @@
       "_genre": "Cổ trang / Cổ đại",
       "url": "https://truyencom.com/truyen-co-dai/full/",
       "target_count": 0,
-      "free_chapter_threshold": 20,
+      "free_chapter_threshold": 0,
       "concurrency": 2,
       "enabled": true
     },
@@ -89,7 +93,7 @@
       "_genre": "Đam mỹ",
       "url": "https://truyencom.com/truyen-dam-my/full/",
       "target_count": 0,
-      "free_chapter_threshold": 20,
+      "free_chapter_threshold": 0,
       "concurrency": 2,
       "enabled": true
     },
@@ -97,7 +101,7 @@
       "_genre": "Trinh thám",
       "url": "https://truyencom.com/truyen-trinh-tham/full/",
       "target_count": 0,
-      "free_chapter_threshold": 20,
+      "free_chapter_threshold": 0,
       "concurrency": 2,
       "enabled": true
     },
@@ -105,7 +109,7 @@
       "_genre": "Kinh dị / Linh dị",
       "url": "https://truyencom.com/truyen-linh-di/full/",
       "target_count": 0,
-      "free_chapter_threshold": 20,
+      "free_chapter_threshold": 0,
       "concurrency": 2,
       "enabled": true
     },
@@ -113,7 +117,7 @@
       "_genre": "Xuyên Nhanh",
       "url": "https://truyencom.com/truyen-xuyen-nhanh/full/",
       "target_count": 0,
-      "free_chapter_threshold": 20,
+      "free_chapter_threshold": 0,
       "concurrency": 2,
       "enabled": true
     }
