@@ -1,0 +1,66 @@
+{
+  "_comment": "SAMPLE config cho scheduled scrape job. Copy → scrape_sources.json và chỉnh.",
+  "_comment_modes": "3 mode schedule: continuous | interval | cron. Đổi 'type' để switch.",
+
+  "schedule": {
+    "type": "continuous",
+
+    "_mode_continuous": "=== CONTINUOUS MODE ===",
+    "_continuous_desc": "Chạy liên tục đến khi tắt service. Sau mỗi vòng (scrape xong tất cả sources) nghỉ idle_seconds rồi lặp.",
+    "idle_seconds": 30,
+
+    "_mode_interval": "=== INTERVAL MODE ===",
+    "_interval_desc": "Chạy lặp mỗi N giờ/phút/giây. Dùng key: seconds | minutes | hours | days | weeks.",
+    "_interval_example": "Bỏ comment dòng dưới và set type=interval để dùng:",
+    "hours": 2,
+
+    "_mode_cron": "=== CRON MODE ===",
+    "_cron_desc": "Chạy theo lịch cố định. Dùng key: hour, minute, day_of_week, ...",
+    "_cron_example": "Set type=cron và thêm 'hour': 2, 'minute': 0 → chạy 2h sáng mỗi ngày.",
+
+    "_dates_desc": "start_date / end_date: chỉ áp dụng interval/cron. Format 'YYYY-MM-DD HH:MM:SS'. Bỏ trống = không giới hạn.",
+    "start_date": "",
+    "end_date": "",
+
+    "_window_desc": "active_window: cửa sổ GIỜ hàng ngày — vòng scrape bị skip nếu ngoài khung. Áp dụng MỌI mode (kể cả continuous).",
+    "_window_example": "start='22:00' end='06:00' = qua đêm. Bỏ trống = chạy cả ngày.",
+    "active_window": {
+      "start": "",
+      "end": ""
+    }
+  },
+
+  "_comment_sources": "Mỗi source = 1 trang danh mục. Field giải thích:",
+  "_field_url": "url: trang listing truyện (truyencom.com/...)",
+  "_field_target_count": "target_count: số truyện MỚI cần crawl mỗi vòng. <=0 = unlimited (lấy toàn bộ truyện chưa có trong DB)",
+  "_field_free_threshold": "free_chapter_threshold: chương 1..N miễn phí. 0 = TẤT CẢ chương free. >0 = chỉ N chương đầu free, còn lại trả Linh Thạch.",
+  "_field_concurrency": "concurrency: số truyện crawl song song (max 4 tránh bị chặn bot)",
+  "_field_enabled": "enabled: false = skip source này",
+
+  "sources": [
+    {
+      "_genre": "Tiên hiệp (mẫu — unlimited, all free)",
+      "url": "https://truyencom.com/truyen-tien-hiep/full/",
+      "target_count": 0,
+      "free_chapter_threshold": 0,
+      "concurrency": 2,
+      "enabled": true
+    },
+    {
+      "_genre": "Ngôn tình (mẫu — chỉ 5 truyện mới mỗi vòng, 20 chương đầu free)",
+      "url": "https://truyencom.com/truyen-ngon-tinh/full/",
+      "target_count": 5,
+      "free_chapter_threshold": 20,
+      "concurrency": 2,
+      "enabled": true
+    },
+    {
+      "_genre": "Đam mỹ (mẫu — disabled)",
+      "url": "https://truyencom.com/truyen-dam-my/full/",
+      "target_count": 0,
+      "free_chapter_threshold": 0,
+      "concurrency": 1,
+      "enabled": false
+    }
+  ]
+}

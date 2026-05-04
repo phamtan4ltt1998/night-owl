@@ -355,10 +355,16 @@ def update_book(book_id: int, title: str | None, author: str | None, free_chapte
 
             # Cập nhật ngưỡng chương tính phí nếu có
             if free_chapter_threshold is not None:
-                cur.execute(
-                    "UPDATE chapters SET free = (chapter_number <= %s) WHERE book_id = %s",
-                    (free_chapter_threshold, book_id),
-                )
+                if free_chapter_threshold == 0:
+                    cur.execute(
+                        "UPDATE chapters SET free = 1 WHERE book_id = %s",
+                        (book_id,),
+                    )
+                else:
+                    cur.execute(
+                        "UPDATE chapters SET free = (chapter_number <= %s) WHERE book_id = %s",
+                        (free_chapter_threshold, book_id),
+                    )
 
             conn.commit()
             cur.execute("SELECT * FROM books WHERE id = %s", (book_id,))
@@ -602,7 +608,7 @@ def upsert_story_from_dir(
                 if ch_num in existing_numbers:
                     continue
                 file_path = os.path.join(story_dir, fname)
-                free = 1 if ch_num <= free_chapter_threshold else 0
+                free = 1 if free_chapter_threshold == 0 or ch_num <= free_chapter_threshold else 0
                 # Đọc tên chương thật từ dòng đầu file (# Title)
                 ch_title = f"Chương {ch_num}"
                 try:

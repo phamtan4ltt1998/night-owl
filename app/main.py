@@ -31,7 +31,13 @@ from app.config import (
     SESSION_TOKEN_ENABLED, SESSION_TOKEN_TTL,
 )
 from app.logging_setup import setup_logging
-from app.scrape_job import get_schedule_kwargs, load_config, run_scheduled_scrape
+from app.scrape_job import (
+    get_schedule_kwargs,
+    get_schedule_mode,
+    load_config,
+    run_continuous_scrape,
+    run_scheduled_scrape,
+)
 
 setup_logging()
 from app.middleware.bot_guard import BANNED_IPS, _is_private, bot_guard_middleware  # noqa: E402
@@ -156,14 +162,26 @@ async def _start_scheduler() -> None:
     if not enabled_sources:
         logger.warning("[scheduler] Không có source nào trong config — bỏ qua đăng ký scheduled_scrape job.")
     else:
-        schedule_kwargs = get_schedule_kwargs(scrape_config)
-        _scheduler.add_job(
-            run_scheduled_scrape,
-            id="scheduled_scrape",
-            replace_existing=True,
-            **schedule_kwargs,
-        )
-        logger.info("[scheduler] Scheduled scrape job registered — sources=%d %s", len(enabled_sources), schedule_kwargs)
+        mode = get_schedule_mode(scrape_config)
+        if mode == "continuous":
+            idle_seconds = float(scrape_config.get("schedule", {}).get("idle_seconds", 30))
+            app.state.scrape_stop_event = asyncio.Event()
+            app.state.scrape_task = asyncio.create_task(
+                run_continuous_scrape(app.state.scrape_stop_event, idle_seconds=idle_seconds)
+            )
+            logger.info(
+                "[scheduler] Continuous scrape task started — sources=%d idle=%ss",
+                len(enabled_sources), idle_seconds,
+            )
+        else:
+            schedule_kwargs = get_schedule_kwargs(scrape_config)
+            _scheduler.add_job(
+                run_scheduled_scrape,
+                id="scheduled_scrape",
+                replace_existing=True,
+                **schedule_kwargs,
+            )
+            logger.info("[scheduler] Scheduled scrape job registered — sources=%d %s", len(enabled_sources), schedule_kwargs)
 
     _scheduler.start()
     logger.info("[scheduler] Crawl retry job started — interval=%dm max_attempts=%d",
@@ -172,6 +190,15 @@ async def _start_scheduler() -> None:
 
 @app.on_event("shutdown")
 async def _stop_scheduler() -> None:
+    stop_event = getattr(app.state, "scrape_stop_event", None)
+    task = getattr(app.state, "scrape_task", None)
+    if stop_event is not None:
+        stop_event.set()
+    if task is not None:
+        try:
+            await asyncio.wait_for(task, timeout=10)
+        except (asyncio.TimeoutError, asyncio.CancelledError):
+            task.cancel()
     _scheduler.shutdown(wait=False)
 tts_service = StoryTTSService(story_content_root="story-content", output_root="outputs/audio")
 
@@ -241,7 +268,7 @@ class CrawlRequest(BaseModel):
     story_url: str = DEFAULT_STORY_URL
     story_limit: int | None = Field(default=None, ge=1)
     start_story_from: int = Field(default=1, ge=1)
-    free_chapter_threshold: int = Field(default=20, ge=0, description="Chương từ 1 đến giá trị này sẽ miễn phí. Chương sau sẽ trả Linh Thạch.")
+    free_chapter_threshold: int = Field(default=20, ge=0, description="Chương từ 1 đến giá trị này sẽ miễn phí. Chương sau sẽ trả Linh Thạch. 0 = tất cả miễn phí.")
 
 
 class StoryTTSRequest(BaseModel):
@@ -356,7 +383,7 @@ async def crawl_story(request: CrawlRequest) -> dict:
 class CategoryCrawlRequest(BaseModel):
     listing_url: str = Field(..., description="URL danh mục, vd: https://truyencom.com/truyen-ngon-tinh/full/")
     target_count: int = Field(default=5, ge=1, le=100, description="Số truyện MỚI cần crawl (chưa có trong DB)")
-    free_chapter_threshold: int = Field(default=20, ge=0)
+    free_chapter_threshold: int = Field(default=20, ge=0, description="Chương từ 1 đến giá trị này miễn phí. 0 = tất cả miễn phí.")
     concurrency: int = Field(default=2, ge=1, le=4, description="Số truyện crawl song song (tối đa 4 tránh bot)")
 
 
@@ -884,7 +911,7 @@ async def get_book(book_id: int) -> dict:
 class UpdateBookRequest(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=500, description="Tên truyện mới")
     author: str | None = Field(default=None, min_length=1, max_length=255, description="Tên tác giả mới")
-    free_chapter_threshold: int | None = Field(default=None, ge=0, description="Chương từ 1 đến giá trị này miễn phí. 0 = tất cả tính phí.")
+    free_chapter_threshold: int | None = Field(default=None, ge=0, description="Chương từ 1 đến giá trị này miễn phí. 0 = tất cả miễn phí.")
 
 
 @app.patch("/books/{book_id}")

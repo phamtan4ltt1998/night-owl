@@ -38,19 +38,25 @@ def load_config() -> dict:
         return {"sources": []}
 
 
+def get_schedule_mode(config: dict) -> str:
+    """Trả về schedule type: 'continuous' | 'interval' | 'cron'."""
+    return config.get("schedule", {}).get("type", "interval")
+
+
 def get_schedule_kwargs(config: dict) -> dict:
     """Chuyển config['schedule'] → kwargs cho APScheduler add_job().
 
     Các key được xử lý đặc biệt (không truyền thẳng vào APScheduler):
-      - type         : xác định trigger (interval | cron)
+      - type         : xác định trigger (interval | cron | continuous)
       - active_window: kiểm tra runtime, không phải APScheduler param
+      - idle_seconds : chỉ dùng cho continuous mode
     Các key còn lại (hours, minutes, start_date, end_date, hour, minute, …)
     được forward thẳng vào APScheduler sau khi lọc chuỗi rỗng.
     """
     sched = config.get("schedule", {})
     trigger_type = sched.get("type", "interval")
 
-    _skip = {"type", "active_window"}
+    _skip = {"type", "active_window", "idle_seconds"}
     raw_fields = {
         k: v
         for k, v in sched.items()
@@ -67,6 +73,26 @@ def get_schedule_kwargs(config: dict) -> dict:
     if not any(k in interval_fields for k in ("seconds", "minutes", "hours", "days", "weeks")):
         interval_fields["hours"] = 2
     return {"trigger": "interval", **interval_fields}
+
+
+async def run_continuous_scrape(stop_event: asyncio.Event, idle_seconds: float = 30.0) -> None:
+    """Loop run_scheduled_scrape liên tục đến khi stop_event được set.
+
+    Giữa mỗi vòng nghỉ idle_seconds (mặc định 30s) tránh hammer site.
+    """
+    logger.info("[scrape_job] Continuous mode bật — idle=%ss giữa mỗi vòng.", idle_seconds)
+    while not stop_event.is_set():
+        try:
+            await run_scheduled_scrape()
+        except Exception as exc:  # noqa: BLE001
+            logger.error("[scrape_job] Vòng scrape lỗi: %s", exc)
+        if stop_event.is_set():
+            break
+        try:
+            await asyncio.wait_for(stop_event.wait(), timeout=idle_seconds)
+        except asyncio.TimeoutError:
+            pass
+    logger.info("[scrape_job] Continuous mode dừng.")
 
 
 def _within_active_window(start_str: str, end_str: str) -> bool:
