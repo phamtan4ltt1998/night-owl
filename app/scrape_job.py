@@ -81,18 +81,25 @@ async def run_continuous_scrape(stop_event: asyncio.Event, idle_seconds: float =
     Giữa mỗi vòng nghỉ idle_seconds (mặc định 30s) tránh hammer site.
     """
     logger.info("[scrape_job] Continuous mode bật — idle=%ss giữa mỗi vòng.", idle_seconds)
+    iteration = 0
     while not stop_event.is_set():
+        iteration += 1
+        loop_start = datetime.now()
+        logger.info("[scrape_job] === Vòng #%d bắt đầu lúc %s ===", iteration, loop_start.strftime("%H:%M:%S"))
         try:
             await run_scheduled_scrape()
         except Exception as exc:  # noqa: BLE001
-            logger.error("[scrape_job] Vòng scrape lỗi: %s", exc)
+            logger.error("[scrape_job] Vòng #%d lỗi: %s", iteration, exc)
+        elapsed = (datetime.now() - loop_start).total_seconds()
+        logger.info("[scrape_job] === Vòng #%d xong — %.1fs ===", iteration, elapsed)
         if stop_event.is_set():
             break
+        logger.info("[scrape_job] Nghỉ %ss trước vòng kế.", idle_seconds)
         try:
             await asyncio.wait_for(stop_event.wait(), timeout=idle_seconds)
         except asyncio.TimeoutError:
             pass
-    logger.info("[scrape_job] Continuous mode dừng.")
+    logger.info("[scrape_job] Continuous mode dừng sau %d vòng.", iteration)
 
 
 def _within_active_window(start_str: str, end_str: str) -> bool:
@@ -147,14 +154,20 @@ async def run_scheduled_scrape() -> None:
 
     logger.info("[scrape_job] Bắt đầu — %d source(s)", len(sources))
     scraper = StoryScraper(output_root="story")
+    total = len(sources)
+    overall_start = datetime.now()
 
-    for source in sources:
+    for idx, source in enumerate(sources, start=1):
         url: str = source["url"]
         target_count: int = source.get("target_count", 5)
         free_threshold: int = source.get("free_chapter_threshold", 20)
         concurrency: int = min(source.get("concurrency", 2), 4)
 
-        logger.info("[scrape_job] Source: %s target=%d", url, target_count)
+        src_start = datetime.now()
+        logger.info(
+            "[scrape_job] [%d/%d] Source: %s target=%d concurrency=%d free_threshold=%d",
+            idx, total, url, target_count, concurrency, free_threshold,
+        )
         try:
             await _scrape_source(
                 scraper=scraper,
@@ -166,9 +179,13 @@ async def run_scheduled_scrape() -> None:
                 upsert_story_from_dir=upsert_story_from_dir,
             )
         except Exception as exc:
-            logger.error("[scrape_job] Lỗi source=%s: %s", url, exc)
+            logger.error("[scrape_job] [%d/%d] Lỗi source=%s: %s", idx, total, url, exc)
+        finally:
+            src_elapsed = (datetime.now() - src_start).total_seconds()
+            logger.info("[scrape_job] [%d/%d] Source xong — %.1fs", idx, total, src_elapsed)
 
-    logger.info("[scrape_job] Hoàn thành tất cả sources.")
+    overall_elapsed = (datetime.now() - overall_start).total_seconds()
+    logger.info("[scrape_job] Hoàn thành tất cả sources — tổng %.1fs.", overall_elapsed)
 
 
 async def _scrape_source(
@@ -217,11 +234,26 @@ async def _scrape_source(
             if stop_event.is_set():
                 return
             jitter = random.uniform(1.5, 4.0) + (position % concurrency) * 1.0
+            logger.info(
+                "[scrape_job] → start pos=%d/%d sleep=%.1fs url=%s",
+                position + 1, len(candidates), jitter, story_url,
+            )
             await asyncio.sleep(jitter)
+            t0 = datetime.now()
             try:
                 result = await scraper.scrape_story(story_url=story_url)
                 slug = result.get("story_slug")
+                status = result.get("status", "")
                 story_url_r = result.get("story_url", story_url)
+                elapsed = (datetime.now() - t0).total_seconds()
+
+                if status == "already_updated":
+                    logger.info(
+                        "[scrape_job] ⊝ skip slug=%s (already_updated) %.1fs",
+                        slug, elapsed,
+                    )
+                    return
+
                 if slug:
                     meta_kwargs = {
                         "story_name": result.get("story_name", ""),
@@ -243,13 +275,17 @@ async def _scrape_source(
                         new_chapters = result.get("new_chapter_count", 0)
                         target_disp = "∞" if unlimited else str(target_count)
                         logger.info(
-                            "[scrape_job] ✓ slug=%s new_chapters=%d (%d/%s)",
-                            slug, new_chapters, success_count, target_disp,
+                            "[scrape_job] ✓ slug=%s new_chapters=%d %.1fs (%d/%s)",
+                            slug, new_chapters, elapsed, success_count, target_disp,
                         )
                         if not unlimited and success_count >= target_count:
+                            logger.info("[scrape_job] Đạt target=%d, dừng source này.", target_count)
                             stop_event.set()
+                else:
+                    logger.warning("[scrape_job] ✗ no slug returned url=%s status=%s", story_url, status)
             except Exception as exc:
-                logger.warning("[scrape_job] Lỗi url=%s: %s", story_url, exc)
+                elapsed = (datetime.now() - t0).total_seconds()
+                logger.warning("[scrape_job] ✗ Lỗi url=%s %.1fs: %s", story_url, elapsed, exc)
 
     # Buffer: limited mode gửi target_count * 3, unlimited mode gửi tất cả
     candidates = new_urls if unlimited else new_urls[: target_count * 3]
