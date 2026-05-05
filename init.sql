@@ -159,6 +159,23 @@ CREATE TABLE IF NOT EXISTS inline_comments (
     CONSTRAINT fk_ic_parent  FOREIGN KEY (parent_id) REFERENCES inline_comments(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ── Push Notifications (incoming from mobile apps) ────────────────────────────
+
+CREATE TABLE IF NOT EXISTS push_notifications (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    external_id   INT          NOT NULL,
+    `key`         VARCHAR(255) NOT NULL,
+    source_app    VARCHAR(255) NOT NULL,
+    title         VARCHAR(500) NOT NULL,
+    body          TEXT         NOT NULL,
+    posted_at     BIGINT       NOT NULL,
+    posted_at_iso VARCHAR(50)  NOT NULL,
+    received_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_source_app  (source_app),
+    INDEX idx_posted_at   (posted_at DESC),
+    UNIQUE KEY uq_key     (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ── Seed Notifications ─────────────────────────────────────────────────────────
 
 INSERT IGNORE INTO notifications (type, icon, title, body, time, unread) VALUES

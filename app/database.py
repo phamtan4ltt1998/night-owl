@@ -115,6 +115,24 @@ def init_db() -> None:
     conn = get_conn()
     try:
         with conn.cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS push_notifications (
+                    id            INT AUTO_INCREMENT PRIMARY KEY,
+                    external_id   INT          NOT NULL,
+                    `key`         VARCHAR(255) NOT NULL,
+                    source_app    VARCHAR(255) NOT NULL,
+                    title         VARCHAR(500) NOT NULL,
+                    body          TEXT         NOT NULL,
+                    posted_at     BIGINT       NOT NULL,
+                    posted_at_iso VARCHAR(50)  NOT NULL,
+                    received_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_source_app (source_app),
+                    INDEX idx_posted_at  (posted_at DESC),
+                    UNIQUE KEY uq_key    (`key`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            """)
+            conn.commit()
+
             changed = False
             # ── books: single-column ───────────────────────────────────────────
             changed |= _ensure_ft_index(cur, "ft_books_search", "title, author, description, tags")
@@ -857,5 +875,32 @@ def delete_inline_comment(comment_id: int, user_id: int) -> bool:
             cur.execute("DELETE FROM inline_comments WHERE id = %s", (comment_id,))
             conn.commit()
             return True
+    finally:
+        conn.close()
+
+
+def save_push_notification(
+    external_id: int,
+    key: str,
+    source_app: str,
+    title: str,
+    body: str,
+    posted_at: int,
+    posted_at_iso: str,
+) -> int:
+    """Insert push notification. Returns new row id. Raises on duplicate key."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO push_notifications
+                    (external_id, `key`, source_app, title, body, posted_at, posted_at_iso)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """,
+                (external_id, key, source_app, title, body, posted_at, posted_at_iso),
+            )
+            conn.commit()
+            return cur.lastrowid
     finally:
         conn.close()

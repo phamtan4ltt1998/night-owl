@@ -57,6 +57,7 @@ from app.database import (  # noqa: E402
     get_existing_slugs,
     increment_chapter_view,
     get_books_paged,
+    save_push_notification,
 )
 
 logger = logging.getLogger("nightowl.crawl")
@@ -702,17 +703,30 @@ GOOGLE_CLIENT_ID = "580494851023-u34i18n43a2cho99kp20ncjnl47u2q1d.apps.googleuse
 
 
 class GoogleLoginRequest(BaseModel):
-    email: str
-    name: str | None = None
-    picture: str | None = None
-    sub: str | None = None
+    id_token: str
 
 
 @app.post("/auth/google")
 async def google_login(req: GoogleLoginRequest) -> dict:
-    """Upsert user from Google userinfo, return JWT + profile."""
-    user = get_or_create_user(req.email, req.name or "", req.picture or "")
-    token = _create_token(req.email, user["id"])
+    """Verify Google id_token, upsert user, return JWT + profile."""
+    from google.oauth2 import id_token as google_id_token
+    from google.auth.transport import requests as google_requests
+
+    try:
+        idinfo = google_id_token.verify_oauth2_token(
+            req.id_token,
+            google_requests.Request(),
+            GOOGLE_CLIENT_ID,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=401, detail=f"Invalid Google token: {exc}")
+
+    email = idinfo["email"]
+    name = idinfo.get("name", "")
+    picture = idinfo.get("picture", "")
+
+    user = get_or_create_user(email, name, picture)
+    token = _create_token(email, user["id"])
     return {
         "access_token": token,
         "token_type": "bearer",
@@ -727,25 +741,33 @@ async def google_login(req: GoogleLoginRequest) -> dict:
 
 
 class FacebookLoginRequest(BaseModel):
-    email: str | None = None
-    name: str | None = None
-    username: str | None = None
-    picture: str | None = None
-    facebook_id: str | None = None
+    access_token: str
 
 
 @app.post("/auth/facebook")
 async def facebook_login(req: FacebookLoginRequest) -> dict:
-    """Upsert user from Facebook userinfo, return JWT + profile."""
-    email = req.email
-    if not email:
-        if req.username:
-            email = f"fb_{req.username}@nightowl.local"
-        elif req.facebook_id:
-            email = f"fb_{req.facebook_id}@nightowl.local"
-        else:
-            raise HTTPException(status_code=400, detail="Email, username hoặc facebook_id là bắt buộc")
-    user = get_or_create_user(email, req.name or "", req.picture or "")
+    """Verify Facebook access_token via Graph API, upsert user, return JWT + profile."""
+    import requests as http_requests
+
+    resp = await run_in_threadpool(
+        http_requests.get,
+        "https://graph.facebook.com/me",
+        params={"fields": "id,name,email,picture.type(large)", "access_token": req.access_token},
+        timeout=10,
+    )
+    if resp.status_code != 200:
+        raise HTTPException(status_code=401, detail="Invalid Facebook access token")
+
+    fb_data = resp.json()
+    if "error" in fb_data:
+        raise HTTPException(status_code=401, detail=f"Facebook: {fb_data['error'].get('message')}")
+
+    fb_id = fb_data.get("id")
+    name = fb_data.get("name", "")
+    email = fb_data.get("email") or f"fb_{fb_id}@nightowl.local"
+    picture = fb_data.get("picture", {}).get("data", {}).get("url", "")
+
+    user = get_or_create_user(email, name, picture)
     token = _create_token(email, user["id"])
     return {
         "access_token": token,
@@ -1307,6 +1329,39 @@ async def mark_all_read() -> dict:
     conn.commit()
     conn.close()
     return {"status": "ok"}
+
+
+# ── Push Notifications (incoming from mobile) ──────────────────────────────────
+
+class PushNotificationRequest(BaseModel):
+    id: int
+    key: str
+    sourceApp: str
+    title: str
+    body: str
+    postedAt: int
+    postedAtIso: str
+
+
+@app.post("/push-notifications", status_code=201)
+async def receive_push_notification(payload: PushNotificationRequest) -> dict:
+    key_with_ms = f"{payload.key}|{payload.postedAt}"
+    try:
+        row_id = await run_in_threadpool(
+            save_push_notification,
+            payload.id,
+            key_with_ms,
+            payload.sourceApp,
+            payload.title,
+            payload.body,
+            payload.postedAt,
+            payload.postedAtIso,
+        )
+    except Exception as e:
+        if "Duplicate entry" in str(e):
+            raise HTTPException(status_code=409, detail="Notification key already exists")
+        raise HTTPException(status_code=500, detail=str(e))
+    return {"status": "saved", "id": row_id}
 
 
 # ── User / Linh Thạch ──────────────────────────────────────────────────────────
