@@ -110,7 +110,8 @@ def _ensure_btree_index(cur, index_name: str, columns: str, table: str = "books"
 
 
 def init_db() -> None:
-    """Schema managed by init.sql. Ensure FTS and btree indexes exist for running DBs."""
+    """Run init.sql idempotently, then ensure all indexes exist."""
+    _run_init_sql()
     conn = get_conn()
     try:
         with conn.cursor() as cur:
@@ -122,13 +123,44 @@ def init_db() -> None:
             changed |= _ensure_btree_index(cur, "idx_read_count", "read_count")
             changed |= _ensure_btree_index(cur, "idx_rating", "rating")
             # ── books: composite (genre + sort_by) for get_books_paged ─────────
-            # Covers WHERE genre=? ORDER BY {col} — eliminates filesort
             changed |= _ensure_btree_index(cur, "idx_genre_read_count",   "genre, read_count")
             changed |= _ensure_btree_index(cur, "idx_genre_rating",       "genre, rating")
             changed |= _ensure_btree_index(cur, "idx_genre_chapter_count","genre, chapter_count")
             changed |= _ensure_btree_index(cur, "idx_genre_title",        "genre, title")
             if changed:
                 conn.commit()
+    finally:
+        conn.close()
+
+
+def _run_init_sql() -> None:
+    """Execute init.sql against the live DB. All statements use IF NOT EXISTS / INSERT IGNORE — safe to re-run."""
+    sql_path = os.path.join(os.path.dirname(__file__), "..", "init.sql")
+    if not os.path.isfile(sql_path):
+        return
+    with open(sql_path, encoding="utf-8") as f:
+        sql = f.read()
+
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            # Split on ; — skip empty and USE/SET statements that are Docker-only
+            for stmt in sql.split(";"):
+                stmt = stmt.strip()
+                if not stmt:
+                    continue
+                # Skip USE / SET statements — already connected to correct DB
+                upper = stmt.upper().lstrip()
+                if upper.startswith("USE ") or upper.startswith("SET "):
+                    continue
+                # Skip CREATE DATABASE — server already selected DB via env
+                if upper.startswith("CREATE DATABASE"):
+                    continue
+                try:
+                    cur.execute(stmt)
+                except Exception:
+                    pass  # IF NOT EXISTS guards most; swallow duplicates silently
+        conn.commit()
     finally:
         conn.close()
 
