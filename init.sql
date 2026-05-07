@@ -29,11 +29,15 @@ CREATE TABLE IF NOT EXISTS books (
     cover_image  VARCHAR(1000) NOT NULL DEFAULT '',
     status       VARCHAR(50)   NOT NULL DEFAULT '',
     read_count   BIGINT        NOT NULL DEFAULT 0,
-    INDEX idx_genre        (genre),
-    INDEX idx_read_count   (read_count DESC),
-    INDEX idx_rating       (rating DESC),
+    INDEX idx_genre              (genre),
+    INDEX idx_read_count         (read_count DESC),
+    INDEX idx_rating             (rating DESC),
+    INDEX idx_genre_read_count   (genre, read_count),
+    INDEX idx_genre_rating       (genre, rating),
+    INDEX idx_genre_chapter_count(genre, chapter_count),
+    INDEX idx_genre_title        (genre, title),
     FULLTEXT KEY ft_books_search (title, author, description, tags),
-    FULLTEXT KEY ft_books_title (title)
+    FULLTEXT KEY ft_books_title  (title)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── Failed Crawl Requests ──────────────────────────────────────────────────────
