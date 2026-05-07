@@ -1,23 +1,48 @@
 import datetime
 import os
 import re
+from typing import Callable
 
 import pymysql
 import pymysql.cursors
+from dbutils.pooled_db import PooledDB
 
-# ── Connection ─────────────────────────────────────────────────────────────────
+# ── Connection pool ────────────────────────────────────────────────────────────
+
+_pool: PooledDB | None = None
+
+def _get_pool() -> PooledDB:
+    global _pool
+    if _pool is None:
+        _pool = PooledDB(
+            creator=pymysql,
+            mincached=2,
+            maxcached=10,
+            maxconnections=20,
+            blocking=True,
+            host=os.getenv("DB_HOST", "localhost"),
+            port=int(os.getenv("DB_PORT", 3306)),
+            user=os.getenv("DB_USER", "nightowl"),
+            password=os.getenv("DB_PASSWORD", "nightowl"),
+            database=os.getenv("DB_NAME", "nightowl"),
+            charset="utf8mb4",
+            cursorclass=pymysql.cursors.DictCursor,
+            autocommit=False,
+        )
+    return _pool
+
 
 def get_conn() -> pymysql.connections.Connection:
-    return pymysql.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        port=int(os.getenv("DB_PORT", 3306)),
-        user=os.getenv("DB_USER", "nightowl"),
-        password=os.getenv("DB_PASSWORD", "nightowl"),
-        database=os.getenv("DB_NAME", "nightowl"),
-        charset="utf8mb4",
-        cursorclass=pymysql.cursors.DictCursor,
-        autocommit=False,
-    )
+    return _get_pool().connection()
+
+
+# ── Books cache invalidation hook ─────────────────────────────────────────────
+# main.py registers this after TTLCache is created.
+_invalidate_books_cache: Callable[[], None] | None = None
+
+def register_books_cache_invalidator(fn: Callable[[], None]) -> None:
+    global _invalidate_books_cache
+    _invalidate_books_cache = fn
 
 
 # Display metadata keyed by folder slug
@@ -407,7 +432,9 @@ def get_books_paged(
             total = cur.fetchone()["cnt"]
 
             cur.execute(
-                f"SELECT * FROM books {where} "
+                f"SELECT id, slug, title, author, genre, chapter_count, reads, rating, "
+                f"c1, c2, emoji, cover_image, status, read_count, updated, tags, words "
+                f"FROM books {where} "
                 f"ORDER BY {sort_by} {sort_order} "
                 f"LIMIT %s OFFSET %s",
                 params_filter + [page_size, offset],
@@ -630,6 +657,8 @@ def upsert_story_from_dir(
                 )
 
         conn.commit()
+        if _invalidate_books_cache is not None:
+            _invalidate_books_cache()
         return {"book_id": book_id, "slug": slug, "new_chapters": len(new_rows), "total_chapters": chapter_count}
     finally:
         conn.close()

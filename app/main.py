@@ -12,8 +12,10 @@ from datetime import datetime, timedelta, timezone
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Request
+from cachetools import TTLCache
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import PlainTextResponse, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
@@ -45,6 +47,7 @@ from app.scraper import DEFAULT_STORY_URL, StoryScraper  # noqa: E402
 from app.tts_service import StoryTTSService  # noqa: E402
 from app.database import (  # noqa: E402
     init_db, get_conn, upsert_story_from_dir, update_book,
+    register_books_cache_invalidator,
     get_or_create_user, update_user_profile,
     add_linh_thach, get_linh_thach_history, claim_daily_reward,
     unlock_chapter, get_unlocked_chapter_numbers,
@@ -80,6 +83,7 @@ app = FastAPI(title="NightOwl API", version="2.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
+app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 app.add_middleware(
     CORSMiddleware,
@@ -89,6 +93,15 @@ app.add_middleware(
 )
 
 app.middleware("http")(bot_guard_middleware)
+
+# ── Books TTL cache ────────────────────────────────────────────────────────────
+_books_cache: TTLCache = TTLCache(maxsize=64, ttl=60)
+_books_cache_lock = asyncio.Lock()
+
+def _invalidate_books_cache() -> None:
+    _books_cache.clear()
+
+register_books_cache_invalidator(_invalidate_books_cache)
 
 init_db()
 
@@ -758,7 +771,7 @@ def _row_to_book(row) -> dict:
         "c1": row["c1"],
         "c2": row["c2"],
         "emoji": row["emoji"],
-        "desc": row["description"],
+        "desc": row.get("description") or "",
         "lastChapter": row["updated"],
         "tags": tags,
         "words": row["words"],
@@ -769,18 +782,46 @@ def _row_to_book(row) -> dict:
     }
 
 
+_LIST_BOOKS_COLS = (
+    "id, slug, title, author, genre, chapter_count, reads, rating, "
+    "c1, c2, emoji, cover_image, status, read_count, updated, tags, words"
+)
+
+
+def _fetch_books_sync(genre: str | None) -> list:
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            if genre:
+                cur.execute(f"SELECT {_LIST_BOOKS_COLS} FROM books WHERE genre = %s", (genre,))
+            else:
+                cur.execute(f"SELECT {_LIST_BOOKS_COLS} FROM books")
+            return cur.fetchall()
+    finally:
+        conn.close()
+
+
 @app.get("/books")
 @limiter.limit(RATE_LIMIT_BOOKS)
-async def list_books(request: Request, genre: str | None = None) -> list:
-    conn = get_conn()
-    with conn.cursor() as cur:
-        if genre:
-            cur.execute("SELECT * FROM books WHERE genre = %s", (genre,))
-        else:
-            cur.execute("SELECT * FROM books")
-        rows = cur.fetchall()
-    conn.close()
-    return [_row_to_book(r) for r in rows]
+async def list_books(request: Request, response: Response, genre: str | None = None) -> list:
+    cache_key = ("list", genre)
+    cached = _books_cache.get(cache_key)
+    if cached is not None:
+        response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+        response.headers["X-Cache"] = "HIT"
+        return cached
+    async with _books_cache_lock:
+        cached = _books_cache.get(cache_key)
+        if cached is not None:
+            response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+            response.headers["X-Cache"] = "HIT"
+            return cached
+        rows = await run_in_threadpool(_fetch_books_sync, genre)
+        result = [_row_to_book(r) for r in rows]
+        _books_cache[cache_key] = result
+    response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+    response.headers["X-Cache"] = "MISS"
+    return result
 
 
 def _build_ft_query(q: str) -> str:
@@ -878,21 +919,38 @@ async def search_books(
 @limiter.limit(RATE_LIMIT_BOOKS)
 async def list_books_paged(
     request: Request,
+    response: Response,
     page: int = Query(1, ge=1, description="Trang hiện tại (bắt đầu từ 1)"),
     page_size: int = Query(24, ge=1, le=100, description="Số truyện mỗi trang (tối đa 100)"),
     genre: str | None = Query(None, description="Lọc theo thể loại"),
     sort_by: str = Query("read_count", description="Sắp xếp theo: read_count | rating | id | title | chapter_count"),
     sort_order: str = Query("desc", description="Thứ tự: asc | desc"),
 ) -> dict:
-    result = await run_in_threadpool(
-        get_books_paged,
-        page=page,
-        page_size=page_size,
-        genre=genre if genre and genre != "Tất cả" else None,
-        sort_by=sort_by,
-        sort_order=sort_order,
-    )
-    result["data"] = [_row_to_book(r) for r in result["data"]]
+    effective_genre = genre if genre and genre != "Tất cả" else None
+    cache_key = ("paged", page, page_size, effective_genre, sort_by, sort_order)
+    cached = _books_cache.get(cache_key)
+    if cached is not None:
+        response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+        response.headers["X-Cache"] = "HIT"
+        return cached
+    async with _books_cache_lock:
+        cached = _books_cache.get(cache_key)
+        if cached is not None:
+            response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+            response.headers["X-Cache"] = "HIT"
+            return cached
+        result = await run_in_threadpool(
+            get_books_paged,
+            page=page,
+            page_size=page_size,
+            genre=effective_genre,
+            sort_by=sort_by,
+            sort_order=sort_order,
+        )
+        result["data"] = [_row_to_book(r) for r in result["data"]]
+        _books_cache[cache_key] = result
+    response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+    response.headers["X-Cache"] = "MISS"
     return result
 
 
