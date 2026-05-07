@@ -97,15 +97,14 @@ def _ensure_ft_index(cur, index_name: str, columns: str) -> bool:
     return False
 
 
-def _ensure_btree_index(cur, index_name: str, columns: str) -> bool:
+def _ensure_btree_index(cur, index_name: str, columns: str, table: str = "books") -> bool:
     cur.execute(
         "SELECT COUNT(*) AS cnt FROM information_schema.STATISTICS "
-        "WHERE table_schema = DATABASE() AND table_name = 'books' "
-        "AND index_name = %s",
-        (index_name,),
+        "WHERE table_schema = DATABASE() AND table_name = %s AND index_name = %s",
+        (table, index_name),
     )
     if cur.fetchone()["cnt"] == 0:
-        cur.execute(f"ALTER TABLE books ADD INDEX {index_name} ({columns})")
+        cur.execute(f"ALTER TABLE `{table}` ADD INDEX {index_name} ({columns})")
         return True
     return False
 
@@ -116,11 +115,18 @@ def init_db() -> None:
     try:
         with conn.cursor() as cur:
             changed = False
+            # ── books: single-column ───────────────────────────────────────────
             changed |= _ensure_ft_index(cur, "ft_books_search", "title, author, description, tags")
             changed |= _ensure_ft_index(cur, "ft_books_title", "title")
             changed |= _ensure_btree_index(cur, "idx_genre", "genre")
             changed |= _ensure_btree_index(cur, "idx_read_count", "read_count")
             changed |= _ensure_btree_index(cur, "idx_rating", "rating")
+            # ── books: composite (genre + sort_by) for get_books_paged ─────────
+            # Covers WHERE genre=? ORDER BY {col} — eliminates filesort
+            changed |= _ensure_btree_index(cur, "idx_genre_read_count",   "genre, read_count")
+            changed |= _ensure_btree_index(cur, "idx_genre_rating",       "genre, rating")
+            changed |= _ensure_btree_index(cur, "idx_genre_chapter_count","genre, chapter_count")
+            changed |= _ensure_btree_index(cur, "idx_genre_title",        "genre, title")
             if changed:
                 conn.commit()
     finally:
