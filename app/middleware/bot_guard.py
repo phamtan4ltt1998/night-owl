@@ -10,7 +10,13 @@ import ipaddress
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
-from app.config import BOT_UA_ENABLED, HEADER_CHECK_ENABLED, HONEYPOT_ENABLED
+from app.config import (
+    ALLOWED_CONTENT_ORIGINS,
+    BOT_UA_ENABLED,
+    FETCH_SITE_CHECK_ENABLED,
+    HEADER_CHECK_ENABLED,
+    HONEYPOT_ENABLED,
+)
 
 
 def _is_private(ip: str) -> bool:
@@ -72,6 +78,17 @@ async def bot_guard_middleware(request: Request, call_next):
             if not request.headers.get("accept-language"):
                 return JSONResponse({"detail": "Forbidden"}, status_code=403)
             if not request.headers.get("accept"):
+                return JSONResponse({"detail": "Forbidden"}, status_code=403)
+
+    # Layer 6: Sec-Fetch-Site / Origin check for chapter content
+    # Browsers always send Sec-Fetch-Site; scripts/bots typically omit or send cross-site.
+    # Allowed: same-origin, same-site, none (direct navigation / bookmarks).
+    # Blocked: cross-site with an Origin not in ALLOWED_CONTENT_ORIGINS.
+    if FETCH_SITE_CHECK_ENABLED and "/content" in request.url.path:
+        fetch_site = request.headers.get("sec-fetch-site", "")
+        origin = request.headers.get("origin", "")
+        if fetch_site == "cross-site":
+            if origin not in ALLOWED_CONTENT_ORIGINS:
                 return JSONResponse({"detail": "Forbidden"}, status_code=403)
 
     return await call_next(request)

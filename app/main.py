@@ -98,8 +98,13 @@ app.middleware("http")(bot_guard_middleware)
 _books_cache: TTLCache = TTLCache(maxsize=64, ttl=60)
 _books_cache_lock = asyncio.Lock()
 
+# ── Chapter content TTL cache ──────────────────────────────────────────────────
+_content_cache: TTLCache = TTLCache(maxsize=512, ttl=1800)  # 30 min — chapters rarely change
+_content_cache_lock = asyncio.Lock()
+
 def _invalidate_books_cache() -> None:
     _books_cache.clear()
+    _content_cache.clear()
 
 register_books_cache_invalidator(_invalidate_books_cache)
 
@@ -1100,14 +1105,30 @@ async def get_chapter_content(
         if chapter_number not in unlocked:
             raise HTTPException(status_code=403, detail="locked")
 
-    file_path = row["file_path"]
-    if not os.path.isfile(file_path):
-        raise HTTPException(status_code=404, detail=f"Content file not found: {file_path}")
-    with open(file_path, encoding="utf-8") as f:
-        content = f.read()
+    cache_key = (book_id, chapter_number)
+    cached_payload = _content_cache.get(cache_key)
+    if cached_payload is None:
+        async with _content_cache_lock:
+            cached_payload = _content_cache.get(cache_key)
+            if cached_payload is None:
+                file_path = row["file_path"]
 
-    content = _clean_chapter_content(content, row["title"])
-    clean_title = _clean_chapter_title(row["title"])
+                def _read_and_clean() -> dict:
+                    if not os.path.isfile(file_path):
+                        raise FileNotFoundError(file_path)
+                    with open(file_path, encoding="utf-8") as f:
+                        raw = f.read()
+                    return {
+                        "title": _clean_chapter_title(row["title"]),
+                        "content": _clean_chapter_content(raw, row["title"]),
+                        "free": bool(row["free"]),
+                    }
+
+                try:
+                    cached_payload = await run_in_threadpool(_read_and_clean)
+                except FileNotFoundError:
+                    raise HTTPException(status_code=404, detail=f"Content file not found: {file_path}")
+                _content_cache[cache_key] = cached_payload
 
     background_tasks.add_task(
         run_in_threadpool, lambda: increment_chapter_view(book_id, chapter_number)
@@ -1115,9 +1136,9 @@ async def get_chapter_content(
 
     return {
         "chapterNumber": chapter_number,
-        "title": clean_title,
-        "free": bool(row["free"]),
-        "content": content,
+        "title": cached_payload["title"],
+        "free": cached_payload["free"],
+        "content": cached_payload["content"],
     }
 
 
