@@ -783,7 +783,7 @@ def _row_to_book(row) -> dict:
 
 
 _LIST_BOOKS_COLS = (
-    "id, slug, title, author, genre, chapter_count, reads, rating, "
+    "id, slug, title, author, genre, chapter_count, `reads`, rating, "
     "c1, c2, emoji, cover_image, status, read_count, updated, tags, words"
 )
 
