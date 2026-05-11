@@ -9,5 +9,5 @@ python-jose[cryptography]
 PyMySQL[rsa]
 slowapi
 apscheduler
-cachetools
 DBUtils
+cachetools

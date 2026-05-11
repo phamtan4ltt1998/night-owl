@@ -94,3 +94,20 @@ Copy `.env.example` → `.env`. Key vars:
 - `schedule.type`: `interval` (hours/minutes) or `cron`
 - `schedule.active_window`: daily time window to constrain job execution
 - Each source: `url`, `target_count`, `free_chapter_threshold`, `concurrency`, `enabled`
+
+## API sequences & performance
+
+See [`architecture/api-sequences.md`](architecture/api-sequences.md) for full endpoint flows (auth, browse, read, comment, user, notifications, TTS, crawl) + flagged hotspots needing optimization.
+
+Hot-path summary (must stay fast, <100ms p95):
+- `GET /books/paged` — verify composite indexes `(genre, read_count|rating|chapter_count)`
+- `GET /books/search` — FTS already; watch `COUNT(*)` cost
+- `GET /books/{id}/chapters` — **paginate**, currently returns all rows
+- `GET /books/{id}/chapters/{n}/content` — file IO + DB; cache LRU + cache unlocked set
+- `GET /books/{id}/chapters/{n}/comment-counts` — called per chapter open; cache 30s + index `(chapter_id, parent_id)`
+- `POST /user/reading-progress` — high QPS; ensure UPSERT uses unique index
+
+Cross-cutting fixes (P0):
+1. Connection pool for `get_conn()` (currently open/close every request)
+2. Wrap sync `pymysql` calls in `run_in_threadpool` for all async endpoints
+3. Add `LIMIT` + cursor pagination to `GET /notifications` and `GET /books` (unpaged variant)
