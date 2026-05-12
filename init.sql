@@ -11,6 +11,8 @@ USE nightowl;
 
 CREATE TABLE IF NOT EXISTS books (
     id           INT AUTO_INCREMENT PRIMARY KEY,
+    created_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     slug         VARCHAR(255)  NOT NULL UNIQUE,
     title        VARCHAR(500)  NOT NULL,
     author       VARCHAR(255)  NOT NULL,
@@ -29,9 +31,13 @@ CREATE TABLE IF NOT EXISTS books (
     cover_image  VARCHAR(1000) NOT NULL DEFAULT '',
     status       VARCHAR(50)   NOT NULL DEFAULT '',
     read_count   BIGINT        NOT NULL DEFAULT 0,
+    INDEX idx_created_at         (created_at DESC),
+    INDEX idx_updated_at         (updated_at DESC),
     INDEX idx_genre              (genre),
     INDEX idx_read_count         (read_count DESC),
     INDEX idx_rating             (rating DESC),
+    INDEX idx_genre_created_at   (genre, created_at DESC),
+    INDEX idx_genre_updated_at   (genre, updated_at DESC),
     INDEX idx_genre_read_count   (genre, read_count),
     INDEX idx_genre_rating       (genre, rating),
     INDEX idx_genre_chapter_count(genre, chapter_count),
