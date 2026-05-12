@@ -12,3 +12,4 @@ apscheduler
 DBUtils
 cachetools
 httpx
+redis[asyncio]>=5.0
