@@ -101,6 +101,20 @@ def _ensure_index(cur, table: str, index_name: str, columns: str, index_type: st
     return False
 
 
+def _ensure_column(cur, table: str, column: str, definition: str, after: str | None = None) -> bool:
+    """Add column to table if it does not exist. Returns True if column was added."""
+    cur.execute(
+        "SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS "
+        "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s AND COLUMN_NAME = %s",
+        (table, column),
+    )
+    if cur.fetchone()["cnt"] == 0:
+        after_clause = f" AFTER `{after}`" if after else ""
+        cur.execute(f"ALTER TABLE `{table}` ADD COLUMN `{column}` {definition}{after_clause}")
+        return True
+    return False
+
+
 def _ensure_ft_index(cur, index_name: str, columns: str) -> bool:
     return _ensure_index(cur, "books", index_name, columns, "FULLTEXT KEY")
 
@@ -134,17 +148,30 @@ def init_db() -> None:
             conn.commit()
 
             changed = False
+            # ── books: add timestamp columns if missing (idempotent) ───────────
+            changed |= _ensure_column(cur, "books", "created_at",
+                                      "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP",
+                                      after="id")
+            changed |= _ensure_column(cur, "books", "updated_at",
+                                      "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+                                      after="created_at")
+            if changed:
+                conn.commit()
             # ── books: single-column ───────────────────────────────────────────
             changed |= _ensure_ft_index(cur, "ft_books_search", "title, author, description, tags")
             changed |= _ensure_ft_index(cur, "ft_books_title", "title")
             changed |= _ensure_btree_index(cur, "idx_genre", "genre")
             changed |= _ensure_btree_index(cur, "idx_read_count", "read_count")
             changed |= _ensure_btree_index(cur, "idx_rating", "rating")
+            changed |= _ensure_btree_index(cur, "idx_created_at", "created_at")
+            changed |= _ensure_btree_index(cur, "idx_updated_at", "updated_at")
             # ── books: composite (genre + sort_by) for get_books_paged ─────────
             changed |= _ensure_btree_index(cur, "idx_genre_read_count",    "genre, read_count")
             changed |= _ensure_btree_index(cur, "idx_genre_rating",        "genre, rating")
             changed |= _ensure_btree_index(cur, "idx_genre_chapter_count", "genre, chapter_count")
             changed |= _ensure_btree_index(cur, "idx_genre_title",         "genre, title")
+            changed |= _ensure_btree_index(cur, "idx_genre_created_at",    "genre, created_at")
+            changed |= _ensure_btree_index(cur, "idx_genre_updated_at",    "genre, updated_at")
             # ── inline_comments: comment-counts + paginated comments ───────────
             changed |= _ensure_index(cur, "inline_comments", "idx_ic_chapter_parent", "chapter_id, parent_id")
             changed |= _ensure_index(cur, "inline_comments", "idx_ic_chapter_para_parent_time",
@@ -480,7 +507,7 @@ def update_book(book_id: int, title: str | None, author: str | None, free_chapte
         conn.close()
 
 
-_VALID_SORT_COLS = {"read_count", "rating", "id", "title", "chapter_count"}
+_VALID_SORT_COLS = {"read_count", "rating", "id", "title", "chapter_count", "created_at", "updated_at"}
 _VALID_SORT_ORDERS = {"asc", "desc"}
 
 
