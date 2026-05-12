@@ -11,3 +11,4 @@ slowapi
 apscheduler
 DBUtils
 cachetools
+httpx

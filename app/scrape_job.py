@@ -198,9 +198,8 @@ async def _scrape_source(
     upsert_story_from_dir,
 ) -> None:
     # 1. Thu thập tất cả URL truyện trong trang danh mục
-    all_story_urls: list[str] = await run_in_threadpool(
-        scraper._collect_story_urls_from_listing, url
-    )
+    # collect_story_urls routes to Go fetcher or Python depending on USE_GO_FETCHER
+    all_story_urls: list[str] = await scraper.collect_story_urls(url)
     if not all_story_urls:
         logger.info("[scrape_job] Không tìm thấy truyện tại: %s", url)
         return

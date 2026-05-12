@@ -14,6 +14,11 @@ python -m playwright install --with-deps chromium  # if browser errors
 # Run server
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
+# Go fetcher service (see ../../go-nightowl/)
+export PATH=$PATH:$HOME/go-sdk/bin
+cd ../../go-nightowl && go run ./cmd/server   # dev
+cd ../../go-nightowl && make build && ./bin/fetcher  # prod
+
 # Docker (MySQL only)
 docker-compose up -d
 

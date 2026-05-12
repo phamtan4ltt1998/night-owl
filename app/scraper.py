@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import re
 import unicodedata
 from dataclasses import dataclass
@@ -13,6 +14,8 @@ from bs4 import BeautifulSoup
 from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig
 
 DEFAULT_STORY_URL = "https://truyencom.com/truyen-xuyen-nhanh/full/"
+
+USE_GO_FETCHER: bool = os.getenv("USE_GO_FETCHER", "").lower() in ("1", "true", "yes")
 
 
 def _strip_markdown_link(text: str) -> str:
@@ -56,6 +59,170 @@ class StoryScraper:
                 )
             }
         )
+        self._fetcher = None  # lazy init
+
+    # ------------------------------------------------------------------
+    # Go fetcher helpers
+    # ------------------------------------------------------------------
+
+    def _get_fetcher(self):
+        if self._fetcher is None:
+            from app.fetcher_client import FetcherClient
+            self._fetcher = FetcherClient()
+        return self._fetcher
+
+    async def collect_story_urls(self, listing_url: str) -> List[str]:
+        """Collect story URLs from a listing page.
+
+        Routes to Go fetcher when USE_GO_FETCHER=true, otherwise runs the
+        synchronous Python implementation in a thread.
+        """
+        if USE_GO_FETCHER:
+            urls: List[str] = []
+            async for url in self._get_fetcher().fetch_listing(listing_url):
+                urls.append(url)
+            return urls
+        from starlette.concurrency import run_in_threadpool
+        return await run_in_threadpool(self._collect_story_urls_from_listing, listing_url)
+
+    async def _save_story_go(self, story_url: str) -> Dict[str, object]:
+        """Fetch + save a single story using the Go fetcher service.
+
+        Streams story_meta and chapter events, writes new chapters to disk,
+        then returns the same result dict shape as _save_story().
+        """
+        story_slug = self._story_slug_from_url(story_url)
+        content_dir = self.content_root / story_slug
+        content_dir.mkdir(parents=True, exist_ok=True)
+
+        existing_numbers = self._existing_chapter_numbers(content_dir)
+        existing_file_count = len(list(content_dir.glob("*.md")))
+
+        meta_dict: Dict[str, str] = {}
+        new_chapters: List[Dict] = []
+        done_count = 0
+
+        async for event in self._get_fetcher().fetch_story(story_url):
+            etype = event.get("type")
+            if etype == "story_meta":
+                d = event.get("data", {})
+                meta_dict = {
+                    "story_name": d.get("title", ""),
+                    "story_author": d.get("author", ""),
+                    "story_genre": d.get("genre", ""),
+                    "story_status": d.get("status", ""),
+                    "story_description": d.get("description", ""),
+                    "story_cover": d.get("cover_image", ""),
+                }
+            elif etype == "chapter":
+                ch = event.get("data", {})
+                num = ch.get("number", 0)
+                if num in existing_numbers or not ch.get("content_md"):
+                    continue
+                new_chapters.append(ch)
+                existing_numbers.add(num)
+            elif etype == "done":
+                done_count = event.get("count", 0)
+
+        if not meta_dict:
+            return {
+                "story_url": story_url,
+                "story_slug": story_slug,
+                "status": "error",
+                "error": "no metadata received from fetcher",
+            }
+
+        if not new_chapters:
+            return {
+                "story_url": story_url,
+                "story_slug": story_slug,
+                "chapter_count": done_count,
+                "new_chapter_count": 0,
+                "status": "already_updated",
+                "content_output_dir": str(content_dir),
+                **meta_dict,
+            }
+
+        # Sort by chapter number, write sequentially after existing files
+        new_chapters.sort(key=lambda c: c.get("number", 0))
+        for idx, ch in enumerate(new_chapters, start=existing_file_count + 1):
+            slug = ch.get("slug") or f"chuong-{ch['number']}"
+            (content_dir / f"{idx:04d}-{slug}.md").write_text(
+                ch["content_md"], encoding="utf-8"
+            )
+
+        return {
+            "story_url": story_url,
+            "story_slug": story_slug,
+            "chapter_count": done_count,
+            "new_chapter_count": len(new_chapters),
+            "status": "updated",
+            "content_output_dir": str(content_dir),
+            "content_file_count": len(new_chapters),
+            **meta_dict,
+        }
+
+    def _is_listing_url(self, url: str) -> bool:
+        """True if URL has multiple meaningful path segments (listing pattern).
+
+        truyencom.com listings: /truyen-tien-hiep/full/ → 2 segments
+        Story pages:            /de-ba.27/              → 1 segment
+        """
+        parts = [p for p in urlparse(url).path.split("/") if p]
+        return len(parts) > 1
+
+    async def _scrape_story_go(
+        self,
+        source_url: str,
+        story_limit: int | None,
+        start_story_from: int,
+    ) -> Dict[str, object]:
+        """Go-fetcher path for scrape_story()."""
+        if not self._is_listing_url(source_url):
+            # Direct story URL
+            result = await self._save_story_go(source_url)
+            return {"source_url": source_url, "mode": "single_story", **result}
+
+        # Listing URL: collect all story URLs via Go fetcher
+        story_urls: List[str] = []
+        async for url in self._get_fetcher().fetch_listing(source_url):
+            story_urls.append(url)
+        story_urls = sorted(story_urls)
+
+        if not story_urls:
+            raise ValueError("Không tìm thấy truyện từ URL đã cho.")
+
+        start_index = start_story_from - 1
+        if start_index >= len(story_urls):
+            raise ValueError(
+                f"start_story_from={start_story_from} vượt quá tổng số truyện tìm thấy ({len(story_urls)})."
+            )
+        selected = story_urls[start_index:]
+        if story_limit is not None:
+            selected = selected[:story_limit]
+
+        stories: List[Dict[str, object]] = []
+        for story_url in selected:
+            result = await self._save_story_go(story_url)
+            if result.get("status") != "error":
+                stories.append(result)
+
+        if not stories:
+            raise ValueError("Tìm thấy danh sách truyện nhưng không lấy được nội dung nào.")
+
+        return {
+            "source_url": source_url,
+            "mode": "listing_page",
+            "start_story_from": start_story_from,
+            "story_limit": story_limit,
+            "selected_story_count": len(selected),
+            "story_count": len(stories),
+            "stories": stories,
+        }
+
+    # ------------------------------------------------------------------
+    # Public entry point
+    # ------------------------------------------------------------------
 
     async def scrape_story(
         self,
@@ -69,6 +236,11 @@ class StoryScraper:
             raise ValueError("story_limit phai >= 1 neu duoc truyen vao.")
 
         source_url = self._normalize_url(story_url)
+
+        if USE_GO_FETCHER:
+            return await self._scrape_story_go(source_url, story_limit, start_story_from)
+
+        # --- Python (legacy) path below ---
 
         # Case 1: URL la trang truyện chi tiết -> crawl chapter của truyện đó.
         direct_story_chapters = self._collect_chapters_for_story(source_url)
