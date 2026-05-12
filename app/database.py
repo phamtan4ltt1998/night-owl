@@ -22,9 +22,9 @@ def _get_pool() -> PooledDB:
             if _pool is None:
                 _pool = PooledDB(
                     creator=pymysql,
-                    maxconnections=20,
                     mincached=2,
                     maxcached=10,
+                    maxconnections=int(os.getenv("DB_MAX_CONNECTIONS", "20")),
                     blocking=True,
                     host=os.getenv("DB_HOST", "localhost"),
                     port=int(os.getenv("DB_PORT", 3306)),

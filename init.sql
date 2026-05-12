@@ -36,6 +36,8 @@ CREATE TABLE IF NOT EXISTS books (
     INDEX idx_genre_rating       (genre, rating),
     INDEX idx_genre_chapter_count(genre, chapter_count),
     INDEX idx_genre_title        (genre, title),
+    INDEX idx_updated            (updated DESC),
+    INDEX idx_genre_updated      (genre, updated DESC),
     FULLTEXT KEY ft_books_search (title, author, description, tags),
     FULLTEXT KEY ft_books_title  (title)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

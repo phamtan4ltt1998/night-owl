@@ -2,6 +2,7 @@ import asyncio
 import base64
 import hashlib
 import hmac
+import json
 import logging
 import os
 import random
@@ -66,6 +67,7 @@ from app.database import (  # noqa: E402
     get_chapters_paged,
     save_push_notification,
 )
+from app.redis_client import init_redis, get_redis, close_redis  # noqa: E402
 
 logger = logging.getLogger("nightowl.crawl")
 
@@ -107,16 +109,43 @@ app.add_middleware(
 app.middleware("http")(bot_guard_middleware)
 
 # ── Books TTL cache ────────────────────────────────────────────────────────────
-_books_cache: TTLCache = TTLCache(maxsize=64, ttl=60)
+_books_cache: TTLCache = TTLCache(maxsize=256, ttl=60)  # increased: also holds chapter list rows per book
 _books_cache_lock = asyncio.Lock()
 
 # ── Chapter content TTL cache ──────────────────────────────────────────────────
 _content_cache: TTLCache = TTLCache(maxsize=512, ttl=1800)  # 30 min — chapters rarely change
 _content_cache_lock = asyncio.Lock()
 
+# ── User profile TTL cache (avoid DB hit on every authenticated request) ────────
+_user_cache: TTLCache = TTLCache(maxsize=2048, ttl=60)
+
+# ── Search result TTL cache ───────────────────────────────────────────────────
+_search_cache: TTLCache = TTLCache(maxsize=256, ttl=30)
+
+async def _invalidate_redis_cache() -> None:
+    redis = get_redis()
+    if redis:
+        try:
+            async for key in redis.scan_iter("books:list:*"):
+                await redis.delete(key)
+            async for key in redis.scan_iter("books:paged:*"):
+                await redis.delete(key)
+            async for key in redis.scan_iter("search:*"):
+                await redis.delete(key)
+        except Exception:
+            pass
+
+
 def _invalidate_books_cache() -> None:
     _books_cache.clear()
     _content_cache.clear()
+    _search_cache.clear()
+    try:
+        loop = asyncio.get_running_loop()
+        loop.create_task(_invalidate_redis_cache())
+    except RuntimeError:
+        pass
+
 
 register_books_cache_invalidator(_invalidate_books_cache)
 
@@ -173,6 +202,11 @@ async def _retry_failed_crawls() -> None:
             increment_crawl_retry(rec_id, str(exc))
             logger.warning("[retry] Still failing id=%d attempt=%d err=%s",
                            rec_id, rec["retry_count"] + 1, exc)
+
+
+@app.on_event("startup")
+async def _start_redis() -> None:
+    await init_redis()
 
 
 @app.on_event("startup")
@@ -252,6 +286,7 @@ async def _stop_scheduler() -> None:
         except (asyncio.TimeoutError, asyncio.CancelledError):
             task.cancel()
     _scheduler.shutdown(wait=False)
+    await close_redis()
 tts_service = StoryTTSService(story_content_root="story-content", output_root="outputs/audio")
 
 # ── Content session token (anti-scraping) ──────────────────────────────────────
@@ -729,11 +764,15 @@ def get_current_user(
             raise HTTPException(status_code=401, detail="Invalid token")
     except JWTError:
         raise HTTPException(status_code=401, detail="Token expired or invalid")
+    cached = _user_cache.get(email)
+    if cached is not None:
+        return cached
     from app.database import get_or_create_user as _get_user
     user = _get_user(email)
     # Backfill uid in token payload for old tokens that don't have it
     if "uid" not in payload:
         user["_token_needs_refresh"] = True
+    _user_cache[email] = user
     return user
 
 
@@ -858,9 +897,9 @@ def _fetch_books_sync(genre: str | None) -> list:
     try:
         with conn.cursor() as cur:
             if genre:
-                cur.execute(f"SELECT {_LIST_BOOKS_COLS} FROM books WHERE genre = %s", (genre,))
+                cur.execute(f"SELECT {_LIST_BOOKS_COLS} FROM books WHERE genre = %s LIMIT 500", (genre,))
             else:
-                cur.execute(f"SELECT {_LIST_BOOKS_COLS} FROM books")
+                cur.execute(f"SELECT {_LIST_BOOKS_COLS} FROM books LIMIT 500")
             return cur.fetchall()
     finally:
         conn.close()
@@ -868,21 +907,45 @@ def _fetch_books_sync(genre: str | None) -> list:
 
 @app.get("/books")
 @limiter.limit(RATE_LIMIT_BOOKS)
-async def list_books(request: Request, genre: str | None = None) -> list:
-    def _fetch():
-        conn = get_conn()
-        try:
-            with conn.cursor() as cur:
-                if genre:
-                    cur.execute("SELECT * FROM books WHERE genre = %s LIMIT 500", (genre,))
-                else:
-                    cur.execute("SELECT * FROM books LIMIT 500")
-                return cur.fetchall()
-        finally:
-            conn.close()
+async def list_books(request: Request, response: Response, genre: str | None = None) -> list:
+    cache_key = ("list", genre)
+    rkey = f"books:list:{genre or 'all'}"
+    response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
 
-    rows = await run_in_threadpool(_fetch)
-    return [_row_to_book(r) for r in rows]
+    # L1 check
+    cached = _books_cache.get(cache_key)
+    if cached is not None:
+        response.headers["X-Cache"] = "HIT"
+        return cached
+
+    # L2 Redis check
+    redis = get_redis()
+    if redis:
+        try:
+            raw = await redis.get(rkey)
+            if raw:
+                cached = json.loads(raw)
+                _books_cache[cache_key] = cached
+                response.headers["X-Cache"] = "HIT"
+                return cached
+        except Exception:
+            pass
+
+    async with _books_cache_lock:
+        cached = _books_cache.get(cache_key)
+        if cached is not None:
+            response.headers["X-Cache"] = "HIT"
+            return cached
+        rows = await run_in_threadpool(_fetch_books_sync, genre)
+        result = [_row_to_book(r) for r in rows]
+        _books_cache[cache_key] = result
+        if redis:
+            try:
+                await redis.set(rkey, json.dumps(result, ensure_ascii=False), ex=60)
+            except Exception:
+                pass
+    response.headers["X-Cache"] = "MISS"
+    return result
 
 
 def _build_ft_query(q: str) -> str:
@@ -907,6 +970,25 @@ async def search_books(
     offset: int = 0,
 ) -> dict:
     q = q.strip()
+    search_cache_key = ("search", q.lower(), genre, limit, offset)
+    rkey = f"search:{hashlib.md5(f'{q.lower()}:{genre}:{limit}:{offset}'.encode()).hexdigest()[:16]}"
+
+    # L1 check
+    cached = _search_cache.get(search_cache_key)
+    if cached is not None:
+        return cached
+
+    # L2 Redis check
+    redis = get_redis()
+    if redis:
+        try:
+            raw = await redis.get(rkey)
+            if raw:
+                cached = json.loads(raw)
+                _search_cache[search_cache_key] = cached
+                return cached
+        except Exception:
+            pass
 
     def _do_search() -> tuple[list, int]:
         conn = get_conn()
@@ -964,12 +1046,19 @@ async def search_books(
             conn.close()
 
     rows, total = await run_in_threadpool(_do_search)
-    return {
+    result = {
         "data": [_row_to_book(r) for r in rows],
         "total": total,
         "limit": limit,
         "offset": offset,
     }
+    _search_cache[search_cache_key] = result
+    if redis:
+        try:
+            await redis.set(rkey, json.dumps(result, ensure_ascii=False), ex=30)
+        except Exception:
+            pass
+    return result
 
 
 @app.get("/books/paged")
@@ -985,15 +1074,31 @@ async def list_books_paged(
 ) -> dict:
     effective_genre = genre if genre and genre != "Tất cả" else None
     cache_key = ("paged", page, page_size, effective_genre, sort_by, sort_order)
+    rkey = f"books:paged:{page}:{page_size}:{effective_genre or 'all'}:{sort_by}:{sort_order}"
+    response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+
+    # L1 check
     cached = _books_cache.get(cache_key)
     if cached is not None:
-        response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
         response.headers["X-Cache"] = "HIT"
         return cached
+
+    # L2 Redis check
+    redis = get_redis()
+    if redis:
+        try:
+            raw = await redis.get(rkey)
+            if raw:
+                cached = json.loads(raw)
+                _books_cache[cache_key] = cached
+                response.headers["X-Cache"] = "HIT"
+                return cached
+        except Exception:
+            pass
+
     async with _books_cache_lock:
         cached = _books_cache.get(cache_key)
         if cached is not None:
-            response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
             response.headers["X-Cache"] = "HIT"
             return cached
         result = await run_in_threadpool(
@@ -1006,7 +1111,11 @@ async def list_books_paged(
         )
         result["data"] = [_row_to_book(r) for r in result["data"]]
         _books_cache[cache_key] = result
-    response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+        if redis:
+            try:
+                await redis.set(rkey, json.dumps(result, ensure_ascii=False), ex=60)
+            except Exception:
+                pass
     response.headers["X-Cache"] = "MISS"
     return result
 
@@ -1147,19 +1256,40 @@ async def get_chapter_content(
         if not _verify_session_token(session_token, uid, book_id):
             raise HTTPException(status_code=403, detail="Session token không hợp lệ hoặc đã hết hạn")
 
-    def _fetch_chapter():
-        conn = get_conn()
+    # Chapter metadata — Redis cache to skip DB query on hot paths
+    redis = get_redis()
+    meta_rkey = f"chapter_meta:{book_id}:{chapter_number}"
+    row = None
+    if redis:
         try:
-            with conn.cursor() as cur:
-                cur.execute(
-                    "SELECT title, file_path, free FROM chapters WHERE book_id = %s AND chapter_number = %s",
-                    (book_id, chapter_number),
-                )
-                return cur.fetchone()
-        finally:
-            conn.close()
+            raw_meta = await redis.get(meta_rkey)
+            if raw_meta:
+                row = json.loads(raw_meta)
+        except Exception:
+            pass
+    if row is None:
+        def _fetch_chapter():
+            conn = get_conn()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "SELECT title, file_path, free FROM chapters WHERE book_id = %s AND chapter_number = %s",
+                        (book_id, chapter_number),
+                    )
+                    return cur.fetchone()
+            finally:
+                conn.close()
 
-    row = await run_in_threadpool(_fetch_chapter)
+        row = await run_in_threadpool(_fetch_chapter)
+        if row and redis:
+            try:
+                await redis.set(
+                    meta_rkey,
+                    json.dumps({"title": row["title"], "file_path": row["file_path"], "free": int(row["free"])}),
+                    ex=3600,
+                )
+            except Exception:
+                pass
     if not row:
         raise HTTPException(status_code=404, detail="Chapter not found")
 
@@ -1171,7 +1301,21 @@ async def get_chapter_content(
             raise HTTPException(status_code=403, detail="locked")
 
     cache_key = (book_id, chapter_number)
+    content_rkey = f"content:{book_id}:{chapter_number}"
+
+    # L1 check
     cached_payload = _content_cache.get(cache_key)
+    if cached_payload is None:
+        # L2 Redis check
+        if redis:
+            try:
+                raw_content = await redis.get(content_rkey)
+                if raw_content:
+                    cached_payload = json.loads(raw_content)
+                    _content_cache[cache_key] = cached_payload
+            except Exception:
+                pass
+
     if cached_payload is None:
         async with _content_cache_lock:
             cached_payload = _content_cache.get(cache_key)
@@ -1194,16 +1338,28 @@ async def get_chapter_content(
                 except FileNotFoundError:
                     raise HTTPException(status_code=404, detail=f"Content file not found: {file_path}")
                 _content_cache[cache_key] = cached_payload
+                if redis:
+                    try:
+                        await redis.set(content_rkey, json.dumps(cached_payload, ensure_ascii=False), ex=1800)
+                    except Exception:
+                        pass
 
     # Buffer view count — flushed to DB every 10s by scheduler
     record_chapter_view(book_id, chapter_number)
 
-    return {
+    body = {
         "chapterNumber": chapter_number,
         "title": cached_payload["title"],
         "free": cached_payload["free"],
         "content": cached_payload["content"],
     }
+    etag = f'"{hashlib.md5(cached_payload["content"].encode()).hexdigest()[:16]}"'
+    if request.headers.get("if-none-match") == etag:
+        return Response(status_code=304)
+    resp = Response(content=json.dumps(body, ensure_ascii=False), media_type="application/json")
+    resp.headers["ETag"] = etag
+    resp.headers["Cache-Control"] = "private, max-age=1800"
+    return resp
 
 
 # ── Genres ─────────────────────────────────────────────────────────────────────
@@ -1490,7 +1646,9 @@ async def put_user_profile(
     _current: dict = Depends(get_current_user),
 ) -> dict:
     try:
-        return update_user_profile(req.email, req.name, req.bio)
+        result = update_user_profile(req.email, req.name, req.bio)
+        _user_cache.pop(req.email, None)
+        return result
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
