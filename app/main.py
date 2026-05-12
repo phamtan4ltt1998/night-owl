@@ -20,7 +20,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import PlainTextResponse, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
@@ -66,6 +66,10 @@ from app.database import (  # noqa: E402
     get_books_paged,
     get_chapters_paged,
     save_push_notification,
+    get_app_comments,
+    post_app_comment,
+    delete_app_comment,
+    purge_expired_app_comments,
 )
 from app.redis_client import init_redis, get_redis, close_redis  # noqa: E402
 
@@ -74,6 +78,8 @@ logger = logging.getLogger("nightowl.crawl")
 # ── In-process TTL caches ──────────────────────────────────────────────────────
 _genres_cache: TTLCache = TTLCache(maxsize=1, ttl=600)
 _comment_counts_cache: TTLCache = TTLCache(maxsize=2048, ttl=30)
+# Caches raw global comments list (no is_own) for 10s to absorb concurrent polls
+_global_comments_cache: TTLCache = TTLCache(maxsize=8, ttl=10)
 
 # ── In-memory category crawl jobs ─────────────────────────────────────────────
 _crawl_jobs: dict[str, dict] = {}
@@ -91,6 +97,20 @@ def _meta_kwargs(src: dict) -> dict:
 
 # ── Rate limiter ───────────────────────────────────────────────────────────────
 limiter = Limiter(key_func=get_remote_address)
+
+
+def _gc_rate_key(request: Request) -> str:
+    """Rate-limit global comment POSTs by user_id when authenticated, fall back to IP."""
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        try:
+            payload = jwt.decode(auth[7:], JWT_SECRET, algorithms=[JWT_ALGORITHM])
+            uid = payload.get("uid")
+            if uid:
+                return f"gc_user:{uid}"
+        except Exception:  # noqa: BLE001
+            pass
+    return f"gc_ip:{get_remote_address(request)}"
 
 app = FastAPI(title="NightOwl API", version="2.0.0")
 
@@ -226,6 +246,21 @@ async def _start_scheduler() -> None:
         )
     else:
         logger.warning("[scheduler] view_count_flush job disabled (JOB_VIEW_COUNT_FLUSH_ENABLED=false).")
+
+    # Job 1a: purge expired app_comments every hour
+    def _purge_and_log():
+        deleted = purge_expired_app_comments()
+        if deleted:
+            logger.info("[purge] Deleted %d expired app_comment(s)", deleted)
+
+    _scheduler.add_job(
+        _purge_and_log,
+        "interval",
+        hours=1,
+        id="purge_app_comments",
+        replace_existing=True,
+    )
+    logger.info("[scheduler] purge_app_comments job registered — interval=1h")
 
     # Job 1: retry failed crawls
     if JOB_CRAWL_RETRY_ENABLED:
@@ -1499,6 +1534,163 @@ async def delete_inline_comment(
     if not deleted:
         raise HTTPException(status_code=404, detail="Comment not found or permission denied")
 
+    return {"status": "deleted", "comment_id": comment_id}
+
+
+# ── Global ephemeral comments ──────────────────────────────────────────────────
+
+class GlobalCommentRequest(BaseModel):
+    content: str = Field(..., min_length=1, max_length=280)
+    context_hint: str | None = Field(default=None, max_length=255)
+
+    @field_validator("content", mode="before")
+    @classmethod
+    def sanitize_content(cls, v: str) -> str:
+        v = re.sub(r"\n{3,}", "\n\n", str(v).strip())
+        if not v:
+            raise ValueError("Nội dung không được để trống")
+        return v
+
+    @field_validator("context_hint", mode="before")
+    @classmethod
+    def sanitize_hint(cls, v: object) -> str | None:
+        if v is None:
+            return None
+        stripped = str(v).strip()
+        return stripped or None
+
+
+class GlobalCommentResponse(BaseModel):
+    id: int
+    user_id: int
+    username: str
+    avatar_url: str | None = None
+    content: str
+    context_hint: str | None = None
+    created_at: str
+    expires_at: str
+    is_own: bool = False
+
+
+class GlobalCommentsListResponse(BaseModel):
+    data: list[GlobalCommentResponse]
+    total: int
+
+
+@app.get(
+    "/comments/global",
+    response_model=GlobalCommentsListResponse,
+    tags=["comments"],
+    summary="List live global comments",
+)
+async def list_global_comments(
+    limit: int = Query(default=50, ge=1, le=100),
+    creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
+) -> GlobalCommentsListResponse:
+    """Return non-expired global app comments newest-first.
+    Auth optional — `is_own` flag set correctly when Bearer token provided.
+    Response cached 10 s server-side; `is_own` overlay applied per-request.
+    """
+    requesting_user_id: int | None = None
+    if creds:
+        try:
+            payload = jwt.decode(creds.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+            requesting_user_id = payload.get("uid")
+        except JWTError:
+            pass
+
+    # Serve from cache (no is_own); overlay is_own per user in-memory
+    if limit not in _global_comments_cache:
+        raw = await run_in_threadpool(get_app_comments, limit, None)
+        _global_comments_cache[limit] = raw
+
+    comments: list[dict] = _global_comments_cache[limit]
+    if requesting_user_id is not None:
+        comments = [{**c, "is_own": c["user_id"] == requesting_user_id} for c in comments]
+
+    return {"data": comments, "total": len(comments)}
+
+
+@app.post(
+    "/comments/global",
+    status_code=201,
+    response_model=GlobalCommentResponse,
+    tags=["comments"],
+    summary="Post a global ephemeral comment",
+)
+@limiter.limit("5/minute", key_func=_gc_rate_key)
+async def create_global_comment(
+    request: Request,
+    body: GlobalCommentRequest,
+    creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
+) -> GlobalCommentResponse:
+    """Post a new global comment (auth required). Auto-expires after 2 days.
+    Rate limited: 5 requests/minute per authenticated user (falls back to IP).
+    """
+    if not creds:
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    try:
+        payload = jwt.decode(creds.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        user_id = payload.get("uid")
+        email = payload.get("sub")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Token không hợp lệ")
+
+    def _fetch_user_and_post():
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT name, picture FROM users WHERE id = %s", (user_id,))
+                user = cur.fetchone()
+                if not user:
+                    raise ValueError("User not found")
+        finally:
+            conn.close()
+        return post_app_comment(
+            user_id=user_id,
+            username=user["name"] or email or "Anonymous",
+            avatar_url=user.get("picture"),
+            content=body.content,
+            context_hint=body.context_hint,
+        )
+
+    try:
+        comment = await run_in_threadpool(_fetch_user_and_post)
+        _global_comments_cache.clear()
+        return comment
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.delete(
+    "/comments/global/{comment_id}",
+    tags=["comments"],
+    summary="Delete own global comment",
+)
+async def remove_global_comment(
+    comment_id: int,
+    creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
+) -> dict:
+    """Delete a global comment. Only the author can delete. Auth required."""
+    if not creds:
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    try:
+        payload = jwt.decode(creds.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        user_id = payload.get("uid")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Token không hợp lệ")
+
+    deleted = await run_in_threadpool(delete_app_comment, comment_id, user_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Comment not found or permission denied")
+
+    _global_comments_cache.clear()
     return {"status": "deleted", "comment_id": comment_id}
 
 
