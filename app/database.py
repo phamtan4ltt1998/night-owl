@@ -151,6 +151,24 @@ def init_db() -> None:
                                      "chapter_id, paragraph_id, parent_id, created_at")
             if changed:
                 conn.commit()
+
+            # ── app_comments: global ephemeral comments (TTL 2 days) ───────────
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS app_comments (
+                    id           INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id      INT          NOT NULL,
+                    username     VARCHAR(150) NOT NULL,
+                    avatar_url   TEXT,
+                    content      VARCHAR(280) NOT NULL,
+                    context_hint VARCHAR(255) DEFAULT NULL,
+                    created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    expires_at   DATETIME     NOT NULL,
+                    INDEX idx_ac_expires  (expires_at),
+                    INDEX idx_ac_created  (created_at DESC),
+                    INDEX idx_ac_user     (user_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            """)
+            conn.commit()
     finally:
         conn.close()
 
@@ -947,6 +965,110 @@ def delete_inline_comment(comment_id: int, user_id: int) -> bool:
             cur.execute("DELETE FROM inline_comments WHERE id = %s", (comment_id,))
             conn.commit()
             return True
+    finally:
+        conn.close()
+
+
+# ── Global ephemeral app comments (TTL 2 days) ────────────────────────────────
+
+def get_app_comments(limit: int = 50, requesting_user_id: int | None = None) -> list[dict]:
+    """Fetch live app_comments (not yet expired), newest first."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """SELECT id, user_id, username, avatar_url, content, context_hint, created_at, expires_at
+                   FROM app_comments
+                   WHERE expires_at > NOW()
+                   ORDER BY created_at DESC
+                   LIMIT %s""",
+                (limit,),
+            )
+            rows = cur.fetchall()
+            result = []
+            for r in rows:
+                result.append({
+                    "id": r["id"],
+                    "user_id": r["user_id"],
+                    "username": r["username"],
+                    "avatar_url": r["avatar_url"],
+                    "content": r["content"],
+                    "context_hint": r["context_hint"],
+                    "created_at": r["created_at"].isoformat() if hasattr(r["created_at"], "isoformat") else str(r["created_at"]),
+                    "expires_at": r["expires_at"].isoformat() if hasattr(r["expires_at"], "isoformat") else str(r["expires_at"]),
+                    "is_own": (requesting_user_id is not None and r["user_id"] == requesting_user_id),
+                })
+            return result
+    finally:
+        conn.close()
+
+
+def post_app_comment(
+    user_id: int,
+    username: str,
+    avatar_url: str | None,
+    content: str,
+    context_hint: str | None = None,
+    ttl_days: int = 2,
+) -> dict:
+    """Insert a new app_comment with expires_at = NOW() + ttl_days."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO app_comments (user_id, username, avatar_url, content, context_hint, expires_at)
+                   VALUES (%s, %s, %s, %s, %s, DATE_ADD(NOW(), INTERVAL %s DAY))""",
+                (user_id, username, avatar_url, content, context_hint, ttl_days),
+            )
+            comment_id = cur.lastrowid
+            conn.commit()
+            cur.execute(
+                "SELECT id, user_id, username, avatar_url, content, context_hint, created_at, expires_at FROM app_comments WHERE id = %s",
+                (comment_id,),
+            )
+            row = cur.fetchone()
+            return {
+                "id": row["id"],
+                "user_id": row["user_id"],
+                "username": row["username"],
+                "avatar_url": row["avatar_url"],
+                "content": row["content"],
+                "context_hint": row["context_hint"],
+                "created_at": row["created_at"].isoformat() if hasattr(row["created_at"], "isoformat") else str(row["created_at"]),
+                "expires_at": row["expires_at"].isoformat() if hasattr(row["expires_at"], "isoformat") else str(row["expires_at"]),
+                "is_own": True,
+            }
+    finally:
+        conn.close()
+
+
+def delete_app_comment(comment_id: int, user_id: int) -> bool:
+    """Delete app_comment. Only owner can delete. Returns True if deleted."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT user_id FROM app_comments WHERE id = %s", (comment_id,))
+            row = cur.fetchone()
+            if not row:
+                return False
+            if row["user_id"] != user_id:
+                return False
+            cur.execute("DELETE FROM app_comments WHERE id = %s", (comment_id,))
+            conn.commit()
+            return True
+    finally:
+        conn.close()
+
+
+def purge_expired_app_comments() -> int:
+    """Hard-delete expired app_comments. Returns count deleted."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM app_comments WHERE expires_at < NOW()")
+            deleted = cur.rowcount
+            conn.commit()
+            return deleted
     finally:
         conn.close()
 
