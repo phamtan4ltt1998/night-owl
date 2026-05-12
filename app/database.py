@@ -1,6 +1,8 @@
+import collections
 import datetime
 import os
 import re
+import threading
 from typing import Callable
 
 import pymysql
@@ -10,25 +12,29 @@ from dbutils.pooled_db import PooledDB
 # ── Connection pool ────────────────────────────────────────────────────────────
 
 _pool: PooledDB | None = None
+_pool_lock = threading.Lock()
+
 
 def _get_pool() -> PooledDB:
     global _pool
     if _pool is None:
-        _pool = PooledDB(
-            creator=pymysql,
-            mincached=2,
-            maxcached=10,
-            maxconnections=20,
-            blocking=True,
-            host=os.getenv("DB_HOST", "localhost"),
-            port=int(os.getenv("DB_PORT", 3306)),
-            user=os.getenv("DB_USER", "nightowl"),
-            password=os.getenv("DB_PASSWORD", "nightowl"),
-            database=os.getenv("DB_NAME", "nightowl"),
-            charset="utf8mb4",
-            cursorclass=pymysql.cursors.DictCursor,
-            autocommit=False,
-        )
+        with _pool_lock:
+            if _pool is None:
+                _pool = PooledDB(
+                    creator=pymysql,
+                    mincached=2,
+                    maxcached=10,
+                    maxconnections=int(os.getenv("DB_MAX_CONNECTIONS", "20")),
+                    blocking=True,
+                    host=os.getenv("DB_HOST", "localhost"),
+                    port=int(os.getenv("DB_PORT", 3306)),
+                    user=os.getenv("DB_USER", "nightowl"),
+                    password=os.getenv("DB_PASSWORD", "nightowl"),
+                    database=os.getenv("DB_NAME", "nightowl"),
+                    charset="utf8mb4",
+                    cursorclass=pymysql.cursors.DictCursor,
+                    autocommit=False,
+                )
     return _pool
 
 
@@ -37,7 +43,6 @@ def get_conn() -> pymysql.connections.Connection:
 
 
 # ── Books cache invalidation hook ─────────────────────────────────────────────
-# main.py registers this after TTLCache is created.
 _invalidate_books_cache: Callable[[], None] | None = None
 
 def register_books_cache_invalidator(fn: Callable[[], None]) -> None:
@@ -84,29 +89,24 @@ def _parse_chapter_number(filename: str) -> int:
     return int(m.group(1)) if m else 0
 
 
-def _ensure_ft_index(cur, index_name: str, columns: str) -> bool:
-    cur.execute(
-        "SELECT COUNT(*) AS cnt FROM information_schema.STATISTICS "
-        "WHERE table_schema = DATABASE() AND table_name = 'books' "
-        "AND index_name = %s",
-        (index_name,),
-    )
-    if cur.fetchone()["cnt"] == 0:
-        cur.execute(f"ALTER TABLE books ADD FULLTEXT KEY {index_name} ({columns})")
-        return True
-    return False
-
-
-def _ensure_btree_index(cur, index_name: str, columns: str, table: str = "books") -> bool:
+def _ensure_index(cur, table: str, index_name: str, columns: str, index_type: str = "INDEX") -> bool:
     cur.execute(
         "SELECT COUNT(*) AS cnt FROM information_schema.STATISTICS "
         "WHERE table_schema = DATABASE() AND table_name = %s AND index_name = %s",
         (table, index_name),
     )
     if cur.fetchone()["cnt"] == 0:
-        cur.execute(f"ALTER TABLE `{table}` ADD INDEX {index_name} ({columns})")
+        cur.execute(f"ALTER TABLE `{table}` ADD {index_type} {index_name} ({columns})")
         return True
     return False
+
+
+def _ensure_ft_index(cur, index_name: str, columns: str) -> bool:
+    return _ensure_index(cur, "books", index_name, columns, "FULLTEXT KEY")
+
+
+def _ensure_btree_index(cur, index_name: str, columns: str) -> bool:
+    return _ensure_index(cur, "books", index_name, columns)
 
 
 def init_db() -> None:
@@ -115,6 +115,24 @@ def init_db() -> None:
     conn = get_conn()
     try:
         with conn.cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS push_notifications (
+                    id            INT AUTO_INCREMENT PRIMARY KEY,
+                    external_id   INT          NOT NULL,
+                    `key`         VARCHAR(255) NOT NULL,
+                    source_app    VARCHAR(255) NOT NULL,
+                    title         VARCHAR(500) NOT NULL,
+                    body          TEXT         NOT NULL,
+                    posted_at     BIGINT       NOT NULL,
+                    posted_at_iso VARCHAR(50)  NOT NULL,
+                    received_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_source_app (source_app),
+                    INDEX idx_posted_at  (posted_at DESC),
+                    UNIQUE KEY uq_key    (`key`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            """)
+            conn.commit()
+
             changed = False
             # ── books: single-column ───────────────────────────────────────────
             changed |= _ensure_ft_index(cur, "ft_books_search", "title, author, description, tags")
@@ -123,10 +141,14 @@ def init_db() -> None:
             changed |= _ensure_btree_index(cur, "idx_read_count", "read_count")
             changed |= _ensure_btree_index(cur, "idx_rating", "rating")
             # ── books: composite (genre + sort_by) for get_books_paged ─────────
-            changed |= _ensure_btree_index(cur, "idx_genre_read_count",   "genre, read_count")
-            changed |= _ensure_btree_index(cur, "idx_genre_rating",       "genre, rating")
-            changed |= _ensure_btree_index(cur, "idx_genre_chapter_count","genre, chapter_count")
-            changed |= _ensure_btree_index(cur, "idx_genre_title",        "genre, title")
+            changed |= _ensure_btree_index(cur, "idx_genre_read_count",    "genre, read_count")
+            changed |= _ensure_btree_index(cur, "idx_genre_rating",        "genre, rating")
+            changed |= _ensure_btree_index(cur, "idx_genre_chapter_count", "genre, chapter_count")
+            changed |= _ensure_btree_index(cur, "idx_genre_title",         "genre, title")
+            # ── inline_comments: comment-counts + paginated comments ───────────
+            changed |= _ensure_index(cur, "inline_comments", "idx_ic_chapter_parent", "chapter_id, parent_id")
+            changed |= _ensure_index(cur, "inline_comments", "idx_ic_chapter_para_parent_time",
+                                     "chapter_id, paragraph_id, parent_id, created_at")
             if changed:
                 conn.commit()
     finally:
@@ -735,6 +757,66 @@ def get_chapter_views(book_id: int) -> dict[int, int]:
         conn.close()
 
 
+def get_chapters_paged(book_id: int, page: int = 1, page_size: int = 200) -> dict:
+    """Return paginated chapter list with total count."""
+    offset = (page - 1) * page_size
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) AS cnt FROM chapters WHERE book_id = %s", (book_id,))
+            total = cur.fetchone()["cnt"]
+            cur.execute(
+                "SELECT id, chapter_number, title, free, view_count FROM chapters "
+                "WHERE book_id = %s ORDER BY chapter_number LIMIT %s OFFSET %s",
+                (book_id, page_size, offset),
+            )
+            rows = cur.fetchall()
+        return {
+            "total": total,
+            "data": [dict(r) for r in rows],
+        }
+    finally:
+        conn.close()
+
+
+# ── View-count batch buffer ────────────────────────────────────────────────────
+
+_view_counter: collections.Counter = collections.Counter()
+_view_lock = threading.Lock()
+
+
+def record_chapter_view(book_id: int, chapter_number: int) -> None:
+    """Thread-safe: buffer a view event; flushed in batch every ~10s."""
+    with _view_lock:
+        _view_counter[(book_id, chapter_number)] += 1
+
+
+def flush_view_counts() -> None:
+    """Drain the in-memory buffer and write batched counts to DB."""
+    with _view_lock:
+        if not _view_counter:
+            return
+        snapshot = dict(_view_counter)
+        _view_counter.clear()
+
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            for (book_id, chapter_number), count in snapshot.items():
+                cur.execute(
+                    "UPDATE chapters SET view_count = view_count + %s "
+                    "WHERE book_id = %s AND chapter_number = %s",
+                    (count, book_id, chapter_number),
+                )
+                cur.execute(
+                    "UPDATE books SET read_count = read_count + %s WHERE id = %s",
+                    (count, book_id),
+                )
+        conn.commit()
+    finally:
+        conn.close()
+
+
 # ── Inline Comments (Wattpad-style) ────────────────────────────────────────────
 
 def get_comment_counts(chapter_id: int) -> dict[str, int]:
@@ -775,17 +857,25 @@ def get_paragraph_comments(chapter_id: int, paragraph_id: str, page: int = 1, li
             )
             comments = [dict(r) for r in cur.fetchall()]
 
-            # Fetch replies for each top-level comment
-            for comment in comments:
+            if comments:
+                parent_ids = [c["id"] for c in comments]
+                placeholders = ",".join(["%s"] * len(parent_ids))
                 cur.execute(
-                    """SELECT c.id, c.user_id, c.content, c.created_at, u.name, u.picture
+                    f"""SELECT c.id, c.user_id, c.content, c.created_at, c.parent_id, u.name, u.picture
                        FROM inline_comments c
                        LEFT JOIN users u ON u.id = c.user_id
-                       WHERE c.parent_id = %s
+                       WHERE c.parent_id IN ({placeholders})
                        ORDER BY c.created_at ASC""",
-                    (comment["id"],),
+                    parent_ids,
                 )
-                comment["replies"] = [dict(r) for r in cur.fetchall()]
+                replies_by_parent: dict[int, list] = {}
+                for r in cur.fetchall():
+                    replies_by_parent.setdefault(r["parent_id"], []).append(dict(r))
+                for comment in comments:
+                    comment["replies"] = replies_by_parent.get(comment["id"], [])
+            else:
+                for comment in comments:
+                    comment["replies"] = []
 
         return {
             "data": comments,
@@ -857,5 +947,32 @@ def delete_inline_comment(comment_id: int, user_id: int) -> bool:
             cur.execute("DELETE FROM inline_comments WHERE id = %s", (comment_id,))
             conn.commit()
             return True
+    finally:
+        conn.close()
+
+
+def save_push_notification(
+    external_id: int,
+    key: str,
+    source_app: str,
+    title: str,
+    body: str,
+    posted_at: int,
+    posted_at_iso: str,
+) -> int:
+    """Insert push notification. Returns new row id. Raises on duplicate key."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO push_notifications
+                    (external_id, `key`, source_app, title, body, posted_at, posted_at_iso)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """,
+                (external_id, key, source_app, title, body, posted_at, posted_at_iso),
+            )
+            conn.commit()
+            return cur.lastrowid
     finally:
         conn.close()

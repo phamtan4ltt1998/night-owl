@@ -79,3 +79,9 @@ ALLOWED_CONTENT_ORIGINS: list[str] = [
 # ── Crawl retry job ────────────────────────────────────────────────────────────
 CRAWL_RETRY_INTERVAL_MINUTES: int = _int("CRAWL_RETRY_INTERVAL_MINUTES", 10)
 CRAWL_RETRY_MAX_ATTEMPTS: int     = _int("CRAWL_RETRY_MAX_ATTEMPTS", 5)
+
+# ── Scheduler job toggles ───────────────────────────────────────────────────────
+SCHEDULER_ENABLED: bool                  = _bool("SCHEDULER_ENABLED", True)
+JOB_VIEW_COUNT_FLUSH_ENABLED: bool       = _bool("JOB_VIEW_COUNT_FLUSH_ENABLED", True)
+JOB_CRAWL_RETRY_ENABLED: bool            = _bool("JOB_CRAWL_RETRY_ENABLED", True)
+JOB_SCHEDULED_SCRAPE_ENABLED: bool       = _bool("JOB_SCHEDULED_SCRAPE_ENABLED", True)

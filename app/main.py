@@ -2,6 +2,7 @@ import asyncio
 import base64
 import hashlib
 import hmac
+import json
 import logging
 import os
 import random
@@ -31,6 +32,10 @@ from app.config import (
     HONEYPOT_ENABLED,
     RATE_LIMIT_BOOKS, RATE_LIMIT_CHAPTERS, RATE_LIMIT_CONTENT,
     SESSION_TOKEN_ENABLED, SESSION_TOKEN_TTL,
+    SCHEDULER_ENABLED,
+    JOB_VIEW_COUNT_FLUSH_ENABLED,
+    JOB_CRAWL_RETRY_ENABLED,
+    JOB_SCHEDULED_SCRAPE_ENABLED,
 )
 from app.logging_setup import setup_logging
 from app.scrape_job import (
@@ -45,6 +50,8 @@ setup_logging()
 from app.middleware.bot_guard import BANNED_IPS, _is_private, bot_guard_middleware  # noqa: E402
 from app.scraper import DEFAULT_STORY_URL, StoryScraper  # noqa: E402
 from app.tts_service import StoryTTSService  # noqa: E402
+from cachetools import TTLCache
+
 from app.database import (  # noqa: E402
     init_db, get_conn, upsert_story_from_dir, update_book,
     register_books_cache_invalidator,
@@ -55,11 +62,18 @@ from app.database import (  # noqa: E402
     save_failed_crawl, get_pending_failed_crawls,
     mark_crawl_resolved, increment_crawl_retry,
     get_existing_slugs,
-    increment_chapter_view,
+    record_chapter_view, flush_view_counts,
     get_books_paged,
+    get_chapters_paged,
+    save_push_notification,
 )
+from app.redis_client import init_redis, get_redis, close_redis  # noqa: E402
 
 logger = logging.getLogger("nightowl.crawl")
+
+# ── In-process TTL caches ──────────────────────────────────────────────────────
+_genres_cache: TTLCache = TTLCache(maxsize=1, ttl=600)
+_comment_counts_cache: TTLCache = TTLCache(maxsize=2048, ttl=30)
 
 # ── In-memory category crawl jobs ─────────────────────────────────────────────
 _crawl_jobs: dict[str, dict] = {}
@@ -95,16 +109,43 @@ app.add_middleware(
 app.middleware("http")(bot_guard_middleware)
 
 # ── Books TTL cache ────────────────────────────────────────────────────────────
-_books_cache: TTLCache = TTLCache(maxsize=64, ttl=60)
+_books_cache: TTLCache = TTLCache(maxsize=256, ttl=60)  # increased: also holds chapter list rows per book
 _books_cache_lock = asyncio.Lock()
 
 # ── Chapter content TTL cache ──────────────────────────────────────────────────
 _content_cache: TTLCache = TTLCache(maxsize=512, ttl=1800)  # 30 min — chapters rarely change
 _content_cache_lock = asyncio.Lock()
 
+# ── User profile TTL cache (avoid DB hit on every authenticated request) ────────
+_user_cache: TTLCache = TTLCache(maxsize=2048, ttl=60)
+
+# ── Search result TTL cache ───────────────────────────────────────────────────
+_search_cache: TTLCache = TTLCache(maxsize=256, ttl=30)
+
+async def _invalidate_redis_cache() -> None:
+    redis = get_redis()
+    if redis:
+        try:
+            async for key in redis.scan_iter("books:list:*"):
+                await redis.delete(key)
+            async for key in redis.scan_iter("books:paged:*"):
+                await redis.delete(key)
+            async for key in redis.scan_iter("search:*"):
+                await redis.delete(key)
+        except Exception:
+            pass
+
+
 def _invalidate_books_cache() -> None:
     _books_cache.clear()
     _content_cache.clear()
+    _search_cache.clear()
+    try:
+        loop = asyncio.get_running_loop()
+        loop.create_task(_invalidate_redis_cache())
+    except RuntimeError:
+        pass
+
 
 register_books_cache_invalidator(_invalidate_books_cache)
 
@@ -164,46 +205,73 @@ async def _retry_failed_crawls() -> None:
 
 
 @app.on_event("startup")
+async def _start_redis() -> None:
+    await init_redis()
+
+
+@app.on_event("startup")
 async def _start_scheduler() -> None:
+    if not SCHEDULER_ENABLED:
+        logger.warning("[scheduler] SCHEDULER_ENABLED=false — all jobs skipped.")
+        return
+
+    # Job 0: flush batched view counts every 10 seconds
+    if JOB_VIEW_COUNT_FLUSH_ENABLED:
+        _scheduler.add_job(
+            lambda: flush_view_counts(),
+            "interval",
+            seconds=10,
+            id="view_count_flush",
+            replace_existing=True,
+        )
+    else:
+        logger.warning("[scheduler] view_count_flush job disabled (JOB_VIEW_COUNT_FLUSH_ENABLED=false).")
+
     # Job 1: retry failed crawls
-    _scheduler.add_job(
-        _retry_failed_crawls,
-        "interval",
-        minutes=CRAWL_RETRY_INTERVAL_MINUTES,
-        id="crawl_retry",
-        replace_existing=True,
-    )
+    if JOB_CRAWL_RETRY_ENABLED:
+        _scheduler.add_job(
+            _retry_failed_crawls,
+            "interval",
+            minutes=CRAWL_RETRY_INTERVAL_MINUTES,
+            id="crawl_retry",
+            replace_existing=True,
+        )
+        logger.info("[scheduler] crawl_retry job registered — interval=%dm max_attempts=%d",
+                    CRAWL_RETRY_INTERVAL_MINUTES, CRAWL_RETRY_MAX_ATTEMPTS)
+    else:
+        logger.warning("[scheduler] crawl_retry job disabled (JOB_CRAWL_RETRY_ENABLED=false).")
 
     # Job 2: scheduled scrape từ scrape_sources.json
-    scrape_config = load_config()
-    enabled_sources = [s for s in scrape_config.get("sources", []) if s.get("enabled", True)]
-    if not enabled_sources:
-        logger.warning("[scheduler] Không có source nào trong config — bỏ qua đăng ký scheduled_scrape job.")
-    else:
-        mode = get_schedule_mode(scrape_config)
-        if mode == "continuous":
-            idle_seconds = float(scrape_config.get("schedule", {}).get("idle_seconds", 30))
-            app.state.scrape_stop_event = asyncio.Event()
-            app.state.scrape_task = asyncio.create_task(
-                run_continuous_scrape(app.state.scrape_stop_event, idle_seconds=idle_seconds)
-            )
-            logger.info(
-                "[scheduler] Continuous scrape task started — sources=%d idle=%ss",
-                len(enabled_sources), idle_seconds,
-            )
+    if JOB_SCHEDULED_SCRAPE_ENABLED:
+        scrape_config = load_config()
+        enabled_sources = [s for s in scrape_config.get("sources", []) if s.get("enabled", True)]
+        if not enabled_sources:
+            logger.warning("[scheduler] Không có source nào trong config — bỏ qua đăng ký scheduled_scrape job.")
         else:
-            schedule_kwargs = get_schedule_kwargs(scrape_config)
-            _scheduler.add_job(
-                run_scheduled_scrape,
-                id="scheduled_scrape",
-                replace_existing=True,
-                **schedule_kwargs,
-            )
-            logger.info("[scheduler] Scheduled scrape job registered — sources=%d %s", len(enabled_sources), schedule_kwargs)
+            mode = get_schedule_mode(scrape_config)
+            if mode == "continuous":
+                idle_seconds = float(scrape_config.get("schedule", {}).get("idle_seconds", 30))
+                app.state.scrape_stop_event = asyncio.Event()
+                app.state.scrape_task = asyncio.create_task(
+                    run_continuous_scrape(app.state.scrape_stop_event, idle_seconds=idle_seconds)
+                )
+                logger.info(
+                    "[scheduler] Continuous scrape task started — sources=%d idle=%ss",
+                    len(enabled_sources), idle_seconds,
+                )
+            else:
+                schedule_kwargs = get_schedule_kwargs(scrape_config)
+                _scheduler.add_job(
+                    run_scheduled_scrape,
+                    id="scheduled_scrape",
+                    replace_existing=True,
+                    **schedule_kwargs,
+                )
+                logger.info("[scheduler] Scheduled scrape job registered — sources=%d %s", len(enabled_sources), schedule_kwargs)
+    else:
+        logger.warning("[scheduler] scheduled_scrape job disabled (JOB_SCHEDULED_SCRAPE_ENABLED=false).")
 
     _scheduler.start()
-    logger.info("[scheduler] Crawl retry job started — interval=%dm max_attempts=%d",
-                CRAWL_RETRY_INTERVAL_MINUTES, CRAWL_RETRY_MAX_ATTEMPTS)
 
 
 @app.on_event("shutdown")
@@ -218,6 +286,7 @@ async def _stop_scheduler() -> None:
         except (asyncio.TimeoutError, asyncio.CancelledError):
             task.cancel()
     _scheduler.shutdown(wait=False)
+    await close_redis()
 tts_service = StoryTTSService(story_content_root="story-content", output_root="outputs/audio")
 
 # ── Content session token (anti-scraping) ──────────────────────────────────────
@@ -536,14 +605,19 @@ async def list_failed_crawls(
     resolved: bool = Query(default=False, description="true = xem đã resolve"),
 ) -> list:
     """Danh sách request crawl bị lỗi (chưa/đã resolve)."""
-    conn = get_conn()
-    with conn.cursor() as cur:
-        cur.execute(
-            "SELECT * FROM failed_crawl_requests WHERE resolved = %s ORDER BY created_at DESC",
-            (1 if resolved else 0,),
-        )
-        rows = cur.fetchall()
-    conn.close()
+    def _fetch():
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT * FROM failed_crawl_requests WHERE resolved = %s ORDER BY created_at DESC",
+                    (1 if resolved else 0,),
+                )
+                return cur.fetchall()
+        finally:
+            conn.close()
+
+    rows = await run_in_threadpool(_fetch)
     return [
         {
             "id": r["id"],
@@ -690,11 +764,15 @@ def get_current_user(
             raise HTTPException(status_code=401, detail="Invalid token")
     except JWTError:
         raise HTTPException(status_code=401, detail="Token expired or invalid")
+    cached = _user_cache.get(email)
+    if cached is not None:
+        return cached
     from app.database import get_or_create_user as _get_user
     user = _get_user(email)
     # Backfill uid in token payload for old tokens that don't have it
     if "uid" not in payload:
         user["_token_needs_refresh"] = True
+    _user_cache[email] = user
     return user
 
 
@@ -702,17 +780,30 @@ GOOGLE_CLIENT_ID = "580494851023-u34i18n43a2cho99kp20ncjnl47u2q1d.apps.googleuse
 
 
 class GoogleLoginRequest(BaseModel):
-    email: str
-    name: str | None = None
-    picture: str | None = None
-    sub: str | None = None
+    id_token: str
 
 
 @app.post("/auth/google")
 async def google_login(req: GoogleLoginRequest) -> dict:
-    """Upsert user from Google userinfo, return JWT + profile."""
-    user = get_or_create_user(req.email, req.name or "", req.picture or "")
-    token = _create_token(req.email, user["id"])
+    """Verify Google id_token, upsert user, return JWT + profile."""
+    from google.oauth2 import id_token as google_id_token
+    from google.auth.transport import requests as google_requests
+
+    try:
+        idinfo = google_id_token.verify_oauth2_token(
+            req.id_token,
+            google_requests.Request(),
+            GOOGLE_CLIENT_ID,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=401, detail=f"Invalid Google token: {exc}")
+
+    email = idinfo["email"]
+    name = idinfo.get("name", "")
+    picture = idinfo.get("picture", "")
+
+    user = get_or_create_user(email, name, picture)
+    token = _create_token(email, user["id"])
     return {
         "access_token": token,
         "token_type": "bearer",
@@ -727,25 +818,33 @@ async def google_login(req: GoogleLoginRequest) -> dict:
 
 
 class FacebookLoginRequest(BaseModel):
-    email: str | None = None
-    name: str | None = None
-    username: str | None = None
-    picture: str | None = None
-    facebook_id: str | None = None
+    access_token: str
 
 
 @app.post("/auth/facebook")
 async def facebook_login(req: FacebookLoginRequest) -> dict:
-    """Upsert user from Facebook userinfo, return JWT + profile."""
-    email = req.email
-    if not email:
-        if req.username:
-            email = f"fb_{req.username}@nightowl.local"
-        elif req.facebook_id:
-            email = f"fb_{req.facebook_id}@nightowl.local"
-        else:
-            raise HTTPException(status_code=400, detail="Email, username hoặc facebook_id là bắt buộc")
-    user = get_or_create_user(email, req.name or "", req.picture or "")
+    """Verify Facebook access_token via Graph API, upsert user, return JWT + profile."""
+    import requests as http_requests
+
+    resp = await run_in_threadpool(
+        http_requests.get,
+        "https://graph.facebook.com/me",
+        params={"fields": "id,name,email,picture.type(large)", "access_token": req.access_token},
+        timeout=10,
+    )
+    if resp.status_code != 200:
+        raise HTTPException(status_code=401, detail="Invalid Facebook access token")
+
+    fb_data = resp.json()
+    if "error" in fb_data:
+        raise HTTPException(status_code=401, detail=f"Facebook: {fb_data['error'].get('message')}")
+
+    fb_id = fb_data.get("id")
+    name = fb_data.get("name", "")
+    email = fb_data.get("email") or f"fb_{fb_id}@nightowl.local"
+    picture = fb_data.get("picture", {}).get("data", {}).get("url", "")
+
+    user = get_or_create_user(email, name, picture)
     token = _create_token(email, user["id"])
     return {
         "access_token": token,
@@ -798,9 +897,9 @@ def _fetch_books_sync(genre: str | None) -> list:
     try:
         with conn.cursor() as cur:
             if genre:
-                cur.execute(f"SELECT {_LIST_BOOKS_COLS} FROM books WHERE genre = %s", (genre,))
+                cur.execute(f"SELECT {_LIST_BOOKS_COLS} FROM books WHERE genre = %s LIMIT 500", (genre,))
             else:
-                cur.execute(f"SELECT {_LIST_BOOKS_COLS} FROM books")
+                cur.execute(f"SELECT {_LIST_BOOKS_COLS} FROM books LIMIT 500")
             return cur.fetchall()
     finally:
         conn.close()
@@ -810,21 +909,41 @@ def _fetch_books_sync(genre: str | None) -> list:
 @limiter.limit(RATE_LIMIT_BOOKS)
 async def list_books(request: Request, response: Response, genre: str | None = None) -> list:
     cache_key = ("list", genre)
+    rkey = f"books:list:{genre or 'all'}"
+    response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+
+    # L1 check
     cached = _books_cache.get(cache_key)
     if cached is not None:
-        response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
         response.headers["X-Cache"] = "HIT"
         return cached
+
+    # L2 Redis check
+    redis = get_redis()
+    if redis:
+        try:
+            raw = await redis.get(rkey)
+            if raw:
+                cached = json.loads(raw)
+                _books_cache[cache_key] = cached
+                response.headers["X-Cache"] = "HIT"
+                return cached
+        except Exception:
+            pass
+
     async with _books_cache_lock:
         cached = _books_cache.get(cache_key)
         if cached is not None:
-            response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
             response.headers["X-Cache"] = "HIT"
             return cached
         rows = await run_in_threadpool(_fetch_books_sync, genre)
         result = [_row_to_book(r) for r in rows]
         _books_cache[cache_key] = result
-    response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+        if redis:
+            try:
+                await redis.set(rkey, json.dumps(result, ensure_ascii=False), ex=60)
+            except Exception:
+                pass
     response.headers["X-Cache"] = "MISS"
     return result
 
@@ -851,73 +970,95 @@ async def search_books(
     offset: int = 0,
 ) -> dict:
     q = q.strip()
-    conn = get_conn()
-    try:
-        with conn.cursor() as cur:
-            # Exact ID match shortcut (only pure digit IDs, not "10 văn tiền")
-            if q.isdigit() and len(q) <= 6:
-                cur.execute("SELECT * FROM books WHERE id = %s", (q,))
-                row = cur.fetchone()
-                if row:
-                    return {"data": [_row_to_book(row)], "total": 1, "limit": limit, "offset": offset}
-                # no ID match → fall through to text search
+    search_cache_key = ("search", q.lower(), genre, limit, offset)
+    rkey = f"search:{hashlib.md5(f'{q.lower()}:{genre}:{limit}:{offset}'.encode()).hexdigest()[:16]}"
 
-            genre_filter = " AND genre = %s" if genre and genre != "Tất cả" else ""
-            genre_params: list = [genre] if genre and genre != "Tất cả" else []
+    # L1 check
+    cached = _search_cache.get(search_cache_key)
+    if cached is not None:
+        return cached
 
-            def _like_search(cur, q: str, genre_filter: str, genre_params: list, limit: int, offset: int):
-                like_q = f"%{q}%"
-                starts_q = f"{q}%"
-                like_where = "WHERE (title LIKE %s OR author LIKE %s)" + genre_filter
-                like_params = [like_q, like_q] + genre_params
-                cur.execute(f"SELECT COUNT(*) AS cnt FROM books {like_where}", like_params)
-                total = cur.fetchone()["cnt"]
-                # Sort: title starts-with query first, then contains, then author match
-                cur.execute(
-                    f"SELECT * FROM books {like_where} "
-                    f"ORDER BY CASE WHEN title LIKE %s THEN 0 ELSE 1 END, title "
-                    f"LIMIT %s OFFSET %s",
-                    like_params + [starts_q, limit, offset],
-                )
-                return total
+    # L2 Redis check
+    redis = get_redis()
+    if redis:
+        try:
+            raw = await redis.get(rkey)
+            if raw:
+                cached = json.loads(raw)
+                _search_cache[search_cache_key] = cached
+                return cached
+        except Exception:
+            pass
 
-            # Short queries (≤2 chars): MySQL FTS min_token_size=3 ignores them → use LIKE directly
-            if len(q) <= 2:
-                total = _like_search(cur, q, genre_filter, genre_params, limit, offset)
-                rows = cur.fetchall()
-            else:
-                # Full-text search with title-boosted relevance ranking
-                ft_q = _build_ft_query(q)
-                ft_where = (
-                    "WHERE MATCH(title, author, description, tags) "
-                    "AGAINST (%s IN BOOLEAN MODE)" + genre_filter
-                )
-                ft_params = [ft_q] + genre_params
+    def _do_search() -> tuple[list, int]:
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                if q.isdigit() and len(q) <= 6:
+                    cur.execute("SELECT * FROM books WHERE id = %s", (q,))
+                    row = cur.fetchone()
+                    if row:
+                        return [row], 1
 
-                cur.execute(f"SELECT COUNT(*) AS cnt FROM books {ft_where}", ft_params)
-                total = cur.fetchone()["cnt"]
+                genre_filter = " AND genre = %s" if genre and genre != "Tất cả" else ""
+                genre_params: list = [genre] if genre and genre != "Tất cả" else []
 
-                if total == 0:
-                    total = _like_search(cur, q, genre_filter, genre_params, limit, offset)
-                else:
+                def _like_search():
+                    like_q = f"%{q}%"
+                    starts_q = f"{q}%"
+                    like_where = "WHERE (title LIKE %s OR author LIKE %s)" + genre_filter
+                    like_params = [like_q, like_q] + genre_params
+                    cur.execute(f"SELECT COUNT(*) AS cnt FROM books {like_where}", like_params)
+                    t = cur.fetchone()["cnt"]
                     cur.execute(
-                        f"SELECT *, "
-                        f"(MATCH(title) AGAINST (%s IN BOOLEAN MODE) * 3 + "
-                        f"MATCH(title, author, description, tags) AGAINST (%s IN BOOLEAN MODE)) AS _score "
-                        f"FROM books {ft_where} ORDER BY _score DESC LIMIT %s OFFSET %s",
-                        [ft_q, ft_q] + ft_params + [limit, offset],
+                        f"SELECT * FROM books {like_where} "
+                        f"ORDER BY CASE WHEN title LIKE %s THEN 0 ELSE 1 END, title "
+                        f"LIMIT %s OFFSET %s",
+                        like_params + [starts_q, limit, offset],
                     )
+                    return t
 
-                rows = cur.fetchall()
-    finally:
-        conn.close()
+                if len(q) <= 2:
+                    total = _like_search()
+                    rows = cur.fetchall()
+                else:
+                    ft_q = _build_ft_query(q)
+                    ft_where = (
+                        "WHERE MATCH(title, author, description, tags) "
+                        "AGAINST (%s IN BOOLEAN MODE)" + genre_filter
+                    )
+                    ft_params = [ft_q] + genre_params
+                    cur.execute(f"SELECT COUNT(*) AS cnt FROM books {ft_where}", ft_params)
+                    total = cur.fetchone()["cnt"]
+                    if total == 0:
+                        total = _like_search()
+                    else:
+                        cur.execute(
+                            f"SELECT *, "
+                            f"(MATCH(title) AGAINST (%s IN BOOLEAN MODE) * 3 + "
+                            f"MATCH(title, author, description, tags) AGAINST (%s IN BOOLEAN MODE)) AS _score "
+                            f"FROM books {ft_where} ORDER BY _score DESC LIMIT %s OFFSET %s",
+                            [ft_q, ft_q] + ft_params + [limit, offset],
+                        )
+                    rows = cur.fetchall()
+            return rows, total
+        finally:
+            conn.close()
 
-    return {
+    rows, total = await run_in_threadpool(_do_search)
+    result = {
         "data": [_row_to_book(r) for r in rows],
         "total": total,
         "limit": limit,
         "offset": offset,
     }
+    _search_cache[search_cache_key] = result
+    if redis:
+        try:
+            await redis.set(rkey, json.dumps(result, ensure_ascii=False), ex=30)
+        except Exception:
+            pass
+    return result
 
 
 @app.get("/books/paged")
@@ -933,15 +1074,31 @@ async def list_books_paged(
 ) -> dict:
     effective_genre = genre if genre and genre != "Tất cả" else None
     cache_key = ("paged", page, page_size, effective_genre, sort_by, sort_order)
+    rkey = f"books:paged:{page}:{page_size}:{effective_genre or 'all'}:{sort_by}:{sort_order}"
+    response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+
+    # L1 check
     cached = _books_cache.get(cache_key)
     if cached is not None:
-        response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
         response.headers["X-Cache"] = "HIT"
         return cached
+
+    # L2 Redis check
+    redis = get_redis()
+    if redis:
+        try:
+            raw = await redis.get(rkey)
+            if raw:
+                cached = json.loads(raw)
+                _books_cache[cache_key] = cached
+                response.headers["X-Cache"] = "HIT"
+                return cached
+        except Exception:
+            pass
+
     async with _books_cache_lock:
         cached = _books_cache.get(cache_key)
         if cached is not None:
-            response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
             response.headers["X-Cache"] = "HIT"
             return cached
         result = await run_in_threadpool(
@@ -954,18 +1111,27 @@ async def list_books_paged(
         )
         result["data"] = [_row_to_book(r) for r in result["data"]]
         _books_cache[cache_key] = result
-    response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+        if redis:
+            try:
+                await redis.set(rkey, json.dumps(result, ensure_ascii=False), ex=60)
+            except Exception:
+                pass
     response.headers["X-Cache"] = "MISS"
     return result
 
 
 @app.get("/books/{book_id}")
 async def get_book(book_id: int) -> dict:
-    conn = get_conn()
-    with conn.cursor() as cur:
-        cur.execute("SELECT * FROM books WHERE id = %s", (book_id,))
-        row = cur.fetchone()
-    conn.close()
+    def _fetch():
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM books WHERE id = %s", (book_id,))
+                return cur.fetchone()
+        finally:
+            conn.close()
+
+    row = await run_in_threadpool(_fetch)
     if not row:
         raise HTTPException(status_code=404, detail="Book not found")
     return _row_to_book(row)
@@ -1001,38 +1167,42 @@ async def patch_book(book_id: int, req: UpdateBookRequest) -> dict:
 async def list_chapters(
     request: Request,
     book_id: int,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(200, ge=1, le=500),
     creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
 ) -> dict:
-    conn = get_conn()
-    with conn.cursor() as cur:
-        cur.execute("SELECT id FROM books WHERE id = %s", (book_id,))
-        if not cur.fetchone():
-            conn.close()
-            raise HTTPException(status_code=404, detail="Book not found")
-        cur.execute(
-            "SELECT id, chapter_number, title, free, view_count FROM chapters WHERE book_id = %s ORDER BY chapter_number",
-            (book_id,),
-        )
-        rows = cur.fetchall()
-    conn.close()
-
-    # Lấy danh sách chương đã mở khóa của user (nếu đã đăng nhập)
     uid: int = 0
-    unlocked: set[int] = set()
     if creds:
         try:
             payload = jwt.decode(creds.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
             uid = payload.get("uid", 0)
-            if uid:
-                unlocked = get_unlocked_chapter_numbers(uid, book_id)
         except JWTError:
             pass
 
-    # Generate short-lived session token — required to read content (if SESSION_TOKEN_ENABLED)
+    def _fetch():
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT id FROM books WHERE id = %s", (book_id,))
+                if not cur.fetchone():
+                    raise HTTPException(status_code=404, detail="Book not found")
+            paged = get_chapters_paged(book_id, page, page_size)
+        finally:
+            conn.close()
+        unlocked: set[int] = set()
+        if uid:
+            unlocked = get_unlocked_chapter_numbers(uid, book_id)
+        return paged, unlocked
+
+    paged, unlocked = await run_in_threadpool(_fetch)
     session_token = _make_session_token(uid, book_id) if SESSION_TOKEN_ENABLED else ""
 
     return {
         "session_token": session_token,
+        "total": paged["total"],
+        "page": page,
+        "page_size": page_size,
+        "total_pages": max(1, -(-paged["total"] // page_size)),
         "chapters": [
             {
                 "id": r["id"],
@@ -1042,7 +1212,7 @@ async def list_chapters(
                 "unlocked": bool(r["free"]) or r["chapter_number"] in unlocked,
                 "viewCount": r["view_count"],
             }
-            for r in rows
+            for r in paged["data"]
         ],
     }
 
@@ -1086,27 +1256,66 @@ async def get_chapter_content(
         if not _verify_session_token(session_token, uid, book_id):
             raise HTTPException(status_code=403, detail="Session token không hợp lệ hoặc đã hết hạn")
 
-    conn = get_conn()
-    with conn.cursor() as cur:
-        cur.execute(
-            "SELECT title, file_path, free FROM chapters WHERE book_id = %s AND chapter_number = %s",
-            (book_id, chapter_number),
-        )
-        row = cur.fetchone()
-    conn.close()
+    # Chapter metadata — Redis cache to skip DB query on hot paths
+    redis = get_redis()
+    meta_rkey = f"chapter_meta:{book_id}:{chapter_number}"
+    row = None
+    if redis:
+        try:
+            raw_meta = await redis.get(meta_rkey)
+            if raw_meta:
+                row = json.loads(raw_meta)
+        except Exception:
+            pass
+    if row is None:
+        def _fetch_chapter():
+            conn = get_conn()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "SELECT title, file_path, free FROM chapters WHERE book_id = %s AND chapter_number = %s",
+                        (book_id, chapter_number),
+                    )
+                    return cur.fetchone()
+            finally:
+                conn.close()
+
+        row = await run_in_threadpool(_fetch_chapter)
+        if row and redis:
+            try:
+                await redis.set(
+                    meta_rkey,
+                    json.dumps({"title": row["title"], "file_path": row["file_path"], "free": int(row["free"])}),
+                    ex=3600,
+                )
+            except Exception:
+                pass
     if not row:
         raise HTTPException(status_code=404, detail="Chapter not found")
 
-    # Kiểm tra quyền truy cập nội dung chương bị khóa
     if not row["free"]:
         if not creds:
             raise HTTPException(status_code=401, detail="Cần đăng nhập để đọc chương này")
-        unlocked = get_unlocked_chapter_numbers(uid, book_id)
+        unlocked = await run_in_threadpool(get_unlocked_chapter_numbers, uid, book_id)
         if chapter_number not in unlocked:
             raise HTTPException(status_code=403, detail="locked")
 
     cache_key = (book_id, chapter_number)
+    content_rkey = f"content:{book_id}:{chapter_number}"
+
+    # L1 check
     cached_payload = _content_cache.get(cache_key)
+    if cached_payload is None:
+        # L2 Redis check
+        if redis:
+            try:
+                raw_content = await redis.get(content_rkey)
+                if raw_content:
+                    cached_payload = json.loads(raw_content)
+                    _content_cache[cache_key] = cached_payload
+            except Exception:
+                pass
+
     if cached_payload is None:
         async with _content_cache_lock:
             cached_payload = _content_cache.get(cache_key)
@@ -1129,54 +1338,78 @@ async def get_chapter_content(
                 except FileNotFoundError:
                     raise HTTPException(status_code=404, detail=f"Content file not found: {file_path}")
                 _content_cache[cache_key] = cached_payload
+                if redis:
+                    try:
+                        await redis.set(content_rkey, json.dumps(cached_payload, ensure_ascii=False), ex=1800)
+                    except Exception:
+                        pass
 
-    background_tasks.add_task(
-        run_in_threadpool, lambda: increment_chapter_view(book_id, chapter_number)
-    )
+    # Buffer view count — flushed to DB every 10s by scheduler
+    record_chapter_view(book_id, chapter_number)
 
-    return {
+    body = {
         "chapterNumber": chapter_number,
         "title": cached_payload["title"],
         "free": cached_payload["free"],
         "content": cached_payload["content"],
     }
+    etag = f'"{hashlib.md5(cached_payload["content"].encode()).hexdigest()[:16]}"'
+    if request.headers.get("if-none-match") == etag:
+        return Response(status_code=304)
+    resp = Response(content=json.dumps(body, ensure_ascii=False), media_type="application/json")
+    resp.headers["ETag"] = etag
+    resp.headers["Cache-Control"] = "private, max-age=1800"
+    return resp
 
 
 # ── Genres ─────────────────────────────────────────────────────────────────────
 
 @app.get("/genres")
 async def list_genres() -> list:
-    conn = get_conn()
-    with conn.cursor() as cur:
-        cur.execute("SELECT DISTINCT genre FROM books ORDER BY genre")
-        rows = cur.fetchall()
-    conn.close()
-    return [r["genre"] for r in rows]
+    if "v" in _genres_cache:
+        return _genres_cache["v"]
+
+    def _fetch():
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT DISTINCT genre FROM books ORDER BY genre")
+                return [r["genre"] for r in cur.fetchall()]
+        finally:
+            conn.close()
+
+    result = await run_in_threadpool(_fetch)
+    _genres_cache["v"] = result
+    return result
 
 
 # ── Inline Comments (Wattpad-style) ────────────────────────────────────────────
 
 @app.get("/books/{book_id}/chapters/{chapter_number}/comment-counts")
 async def get_chapter_comment_counts(book_id: int, chapter_number: int) -> dict:
-    """Get comment count per paragraph for a chapter (optimized - only returns paragraphs with comments)."""
-    conn = get_conn()
-    try:
-        with conn.cursor() as cur:
-            # Verify chapter exists
-            cur.execute(
-                "SELECT id FROM chapters WHERE book_id = %s AND chapter_number = %s",
-                (book_id, chapter_number),
-            )
-            ch = cur.fetchone()
-            if not ch:
-                raise HTTPException(status_code=404, detail="Chapter not found")
-            chapter_id = ch["id"]
-
+    """Get comment count per paragraph for a chapter."""
+    def _fetch():
         from app.database import get_comment_counts
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT id FROM chapters WHERE book_id = %s AND chapter_number = %s",
+                    (book_id, chapter_number),
+                )
+                ch = cur.fetchone()
+                if not ch:
+                    raise HTTPException(status_code=404, detail="Chapter not found")
+                chapter_id = ch["id"]
+        finally:
+            conn.close()
+        if chapter_id in _comment_counts_cache:
+            return _comment_counts_cache[chapter_id]
         counts = get_comment_counts(chapter_id)
+        _comment_counts_cache[chapter_id] = counts
         return counts
-    finally:
-        conn.close()
+
+    return await run_in_threadpool(_fetch)
 
 
 @app.get("/books/{book_id}/chapters/{chapter_number}/paragraphs/{paragraph_id}/comments")
@@ -1188,24 +1421,24 @@ async def get_paragraph_comments(
     limit: int = Query(default=10, ge=1, le=50),
 ) -> dict:
     """Get paginated comments for a specific paragraph."""
-    conn = get_conn()
-    try:
-        with conn.cursor() as cur:
-            # Verify chapter exists
-            cur.execute(
-                "SELECT id FROM chapters WHERE book_id = %s AND chapter_number = %s",
-                (book_id, chapter_number),
-            )
-            ch = cur.fetchone()
-            if not ch:
-                raise HTTPException(status_code=404, detail="Chapter not found")
-            chapter_id = ch["id"]
-
+    def _fetch():
         from app.database import get_paragraph_comments
-        result = get_paragraph_comments(chapter_id, paragraph_id, page, limit)
-        return result
-    finally:
-        conn.close()
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT id FROM chapters WHERE book_id = %s AND chapter_number = %s",
+                    (book_id, chapter_number),
+                )
+                ch = cur.fetchone()
+                if not ch:
+                    raise HTTPException(status_code=404, detail="Chapter not found")
+                chapter_id = ch["id"]
+        finally:
+            conn.close()
+        return get_paragraph_comments(chapter_id, paragraph_id, page, limit)
+
+    return await run_in_threadpool(_fetch)
 
 
 class InlineCommentRequest(BaseModel):
@@ -1235,7 +1468,10 @@ async def post_inline_comment(
 
     try:
         from app.database import post_inline_comment
-        comment = post_inline_comment(body.chapter_id, body.paragraph_id, user_id, body.content, body.parent_id)
+        comment = await run_in_threadpool(
+            post_inline_comment, body.chapter_id, body.paragraph_id, user_id, body.content, body.parent_id
+        )
+        _comment_counts_cache.pop(body.chapter_id, None)
         return comment
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -1269,12 +1505,29 @@ async def delete_inline_comment(
 # ── Notifications ──────────────────────────────────────────────────────────────
 
 @app.get("/notifications")
-async def list_notifications() -> list:
-    conn = get_conn()
-    with conn.cursor() as cur:
-        cur.execute("SELECT * FROM notifications ORDER BY id DESC")
-        rows = cur.fetchall()
-    conn.close()
+async def list_notifications(
+    limit: int = Query(50, ge=1, le=200),
+    before_id: int | None = Query(None, description="Cursor: return notifications with id < before_id"),
+) -> list:
+    def _fetch():
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                if before_id:
+                    cur.execute(
+                        "SELECT * FROM notifications WHERE id < %s ORDER BY id DESC LIMIT %s",
+                        (before_id, limit),
+                    )
+                else:
+                    cur.execute(
+                        "SELECT * FROM notifications ORDER BY id DESC LIMIT %s",
+                        (limit,),
+                    )
+                return cur.fetchall()
+        finally:
+            conn.close()
+
+    rows = await run_in_threadpool(_fetch)
     return [
         {
             "id": r["id"],
@@ -1291,22 +1544,65 @@ async def list_notifications() -> list:
 
 @app.patch("/notifications/{notif_id}/read")
 async def mark_notification_read(notif_id: int) -> dict:
-    conn = get_conn()
-    with conn.cursor() as cur:
-        cur.execute("UPDATE notifications SET unread = 0 WHERE id = %s", (notif_id,))
-    conn.commit()
-    conn.close()
+    def _update():
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE notifications SET unread = 0 WHERE id = %s", (notif_id,))
+            conn.commit()
+        finally:
+            conn.close()
+
+    await run_in_threadpool(_update)
     return {"status": "ok"}
 
 
 @app.patch("/notifications/read-all")
 async def mark_all_read() -> dict:
-    conn = get_conn()
-    with conn.cursor() as cur:
-        cur.execute("UPDATE notifications SET unread = 0")
-    conn.commit()
-    conn.close()
+    def _update():
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE notifications SET unread = 0")
+            conn.commit()
+        finally:
+            conn.close()
+
+    await run_in_threadpool(_update)
     return {"status": "ok"}
+
+
+# ── Push Notifications (incoming from mobile) ──────────────────────────────────
+
+class PushNotificationRequest(BaseModel):
+    id: int
+    key: str
+    sourceApp: str
+    title: str
+    body: str
+    postedAt: int
+    postedAtIso: str
+
+
+@app.post("/push-notifications", status_code=201)
+async def receive_push_notification(payload: PushNotificationRequest) -> dict:
+    key_with_ms = f"{payload.key}|{payload.postedAt}"
+    try:
+        row_id = await run_in_threadpool(
+            save_push_notification,
+            payload.id,
+            key_with_ms,
+            payload.sourceApp,
+            payload.title,
+            payload.body,
+            payload.postedAt,
+            payload.postedAtIso,
+        )
+    except Exception as e:
+        if "Duplicate entry" in str(e):
+            raise HTTPException(status_code=409, detail="Notification key already exists")
+        raise HTTPException(status_code=500, detail=str(e))
+    return {"status": "saved", "id": row_id}
 
 
 # ── User / Linh Thạch ──────────────────────────────────────────────────────────
@@ -1350,7 +1646,9 @@ async def put_user_profile(
     _current: dict = Depends(get_current_user),
 ) -> dict:
     try:
-        return update_user_profile(req.email, req.name, req.bio)
+        result = update_user_profile(req.email, req.name, req.bio)
+        _user_cache.pop(req.email, None)
+        return result
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 

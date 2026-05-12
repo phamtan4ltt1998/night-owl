@@ -36,6 +36,8 @@ CREATE TABLE IF NOT EXISTS books (
     INDEX idx_genre_rating       (genre, rating),
     INDEX idx_genre_chapter_count(genre, chapter_count),
     INDEX idx_genre_title        (genre, title),
+    INDEX idx_updated            (updated DESC),
+    INDEX idx_genre_updated      (genre, updated DESC),
     FULLTEXT KEY ft_books_search (title, author, description, tags),
     FULLTEXT KEY ft_books_title  (title)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -157,6 +159,23 @@ CREATE TABLE IF NOT EXISTS inline_comments (
     CONSTRAINT fk_ic_chapter FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE CASCADE,
     CONSTRAINT fk_ic_user    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_ic_parent  FOREIGN KEY (parent_id) REFERENCES inline_comments(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ── Push Notifications (incoming from mobile apps) ────────────────────────────
+
+CREATE TABLE IF NOT EXISTS push_notifications (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    external_id   INT          NOT NULL,
+    `key`         VARCHAR(255) NOT NULL,
+    source_app    VARCHAR(255) NOT NULL,
+    title         VARCHAR(500) NOT NULL,
+    body          TEXT         NOT NULL,
+    posted_at     BIGINT       NOT NULL,
+    posted_at_iso VARCHAR(50)  NOT NULL,
+    received_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_source_app  (source_app),
+    INDEX idx_posted_at   (posted_at DESC),
+    UNIQUE KEY uq_key     (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── Seed Notifications ─────────────────────────────────────────────────────────

@@ -9,5 +9,7 @@ python-jose[cryptography]
 PyMySQL[rsa]
 slowapi
 apscheduler
-cachetools
 DBUtils
+cachetools
+httpx
+redis[asyncio]>=5.0
