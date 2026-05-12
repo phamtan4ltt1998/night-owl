@@ -31,6 +31,10 @@ from app.config import (
     HONEYPOT_ENABLED,
     RATE_LIMIT_BOOKS, RATE_LIMIT_CHAPTERS, RATE_LIMIT_CONTENT,
     SESSION_TOKEN_ENABLED, SESSION_TOKEN_TTL,
+    SCHEDULER_ENABLED,
+    JOB_VIEW_COUNT_FLUSH_ENABLED,
+    JOB_CRAWL_RETRY_ENABLED,
+    JOB_SCHEDULED_SCRAPE_ENABLED,
 )
 from app.logging_setup import setup_logging
 from app.scrape_job import (
@@ -173,54 +177,67 @@ async def _retry_failed_crawls() -> None:
 
 @app.on_event("startup")
 async def _start_scheduler() -> None:
+    if not SCHEDULER_ENABLED:
+        logger.warning("[scheduler] SCHEDULER_ENABLED=false — all jobs skipped.")
+        return
+
     # Job 0: flush batched view counts every 10 seconds
-    _scheduler.add_job(
-        lambda: flush_view_counts(),
-        "interval",
-        seconds=10,
-        id="view_count_flush",
-        replace_existing=True,
-    )
+    if JOB_VIEW_COUNT_FLUSH_ENABLED:
+        _scheduler.add_job(
+            lambda: flush_view_counts(),
+            "interval",
+            seconds=10,
+            id="view_count_flush",
+            replace_existing=True,
+        )
+    else:
+        logger.warning("[scheduler] view_count_flush job disabled (JOB_VIEW_COUNT_FLUSH_ENABLED=false).")
 
     # Job 1: retry failed crawls
-    _scheduler.add_job(
-        _retry_failed_crawls,
-        "interval",
-        minutes=CRAWL_RETRY_INTERVAL_MINUTES,
-        id="crawl_retry",
-        replace_existing=True,
-    )
+    if JOB_CRAWL_RETRY_ENABLED:
+        _scheduler.add_job(
+            _retry_failed_crawls,
+            "interval",
+            minutes=CRAWL_RETRY_INTERVAL_MINUTES,
+            id="crawl_retry",
+            replace_existing=True,
+        )
+        logger.info("[scheduler] crawl_retry job registered — interval=%dm max_attempts=%d",
+                    CRAWL_RETRY_INTERVAL_MINUTES, CRAWL_RETRY_MAX_ATTEMPTS)
+    else:
+        logger.warning("[scheduler] crawl_retry job disabled (JOB_CRAWL_RETRY_ENABLED=false).")
 
     # Job 2: scheduled scrape từ scrape_sources.json
-    scrape_config = load_config()
-    enabled_sources = [s for s in scrape_config.get("sources", []) if s.get("enabled", True)]
-    if not enabled_sources:
-        logger.warning("[scheduler] Không có source nào trong config — bỏ qua đăng ký scheduled_scrape job.")
-    else:
-        mode = get_schedule_mode(scrape_config)
-        if mode == "continuous":
-            idle_seconds = float(scrape_config.get("schedule", {}).get("idle_seconds", 30))
-            app.state.scrape_stop_event = asyncio.Event()
-            app.state.scrape_task = asyncio.create_task(
-                run_continuous_scrape(app.state.scrape_stop_event, idle_seconds=idle_seconds)
-            )
-            logger.info(
-                "[scheduler] Continuous scrape task started — sources=%d idle=%ss",
-                len(enabled_sources), idle_seconds,
-            )
+    if JOB_SCHEDULED_SCRAPE_ENABLED:
+        scrape_config = load_config()
+        enabled_sources = [s for s in scrape_config.get("sources", []) if s.get("enabled", True)]
+        if not enabled_sources:
+            logger.warning("[scheduler] Không có source nào trong config — bỏ qua đăng ký scheduled_scrape job.")
         else:
-            schedule_kwargs = get_schedule_kwargs(scrape_config)
-            _scheduler.add_job(
-                run_scheduled_scrape,
-                id="scheduled_scrape",
-                replace_existing=True,
-                **schedule_kwargs,
-            )
-            logger.info("[scheduler] Scheduled scrape job registered — sources=%d %s", len(enabled_sources), schedule_kwargs)
+            mode = get_schedule_mode(scrape_config)
+            if mode == "continuous":
+                idle_seconds = float(scrape_config.get("schedule", {}).get("idle_seconds", 30))
+                app.state.scrape_stop_event = asyncio.Event()
+                app.state.scrape_task = asyncio.create_task(
+                    run_continuous_scrape(app.state.scrape_stop_event, idle_seconds=idle_seconds)
+                )
+                logger.info(
+                    "[scheduler] Continuous scrape task started — sources=%d idle=%ss",
+                    len(enabled_sources), idle_seconds,
+                )
+            else:
+                schedule_kwargs = get_schedule_kwargs(scrape_config)
+                _scheduler.add_job(
+                    run_scheduled_scrape,
+                    id="scheduled_scrape",
+                    replace_existing=True,
+                    **schedule_kwargs,
+                )
+                logger.info("[scheduler] Scheduled scrape job registered — sources=%d %s", len(enabled_sources), schedule_kwargs)
+    else:
+        logger.warning("[scheduler] scheduled_scrape job disabled (JOB_SCHEDULED_SCRAPE_ENABLED=false).")
 
     _scheduler.start()
-    logger.info("[scheduler] Crawl retry job started — interval=%dm max_attempts=%d",
-                CRAWL_RETRY_INTERVAL_MINUTES, CRAWL_RETRY_MAX_ATTEMPTS)
 
 
 @app.on_event("shutdown")
