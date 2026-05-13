@@ -815,23 +815,26 @@ GOOGLE_CLIENT_ID = "580494851023-u34i18n43a2cho99kp20ncjnl47u2q1d.apps.googleuse
 
 
 class GoogleLoginRequest(BaseModel):
-    id_token: str
+    access_token: str
 
 
 @app.post("/auth/google")
 async def google_login(req: GoogleLoginRequest) -> dict:
-    """Verify Google id_token, upsert user, return JWT + profile."""
-    from google.oauth2 import id_token as google_id_token
-    from google.auth.transport import requests as google_requests
+    """Verify Google access_token via userinfo endpoint, upsert user, return JWT + profile."""
+    import requests as http_requests
 
-    try:
-        idinfo = google_id_token.verify_oauth2_token(
-            req.id_token,
-            google_requests.Request(),
-            GOOGLE_CLIENT_ID,
-        )
-    except ValueError as exc:
-        raise HTTPException(status_code=401, detail=f"Invalid Google token: {exc}")
+    resp = await run_in_threadpool(
+        http_requests.get,
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        headers={"Authorization": f"Bearer {req.access_token}"},
+        timeout=10,
+    )
+    if resp.status_code != 200:
+        raise HTTPException(status_code=401, detail="Invalid Google access token")
+
+    idinfo = resp.json()
+    if not idinfo.get("email_verified"):
+        raise HTTPException(status_code=401, detail="Google email not verified")
 
     email = idinfo["email"]
     name = idinfo.get("name", "")
