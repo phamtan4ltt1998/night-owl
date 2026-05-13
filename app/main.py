@@ -918,12 +918,13 @@ def _row_to_book(row) -> dict:
         "cover_image": row.get("cover_image") or "",
         "status": row.get("status") or "",
         "read_count": row.get("read_count") or 0,
+        "updated_at": str(row["updated_at"]) if row.get("updated_at") else None,
     }
 
 
 _LIST_BOOKS_COLS = (
     "id, slug, title, author, genre, chapter_count, `reads`, rating, "
-    "c1, c2, emoji, cover_image, status, read_count, updated, tags, words"
+    "c1, c2, emoji, cover_image, status, read_count, updated, tags, words, updated_at"
 )
 
 
@@ -1151,6 +1152,67 @@ async def list_books_paged(
                 await redis.set(rkey, json.dumps(result, ensure_ascii=False), ex=60)
             except Exception:
                 pass
+    response.headers["X-Cache"] = "MISS"
+    return result
+
+
+@app.get("/books/featured")
+@limiter.limit(RATE_LIMIT_BOOKS)
+async def list_books_featured(
+    request: Request,
+    response: Response,
+    limit: int = Query(10, ge=1, le=50, description="Số truyện trả về"),
+    months: int = Query(3, ge=1, le=24, description="Cập nhật trong N tháng gần nhất"),
+) -> list:
+    rkey = f"books:featured:{limit}:{months}"
+    response.headers["Cache-Control"] = "public, max-age=300, s-maxage=600, stale-while-revalidate=1800"
+
+    redis = get_redis()
+    if redis:
+        try:
+            raw = await redis.get(rkey)
+            if raw:
+                response.headers["X-Cache"] = "HIT"
+                return json.loads(raw)
+        except Exception:
+            pass
+
+    def _fetch():
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT id, slug, title, author, genre, chapter_count, `reads`, rating, "
+                    "c1, c2, emoji, cover_image, status, read_count, updated, tags, words, updated_at "
+                    "FROM books "
+                    "WHERE updated_at >= DATE_SUB(NOW(), INTERVAL %s MONTH) "
+                    "ORDER BY rating DESC "
+                    "LIMIT %s",
+                    (months, limit),
+                )
+                rows = cur.fetchall()
+                if len(rows) < limit:
+                    # Fallback: not enough recently-updated books → take top by rating globally
+                    cur.execute(
+                        "SELECT id, slug, title, author, genre, chapter_count, `reads`, rating, "
+                        "c1, c2, emoji, cover_image, status, read_count, updated, tags, words, updated_at "
+                        "FROM books ORDER BY rating DESC LIMIT %s",
+                        (limit,),
+                    )
+                    rows = cur.fetchall()
+                return rows
+        finally:
+            conn.close()
+
+    rows = await run_in_threadpool(_fetch)
+    result = [_row_to_book(r) for r in rows]
+
+    if redis:
+        try:
+            await redis.set(rkey, json.dumps(result, ensure_ascii=False), ex=300)
+        except Exception:
+            pass
+
     response.headers["X-Cache"] = "MISS"
     return result
 

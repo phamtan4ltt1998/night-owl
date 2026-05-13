@@ -538,7 +538,7 @@ def get_books_paged(
 
             cur.execute(
                 f"SELECT id, slug, title, author, genre, chapter_count, `reads`, rating, "
-                f"c1, c2, emoji, cover_image, status, read_count, updated, tags, words "
+                f"c1, c2, emoji, cover_image, status, read_count, updated, tags, words, updated_at "
                 f"FROM books {where} "
                 f"ORDER BY {sort_by} {sort_order} "
                 f"LIMIT %s OFFSET %s",
