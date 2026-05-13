@@ -1155,6 +1155,33 @@ async def list_books_paged(
     return result
 
 
+@app.get("/books/featured")
+async def get_featured_books(
+    limit: int = Query(default=10, ge=1, le=100),
+    months: int = Query(default=3, ge=1, le=24),
+) -> list[dict]:
+    """Sách nổi bật: cập nhật trong N tháng gần nhất, sắp xếp theo lượt đọc."""
+    def _fetch():
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT * FROM books
+                    WHERE updated_at >= DATE_SUB(NOW(), INTERVAL %s MONTH)
+                    ORDER BY read_count DESC
+                    LIMIT %s
+                    """,
+                    (months, limit),
+                )
+                return cur.fetchall()
+        finally:
+            conn.close()
+
+    rows = await run_in_threadpool(_fetch)
+    return [_row_to_book(r) for r in rows]
+
+
 @app.get("/books/{book_id}")
 async def get_book(book_id: int) -> dict:
     def _fetch():
