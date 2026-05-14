@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS `users` (
     `linh_thach`   INT NOT NULL DEFAULT 50,
     `streak`       INT NOT NULL DEFAULT 0,
     `last_daily`   VARCHAR(20) NOT NULL DEFAULT '',
-    `picture`      VARCHAR(500) DEFAULT NULL,
+    `picture`      TEXT DEFAULT NULL,
     `created_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 -- ── Linh Thạch History ─────────────────────────────────────────────────────────
